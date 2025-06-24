@@ -1,5 +1,6 @@
 import { Invoice } from "../models/invoice.model.js";
 import { Product } from "../models/product.model.js";
+import { sendInvoiceViaWhatsApp } from "../utils/sendWhatsApp.js";
 import { generateInvoicePDF } from "../utils/pdfGenerator.js";
 
 // Helper to generate unique invoice numbers
@@ -93,5 +94,25 @@ export const downloadInvoicePDF = async (req, res) => {
     res.send(pdfBuffer);
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+// Send Invoice via WhatsApp
+export const sendInvoiceWhatsApp = async (req, res) => {
+  try {
+    const { invoiceId } = req.params;
+
+    const invoice = await Invoice.findById(invoiceId).populate("products.product");
+    if (!invoice) return res.status(404).json({ message: "Invoice not found" });
+
+    const pdfBuffer = await generateInvoicePDF(invoice);
+    const pdfUrl = await uploadPDFAndGetLink(pdfBuffer, `invoice-${invoice._id}.pdf`);
+
+    await sendInvoiceViaWhatsApp(invoice.phoneNumber, pdfUrl);
+
+    res.json({ message: "Invoice sent via WhatsApp successfully ✅" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to send invoice via WhatsApp ❌" });
   }
 };

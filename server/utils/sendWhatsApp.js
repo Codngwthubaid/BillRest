@@ -12,7 +12,7 @@ export const sendInvoiceViaWhatsApp = async (phoneNumber, pdfUrl) => {
       channel: "whatsapp",
       source: process.env.WHATSAPP_SOURCE_NUMBER,
       destination: phoneNumber,
-      src.name: process.env.GUPSHUP_APP_NAME,
+      "src.name": process.env.GUPSHUP_APP_NAME,
       message: JSON.stringify({
         type: "file",
         url: pdfUrl,

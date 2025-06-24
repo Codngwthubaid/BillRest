@@ -8,7 +8,7 @@ import businessRoutes from "./routes/business.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import invoiceRoutes from "./routes/invoice.routes.js";
 import reportRoutes from "./routes/report.routes.js";
-
+import syncRoutes from "./routes/sync.routes.js";
 
 
 dotenv.config();
@@ -26,7 +26,7 @@ app.use("/api/business", businessRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/report", reportRoutes);
-
+app.use("/api/sync", syncRoutes);
 
 
 
@@ -49,6 +49,15 @@ app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
 // 5. **🟡 Sales Reports**
 // 6. **🟡 WhatsApp Messaging Integration**
 // 7. **🟡 PWA Sync Logic (optional backend part)**
+// for 7 -
+// ✅ Use Service Workers on frontend to capture offline events.
+
+// ✅ Store offline invoices in IndexedDB or localStorage.
+
+// ✅ When online, hit /api/sync/invoices with offline data.
+
+// ✅ Show sync status in the frontend.
+
 // 8. **🟡 Admin Dashboards Data APIs**
 // 9. **🟡 Deployment Scripts (PM2 + Nginx)**
 

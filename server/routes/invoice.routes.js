@@ -4,6 +4,7 @@ import {
   getInvoices,
   getInvoiceById,
   downloadInvoicePDF,
+  sendInvoiceWhatsApp,
 } from "../controllers/invoice.controller.js";
 import { verifyToken, checkRole } from "../middlewares/auth.middleware.js";
 
@@ -16,5 +17,6 @@ router.post("/", createInvoice);
 router.get("/", getInvoices);
 router.get("/:id", getInvoiceById);
 router.get("/:id/download", downloadInvoicePDF);
+router.post("/send-whatsapp/:invoiceId", sendInvoiceWhatsApp);
 
 export default router;
