@@ -1,5 +1,6 @@
 import { Invoice } from "../models/invoice.model.js";
 import { Product } from "../models/product.model.js";
+import { generateInvoicePDF } from "../utils/pdfGenerator.js";
 
 // Helper to generate unique invoice numbers
 let counter = 1;
@@ -66,6 +67,30 @@ export const getInvoiceById = async (req, res) => {
     const invoice = await Invoice.findOne({ _id: req.params.id, user: req.user.id }).populate("products.product");
     if (!invoice) return res.status(404).json({ message: "Invoice not found" });
     res.status(200).json(invoice);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Download Invoice as PDF
+export const downloadInvoicePDF = async (req, res) => {
+  try {
+    const invoice = await Invoice.findOne({
+      _id: req.params.id,
+      user: req.user.id
+    }).populate("products.product");
+
+    if (!invoice) return res.status(404).json({ message: "Invoice not found" });
+
+    const pdfBuffer = await generateInvoicePDF(invoice);
+
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename=${invoice.invoiceNumber}.pdf`,
+      "Content-Length": pdfBuffer.length
+    });
+
+    res.send(pdfBuffer);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

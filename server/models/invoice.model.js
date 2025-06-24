@@ -47,6 +47,10 @@ const invoiceSchema = new mongoose.Schema(
     },
     customerName: String,
     phoneNumber: String,
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    }
   },
   { timestamps: true }
 );
