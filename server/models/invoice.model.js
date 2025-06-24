@@ -1,0 +1,54 @@
+import mongoose from "mongoose";
+
+const invoiceSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    invoiceNumber: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    products: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+        price: {
+          type: Number,
+          required: true,
+        },
+        gstRate: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+    subTotal: Number,
+    gstAmount: Number,
+    totalAmount: Number,
+    currency: {
+      type: String,
+      default: "INR",
+    },
+    paymentMethod: {
+      type: String,
+      enum: ["Cash", "UPI", "Card", "Other"],
+      default: "Cash",
+    },
+    customerName: String,
+    phoneNumber: String,
+  },
+  { timestamps: true }
+);
+
+export const Invoice = mongoose.model("Invoice", invoiceSchema);
