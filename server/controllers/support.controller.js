@@ -1,4 +1,6 @@
 import { SupportTicket } from "../models/supportTicket.model.js";
+import { Product } from "../models/product.model.js";
+import { Invoice } from "../models/invoice.model.js";
 
 export const createTicket = async (req, res) => {
   try {
@@ -28,3 +30,20 @@ export const getMyTickets = async (req, res) => {
   }
 };
 
+export const getAllProducts = async (req, res) => {
+  try {
+    const products = await Product.find().populate("user", "name email");
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch products" });
+  }
+};
+
+export const getAllInvoices = async (req, res) => {
+  try {
+    const invoices = await Invoice.find().populate("user", "name email");
+    res.json(invoices);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch invoices" });
+  }
+};
