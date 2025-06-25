@@ -43,8 +43,8 @@ export const getSalesReport = async (req, res) => {
 
             case "financial":
                 if (now.getMonth() < 3) {
-                    start = new Date(now.getFullYear() - 1, 3, 1); // April 1 last year
-                    end = new Date(now.getFullYear(), 3, 1);       // April 1 this year
+                    start = new Date(now.getFullYear() - 1, 3, 1);
+                    end = new Date(now.getFullYear(), 3, 1);
                 } else {
                     start = new Date(now.getFullYear(), 3, 1);
                     end = new Date(now.getFullYear() + 1, 3, 1);
