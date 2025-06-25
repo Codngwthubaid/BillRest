@@ -55,7 +55,7 @@ export const createInvoice = async (req, res) => {
 // Get All Invoices for User
 export const getInvoices = async (req, res) => {
   try {
-    const invoices = await Invoice.find({ user: req.user.id }).populate("products.product");
+    const invoices = await Invoice.find({ user: req.user.id }).populate("products.product", "name price gstRate").sort({ createdAt: -1 });
     res.status(200).json(invoices);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -65,7 +65,7 @@ export const getInvoices = async (req, res) => {
 // Get Single Invoice by ID
 export const getInvoiceById = async (req, res) => {
   try {
-    const invoice = await Invoice.findOne({ _id: req.params.id, user: req.user.id }).populate("products.product");
+    const invoice = await Invoice.findOne({ _id: req.params.id, user: req.user.id }).populate("products.product", "name price gstRate");
     if (!invoice) return res.status(404).json({ message: "Invoice not found" });
     res.status(200).json(invoice);
   } catch (err) {
@@ -79,7 +79,7 @@ export const downloadInvoicePDF = async (req, res) => {
     const invoice = await Invoice.findOne({
       _id: req.params.id,
       user: req.user.id
-    }).populate("products.product");
+    }).populate("products.product", "name price gstRate");
 
     if (!invoice) return res.status(404).json({ message: "Invoice not found" });
 
@@ -102,7 +102,7 @@ export const sendInvoiceWhatsApp = async (req, res) => {
   try {
     const { invoiceId } = req.params;
 
-    const invoice = await Invoice.findById(invoiceId).populate("products.product");
+    const invoice = await Invoice.findById(invoiceId).populate("products.product", "name price gstRate");
     if (!invoice) return res.status(404).json({ message: "Invoice not found" });
 
     const pdfBuffer = await generateInvoicePDF(invoice);

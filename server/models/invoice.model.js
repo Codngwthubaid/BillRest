@@ -40,6 +40,11 @@ const invoiceSchema = new mongoose.Schema(
       type: String,
       default: "INR",
     },
+    status: {
+      type: String,
+      enum: ['paid', 'pending', 'overdue', 'draft'],
+      default: 'draft',
+    },
     paymentMethod: {
       type: String,
       enum: ["Cash", "UPI", "Card", "Other"],

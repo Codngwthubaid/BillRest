@@ -1,9 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Register from './pages/Register';
-import Login from './pages/login';
+import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import { useAuthStore } from './store/authStore';
 import React, { type ReactNode } from 'react';
+import Invoices from './pages/Invoices';
 
 const ProtectedAuthRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
   const token = useAuthStore((state) => state.token);
@@ -40,6 +41,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/invoices"
+          element={
+            <ProtectedRoute>
+              <Invoices />
             </ProtectedRoute>
           }
         />

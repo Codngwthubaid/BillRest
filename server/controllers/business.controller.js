@@ -1,41 +1,6 @@
 import { Business } from "../models/business.model.js";
 import { User } from "../models/user.model.js";
 
-// export const createOrUpdateBusiness = async (req, res) => {
-//   try {
-//     const { businessName, address, defaultCurrency, gstSlabs } = req.body;
-//     const userId = req.user.id;
-
-//     const existing = await Business.findOne({ user: userId });
-
-//     if (existing) {
-//       existing.businessName = businessName;
-//       existing.address = address;
-//       existing.defaultCurrency = defaultCurrency;
-//       existing.gstSlabs = gstSlabs;
-//       existing.isOnboarded = true;
-//       await existing.save();
-//       return res.status(200).json({ message: "Business updated", business: existing });
-//     }
-
-//     const newBusiness = await Business.create({
-//       user: userId,
-//       businessName,
-//       address,
-//       defaultCurrency,
-//       gstSlabs,
-//       isOnboarded: true,
-//     });
-
-//     res.status(201).json({ message: "Business created", business: newBusiness });
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// };
-
-// controllers/business.controller.js
-
-
 export const createOrUpdateBusiness = async (req, res) => {
   try {
     const {
@@ -87,7 +52,6 @@ export const createOrUpdateBusiness = async (req, res) => {
     res.status(500).json({ message: "Failed to update profile/business" });
   }
 };
-
 
 export const getBusinessByUser = async (req, res) => {
   try {

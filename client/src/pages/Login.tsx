@@ -7,13 +7,16 @@ import { login } from '@/services/authService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormError } from '../components/FormError';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+
   const {
     register: formRegister,
     handleSubmit,
@@ -47,7 +50,19 @@ const Login: React.FC = () => {
           <div>
             <div className="relative">
               <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              <Input type="password" placeholder="Password" className="pl-10" {...formRegister('password')} />
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Password"
+                className="pl-10 pr-10"
+                {...formRegister('password')}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
             <FormError message={errors.password?.message} />
           </div>
