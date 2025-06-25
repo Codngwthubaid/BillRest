@@ -1,6 +1,5 @@
 import express from "express";
 import {
-  adminLogin,
   getDashboardStats,
   getAllBusinesses,
   toggleBusinessActive,
@@ -21,7 +20,6 @@ const router = express.Router();
 // Only allow master admin
 router.use(verifyToken, checkRole(["master"]));
 
-router.post("/login", adminLogin);
 router.get("/dashboard", getDashboardStats);
 router.get("/businesses", getAllBusinesses);
 router.patch("/businesses/:id/toggle", toggleBusinessActive);

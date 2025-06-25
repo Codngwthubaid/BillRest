@@ -13,7 +13,7 @@ import paymentRoutes from "./routes/payment.routes.js";
 import subscriptionRoutes from "./routes/subscription.routes.js";
 import planRoutes from "./routes/plan.routes.js";
 import supportRoutes from "./routes/support.routes.js";
-
+import adminRoutes from "./routes/admin.routes.js";
 
 dotenv.config();
 const app = express();
@@ -25,6 +25,7 @@ app.use(express.json()); // ✅ Required for parsing JSON bodies
 
 
 // Routes
+app.use("/api/admin" , adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/business", businessRoutes);
 app.use("/api/products", productRoutes);
