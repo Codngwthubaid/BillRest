@@ -9,6 +9,10 @@ import productRoutes from "./routes/product.routes.js";
 import invoiceRoutes from "./routes/invoice.routes.js";
 import reportRoutes from "./routes/report.routes.js";
 import syncRoutes from "./routes/sync.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
+import subscriptionRoutes from "./routes/subscription.routes.js";
+import planRoutes from "./routes/plan.routes.js";
+import supportRoutes from "./routes/support.routes.js";
 
 
 dotenv.config();
@@ -27,7 +31,10 @@ app.use("/api/products", productRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/report", reportRoutes);
 app.use("/api/sync", syncRoutes);
-
+app.use("/api/payment", paymentRoutes);
+app.use("/api/subscription", subscriptionRoutes);
+app.use("/api/support", supportRoutes);
+app.use("/api/plans", planRoutes);
 
 
 

@@ -6,7 +6,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "dev:seed": "node --watch seed/planSeed.js"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +21,8 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.0",
-    "pdfmake": "^0.2.20"
+    "nodemailer": "^7.0.3",
+    "pdfmake": "^0.2.20",
+    "razorpay": "^2.9.6"
   }
 }

@@ -7,16 +7,25 @@ import {
   sendInvoiceWhatsApp,
 } from "../controllers/invoice.controller.js";
 import { verifyToken, checkRole } from "../middlewares/auth.middleware.js";
+import { checkFeatureAccess } from "../middlewares/feature.middleware.js";
+import { checkSubscription } from "../middlewares/subscription.middleware.js";
+
 
 const router = express.Router();
 
 // Only for customers
-router.use(verifyToken, checkRole(["customer"]));
+router.use(verifyToken, checkRole(["customer"]), checkSubscription);
 
 router.post("/", createInvoice);
 router.get("/", getInvoices);
 router.get("/:id", getInvoiceById);
 router.get("/:id/download", downloadInvoicePDF);
-router.post("/send-whatsapp/:invoiceId", sendInvoiceWhatsApp);
+
+// ✅ Feature-gated route for WhatsApp invoice sending
+router.post(
+  "/send-whatsapp/:invoiceId",
+  checkFeatureAccess("whatsappInvoice"),
+  sendInvoiceWhatsApp
+);
 
 export default router;

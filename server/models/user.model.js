@@ -12,6 +12,17 @@ const userSchema = new mongoose.Schema(
             enum: ["master", "customer", "support"],
             default: "customer",
         },
+        subscription: {
+            plan: { type: mongoose.Schema.Types.ObjectId, ref: "Plan" },
+            startDate: Date,
+            endDate: Date,
+        },
+        features: {
+            whatsappInvoice: { type: Boolean, default: false },
+            barcode: { type: Boolean, default: false },
+            pwa: { type: Boolean, default: true },
+            backup: { type: Boolean, default: false }
+        }
     },
     { timestamps: true }
 );
