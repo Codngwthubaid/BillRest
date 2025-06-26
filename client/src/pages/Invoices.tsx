@@ -175,9 +175,24 @@ export default function InvoicesPage() {
                   <button onClick={() => handleViewInvoice(invoice._id!)}>
                     <Eye className="w-4 h-4 text-primary hover:scale-110 cursor-pointer" />
                   </button>
-                  <button onClick={() => downloadInvoicePDF(invoice._id!)}>
+                  <button
+                    onClick={async () => {
+                      const blob = await downloadInvoicePDF(invoice._id!);
+                      if (!blob) return;
+
+                      const url = window.URL.createObjectURL(blob);
+                      const link = document.createElement("a");
+                      link.href = url;
+                      link.download = `${invoice.invoiceNumber}.pdf`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      window.URL.revokeObjectURL(url);
+                    }}
+                  >
                     <Download className="w-4 h-4 text-green-600 hover:scale-110" />
                   </button>
+                  {/* this feature is pending */}
                   <button onClick={() => sendInvoiceOnWhatsApp(invoice._id!)}>
                     <Send className="w-4 h-4 text-purple-600 hover:scale-110" />
                   </button>
@@ -195,7 +210,7 @@ export default function InvoicesPage() {
         </table>
       </div>
 
-      
+
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
