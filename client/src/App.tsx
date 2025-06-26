@@ -7,6 +7,7 @@ import Dashboard from "@/pages/Dashboard";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import SubscriptionRoute from "@/routes/SubscriptionRoute";
 import MainLayout from "@/layout/MainLayout";
+import InvoicesPage from "./pages/Invoices";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             <Route path="/plans" element={<Plans />} />
 
             <Route element={<SubscriptionRoute />}>
+              <Route path="/invoices" element={<InvoicesPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
             </Route>
           </Route>
