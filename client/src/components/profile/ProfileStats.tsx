@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { currencySymbolMap } from "@/lib/currencyMap";
 import { useProductStore } from "@/store/product.store";
 import { useReportStore } from "@/store/report.store";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "../ui/skeleton";
 import { format } from "date-fns";
-import { currencySymbolMap } from "@/lib/currencyMap";
+import { DollarSign, FileText, Package } from "lucide-react";
 
 export default function ProfileStats() {
     const { products, fetchProducts } = useProductStore();
@@ -14,7 +15,7 @@ export default function ProfileStats() {
     useEffect(() => {
         fetchProducts();
         fetchReport("monthly", new Date().toISOString().split("T")[0]);
-    }, []);
+    }, [fetchProducts, fetchReport]);
 
     useEffect(() => {
         if (reportData?.invoices?.[0]) {
@@ -27,85 +28,119 @@ export default function ProfileStats() {
 
     if (loading) {
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {[...Array(3)].map((_, i) => (
-                    <Skeleton key={i} className="h-24 w-full rounded-xl" />
-                ))}
+            <div className="space-y-6">
+                <Card className="rounded-lg shadow-sm ">
+                    <CardHeader>
+                        <CardTitle className="text-lg font-semibold ">Quick Stats</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {[...Array(3)].map((_, i) => (
+                            <Skeleton key={i} className="h-8 w-full rounded-lg" />
+                        ))}
+                    </CardContent>
+                </Card>
+                <Card className="bg-white rounded-lg shadow-sm ">
+                    <CardHeader>
+                        <CardTitle className="text-lg font-semibold ">Recent Invoices</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {[...Array(3)].map((_, i) => (
+                            <Skeleton key={i} className="h-12 w-full rounded-lg" />
+                        ))}
+                    </CardContent>
+                </Card>
             </div>
         );
     }
 
+    const stats = [
+        {
+            label: "Total Invoices",
+            value: reportData?.count || 0,
+            icon: FileText,
+            color: "bg-blue-100 text-blue-600",
+        },
+        {
+            label: "Total Products",
+            value: products.length,
+            icon: Package,
+            color: "bg-green-100 text-green-600",
+        },
+        {
+            label: "Total Sales",
+            value: `${symbol} ${reportData?.totalSales?.toFixed(2) || "0.00"}`,
+            icon: DollarSign,
+            color: "bg-purple-100 text-purple-600",
+        },
+    ];
+
     return (
         <div className="space-y-6">
-            {/* QUICK STATS */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Card className="flex flex-row items-center justify-between w-[90vw] sm:w-full">
-                    <CardHeader>
-                        <CardTitle>Total Invoices</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-base font-bold">
-                        {reportData?.count || 0}
-                    </CardContent>
-                </Card>
-                <Card className="flex flex-row items-center justify-between w-[90vw] sm:w-full">
-                    <CardHeader>
-                        <CardTitle>Total Products</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-base font-bold">
-                        {products.length}
-                    </CardContent>
-                </Card>
-                <Card className="flex flex-row items-center justify-between w-[90vw] sm:w-full">
-                    <CardHeader>
-                        <CardTitle>Total Sales</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-base font-bold">
-                        {symbol} {reportData?.totalSales?.toFixed(2) || "0.00"}
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* RECENT INVOICES */}
-            <div>
-                <h2 className="text-xl font-semibold mb-2">Recent Invoices</h2>
-                <div className="grid gap-4">
-                    {reportData?.invoices?.slice(0, 3).map((invoice) => (
-                        <Card key={invoice._id}>
-                            <CardContent>
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <p className="text-md font-semibold">{invoice.invoiceNumber}</p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {format(new Date(invoice.createdAt), "dd MMM yyyy")}
-                                        </p>
+            <Card className=" rounded-lg shadow-sm ">
+                <CardHeader>
+                    <CardTitle className="text-lg font-semibold ">Quick Stats</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                    <div className="space-y-4">
+                        {stats.map((stat, index) => {
+                            const Icon = stat.icon;
+                            return (
+                                <div key={index} className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${stat.color}`}>
+                                            <Icon className="w-4 h-4" />
+                                        </div>
+                                        <span className="text-sm">{stat.label}</span>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-md font-semibold">
-                                            {symbol} {invoice.totalAmount.toFixed(2)}
-                                        </p>
-                                        <p
-                                            className={`text-xs font-medium ${invoice.status === "paid"
-                                                ? "text-green-600"
-                                                : invoice.status === "pending"
-                                                    ? "text-yellow-600"
-                                                    : "text-red-600"
-                                                }`}
-                                        >
-                                            {invoice.status.toUpperCase()}
-                                        </p>
-                                    </div>
+                                    <span className="text-sm font-semibold ">{stat.value}</span>
                                 </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-
-                    {!reportData?.invoices?.length && (
-                        <p className="text-muted-foreground text-sm">
-                            No invoices found.
-                        </p>
-                    )}
-                </div>
-            </div>
+                            );
+                        })}
+                    </div>
+                </CardContent>
+            </Card>
+            <Card className=" rounded-lg shadow-sm ">
+                <CardHeader>
+                    <CardTitle className="text-lg font-semibold ">Recent Invoices</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                    <div className="space-y-4">
+                        {reportData?.invoices?.slice(0, 5).map((invoice) => (
+                            <div key={invoice._id} className="flex items-center space-x-4">
+                                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-100 text-blue-600">
+                                    <FileText className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-sm font-medium ">
+                                        Created invoice {invoice.invoiceNumber}
+                                    </p>
+                                    <p className="text-sm">
+                                        {format(new Date(invoice.createdAt), "dd MMM yyyy, HH:mm")}
+                                    </p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-sm font-semibold ">
+                                        {symbol} {invoice.totalAmount.toFixed(2)}
+                                    </p>
+                                    <p
+                                        className={`text-xs font-medium ${invoice.status === "paid"
+                                            ? "text-green-600"
+                                            : invoice.status === "pending"
+                                                ? "text-yellow-600"
+                                                : "text-red-600"
+                                            }`}
+                                    >
+                                        {invoice.status.toUpperCase()}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                        {!reportData?.invoices?.length && (
+                            <p className="text-sm">No invoices found.</p>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
-};
+}
