@@ -4,6 +4,7 @@ import type { CreateInvoicePayload, Invoice } from "@/types/invoice.types";
 // ✅ Create new invoice
 export const createInvoice = async (payload: CreateInvoicePayload): Promise<{ message: string; invoice: Invoice }> => {
   const res = await axiosInstance.post("/invoices", payload);
+  console.log(res.data)
   return res.data;
 };
 

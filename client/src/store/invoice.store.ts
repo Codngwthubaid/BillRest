@@ -64,6 +64,7 @@ export const useInvoiceStore = create<InvoiceState>((set) => ({
       }));
       return invoice;
     } catch (err: any) {
+      console.error("🔥 Create Invoice Error:", err); 
       set({ error: err.message || "Failed to create invoice", loading: false });
       return null;
     }
