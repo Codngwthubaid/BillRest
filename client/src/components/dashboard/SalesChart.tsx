@@ -44,7 +44,7 @@ const chartOptions = {
 export default function SalesChart() {
   return (
     <Card>
-      <CardHeader className="border-b">
+      <CardHeader className="border-b pt-6">
         <CardTitle className="text-lg font-semibold">
           Sales Over Time
         </CardTitle>

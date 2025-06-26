@@ -8,10 +8,10 @@ export default function QuickActions() {
 
     return (
         <Card className="rounded-lg shadow-sm border">
-            <CardHeader className="border-b">
+            <CardHeader className="border-b pt-6">
                 <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pb-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Button className="flex items-center justify-center space-x-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
                         <FileText className="w-5 h-5 text-blue-600" />

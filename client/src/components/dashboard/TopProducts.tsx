@@ -8,7 +8,7 @@ export default function TopProducts() {
 
   return (
     <Card className="rounded-lg shadow-sm border">
-      <CardHeader className="border-b">
+      <CardHeader className="border-b pt-6">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold">Top Products</CardTitle>
           <Button variant="link" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
@@ -16,7 +16,7 @@ export default function TopProducts() {
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pb-6">
         <div className="space-y-4">
           {data?.topProducts?.slice(0, 4).map((product, index) => (
             <div key={index} className="flex items-center justify-between">

@@ -53,7 +53,7 @@ export default function TopProductsChart() {
 
   return (
     <Card className="rounded-lg shadow-sm border">
-      <CardHeader className="border-b">
+      <CardHeader className="border-b pt-6">
         <CardTitle className="text-lg font-semibold">
           Top Products Distribution
         </CardTitle>

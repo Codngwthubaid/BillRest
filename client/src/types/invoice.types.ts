@@ -1,8 +1,8 @@
 export interface InvoiceProduct {
   product: string; // ID of the product
-  quantity: number;
-  price: number;
-  gstRate: number;
+  quantity: string;
+  price: string;
+  gstRate: string;
 }
 
 export interface PopulatedProduct {

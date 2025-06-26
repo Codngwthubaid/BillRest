@@ -10,15 +10,17 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getInvoiceById } from "@/services/invoice.service";
 import type { Invoice } from "@/types/invoice.types";
+import CreateInvoiceDialog from "@/components/invoices/CreateInvoiceDialog";
+
 
 export default function InvoicesPage() {
   const { invoices, setInvoices } = useInvoiceStore();
   const [search, setSearch] = useState("");
   const [showDialog, setShowDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
   const handleViewInvoice = async (id: string) => {
@@ -69,9 +71,16 @@ export default function InvoicesPage() {
           <h1 className="text-2xl font-bold">Invoices</h1>
           <p className="text-gray-500">Manage your invoices and billing</p>
         </div>
-        <Link to="/invoices/create">
-          <Button className="bg-green-600 hover:bg-green-700">+ Create Invoice</Button>
-        </Link>
+        <Button
+          onClick={() => setShowCreateDialog(true)}
+          className="bg-green-600 hover:bg-green-700"
+        >
+          + Create Invoice
+        </Button>
+        <CreateInvoiceDialog
+          open={showCreateDialog}
+          onOpenChange={setShowCreateDialog}
+        />
       </div>
 
       {/* Summary Cards */}
