@@ -1,82 +1,104 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate } from 'react-router-dom';
-import { z } from 'zod';
-import { loginSchema } from '@/lib/schemas';
-import { login } from '@/services/authService';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { FormError } from '../components/FormError';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginUser } from "@/services/auth.service";
+import { getSubscription } from "@/services/subscription.service";
+import { useAuthStore } from "@/store/auth.store";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
-type LoginFormData = z.infer<typeof loginSchema>;
+const loginSchema = z.object({
+  email: z.string().email("Invalid email"),
+  password: z.string().min(6, "Password is required"),
+});
 
-const Login: React.FC = () => {
+type LoginValues = z.infer<typeof loginSchema>;
+
+export default function Login() {
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
+  const login = useAuthStore((state) => state.login);
+  const token = useAuthStore((state) => state.token);
+  const setSubscription = useAuthStore((state) => state.setSubscription);
+
+  // 🚫 Prevent access if already logged in
+  useEffect(() => {
+    if (token) {
+      navigate("/profile");
+    }
+  }, [token, navigate]);
 
   const {
-    register: formRegister,
+    register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    setError,
-  } = useForm<LoginFormData>({
+  } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: LoginValues) => {
     try {
-      await login(data); // setAuth handled in authService
-      navigate('/dashboard');
-    } catch (error: any) {
-      setError('root', { message: error.response?.data?.message || 'Login failed' });
+      const res = await loginUser(data);
+      login(res.user, res.token);
+
+      try {
+        const { subscription } = await getSubscription();
+        setSubscription(subscription);
+      } catch {
+        setSubscription(null); // No active plan
+      }
+
+      toast.success("Logged in successfully");
+      navigate("/profile");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Login failed");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md space-y-6">
-        <h2 className="text-2xl font-bold text-center">Login</h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <div className="relative">
-              <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              <Input type="email" placeholder="Email" className="pl-10" {...formRegister('email')} />
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-background px-4">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-2xl">Login</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <Input placeholder="Email" type="email" {...register("email")} />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+              )}
             </div>
-            <FormError message={errors.email?.message} />
-          </div>
-          <div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            <div>
               <Input
-                type={showPassword ? 'text' : 'password'}
                 placeholder="Password"
-                className="pl-10 pr-10"
-                {...formRegister('password')}
+                type="password"
+                {...register("password")}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
-            <FormError message={errors.password?.message} />
-          </div>
-          <FormError message={errors.root?.message} />
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Logging in...' : 'Login'}
-          </Button>
-        </form>
-        <p className="text-center text-sm">
-          Don't have an account? <Link to="/register" className="text-blue-600 hover:underline">Register</Link>
-        </p>
-      </div>
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Logging in..." : "Login"}
+            </Button>
+            <p className="text-center text-sm text-muted-foreground">
+              Don’t have an account?{" "}
+              <span
+                className="text-primary cursor-pointer hover:underline"
+                onClick={() => navigate("/register")}
+              >
+                Register here
+              </span>
+            </p>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
-};
-
-export default Login;
+}

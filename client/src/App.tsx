@@ -1,61 +1,38 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Register from './pages/Register';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import { useAuthStore } from './store/authStore';
-import React, { type ReactNode } from 'react';
-import Invoices from './pages/Invoices';
+// src/App.tsx
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Register from "@/pages/Register";
+import Login from "@/pages/Login";
+import Profile from "@/pages/Profile";
+import Plans from "@/pages/Plan";
+import Dashboard from "@/pages/Dashboard"; // 👈 Only allowed after plan purchase
+import ProtectedRoute from "@/routes/ProtectedRoute";
+import SubscriptionRoute from "@/routes/SubscriptionRoute";
 
-const ProtectedAuthRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const token = useAuthStore((state) => state.token);
-  return token ? <Navigate to="/dashboard" replace /> : <>{children}</>;
-};
-
-const ProtectedRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const token = useAuthStore((state) => state.token);
-  return token ? <>{children}</> : <Navigate to="/login" replace />;
-};
-
-const App: React.FC = () => {
+function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
-        <Route
-          path="/register"
-          element={
-            <ProtectedAuthRoute>
-              <Register />
-            </ProtectedAuthRoute>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <ProtectedAuthRoute>
-              <Login />
-            </ProtectedAuthRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/invoices"
-          element={
-            <ProtectedRoute>
-              <Invoices />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* Public Routes */}
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+
+        {/* Protected Routes (Login Required) */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/plans" element={<Plans />} />
+
+          {/* Subscription Protected Routes */}
+          <Route element={<SubscriptionRoute />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            {/* Add more pages that require subscription here */}
+          </Route>
+        </Route>
+
+        {/* Fallback */}
+        <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
-};
+}
 
 export default App;
