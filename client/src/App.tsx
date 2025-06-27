@@ -10,6 +10,8 @@ import MainLayout from "@/layout/MainLayout";
 import InvoicesPage from "./pages/Invoices";
 import ProductsPage from "./pages/Product";
 import ReportPage from "./pages/Report";
+import HelpPage from "./pages/Help";
+import ContactPage from "./pages/contact";
 
 function App() {
   return (
@@ -30,6 +32,8 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/products" element={<ProductsPage />} />
               <Route path="/reports" element={<ReportPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/help" element={<HelpPage />} />
             </Route>
           </Route>
         </Route>
