@@ -11,6 +11,7 @@ export interface Business {
   defaultCurrency: "INR" | "USD" | "AED";
   gstSlabs: GstSlab[];
   isOnboarded: boolean;
+  protectedPin?: string; // Add this
   createdAt?: string;
   updatedAt?: string;
 }
@@ -22,4 +23,5 @@ export interface BusinessPayload {
   address?: string;
   defaultCurrency: "INR" | "USD" | "AED";
   gstSlabs: GstSlab[];
+  protectedPin?: string; // Optional (only on first setup)
 }

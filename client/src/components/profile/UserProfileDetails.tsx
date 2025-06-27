@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { User, Mail, Phone, Building, MapPin, FileText, DollarSign, Calendar, Edit, Save } from "lucide-react";
+import { User, Mail, Phone, Building, MapPin, FileText, DollarSign, Calendar, Edit, Save, Eye, EyeOff } from "lucide-react";
 import type { BusinessPayload } from "@/types/business.types";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { format } from "date-fns";
@@ -18,14 +18,18 @@ export default function UserProfileDetails() {
   const { setBusiness } = useBusinessStore();
   const { data: reportData } = useReportStore();
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState<BusinessPayload>({
+  const [localPin, setLocalPin] = useState("");
+  const [showPin, setShowPin] = useState(false);
+  const [formData, setFormData] = useState<BusinessPayload & { protectedPin?: string }>({
     name: user?.name || "",
     phone: user?.phone || "",
     businessName: "",
     address: "",
     defaultCurrency: "INR",
     gstSlabs: [],
+    protectedPin: "",
   });
+
 
   useEffect(() => {
     const fetchBusiness = async () => {
@@ -39,7 +43,9 @@ export default function UserProfileDetails() {
           address: data.address || "",
           defaultCurrency: data.defaultCurrency,
           gstSlabs: data.gstSlabs,
+          protectedPin: data.protectedPin || "",
         });
+
       } catch (err) {
         console.error("Failed to fetch business", err);
       }
@@ -69,6 +75,10 @@ export default function UserProfileDetails() {
 
   const handleSave = async () => {
     try {
+      if (!formData.protectedPin && localPin) {
+        formData.protectedPin = localPin;
+      }
+
       const res = await upsertBusiness(formData);
       setBusiness(res.business);
       toast.success("Profile updated successfully");
@@ -77,6 +87,7 @@ export default function UserProfileDetails() {
       toast.error(err?.response?.data?.message || "Update failed");
     }
   };
+
 
   return (
     <div className="lg:col-span-2 space-y-6">
@@ -136,6 +147,33 @@ export default function UserProfileDetails() {
                 <span className="">{formData.address || "N/A"}</span>
               </div>
             </div>
+            <div>
+              <Label className="text-sm font-medium mb-2">Protected PIN</Label>
+              <div className="flex items-center space-x-3">
+              <FileText className="w-4 h-4" />
+              <span>
+                {formData.protectedPin
+                ? showPin
+                  ? formData.protectedPin
+                  : "******"
+                : "N/A"}
+              </span>
+              {formData.protectedPin && (
+                <button
+                type="button"
+                className="ml-2 focus:outline-none"
+                onClick={() => setShowPin((prev) => !prev)}
+                >
+                {showPin ? (
+                  <EyeOff className="w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <Eye className="w-4 h-4 text-muted-foreground" />
+                )}
+                </button>
+              )}
+              </div>
+            </div>
+
             <div>
               <Label className="text-sm font-medium  mb-2">Default Currency</Label>
               <div className="flex items-center space-x-3">
@@ -206,6 +244,37 @@ export default function UserProfileDetails() {
                       className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
                     />
                   </div>
+                  {!formData.protectedPin ? (
+                    <div>
+                      <Label className="text-sm font-medium mb-2">Set Protected PIN</Label>
+                      <div className="relative">
+                        <Input
+                          type={showPin ? "text" : "password"}
+                          placeholder="Enter 4 to 6 digit PIN"
+                          name="protectedPin"
+                          value={localPin}
+                          onChange={(e) => setLocalPin(e.target.value)}
+                          maxLength={6}
+                          className="w-full px-3 py-2 pr-10 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                          type="button"
+                          className="absolute inset-y-0 right-0 px-3 flex items-center justify-center"
+                          onClick={() => setShowPin((prev) => !prev)}
+                        >
+                          {showPin ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
+                        </button>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        This PIN is used for extra verification and cannot be changed later.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Protected PIN is already set and cannot be changed.
+                    </p>
+                  )}
+
                   <div>
                     <Label className="text-sm font-medium  mb-2">Default Currency</Label>
                     <select
