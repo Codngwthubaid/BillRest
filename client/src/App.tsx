@@ -8,6 +8,7 @@ import ProtectedRoute from "@/routes/ProtectedRoute";
 import SubscriptionRoute from "@/routes/SubscriptionRoute";
 import MainLayout from "@/layout/MainLayout";
 import InvoicesPage from "./pages/Invoices";
+import ProductsPage from "./pages/Product";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route element={<SubscriptionRoute />}>
               <Route path="/invoices" element={<InvoicesPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/products" element={<ProductsPage />} />
             </Route>
           </Route>
         </Route>

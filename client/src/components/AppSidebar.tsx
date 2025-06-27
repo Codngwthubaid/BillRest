@@ -1,4 +1,4 @@
-import { FileText, Home, User } from "lucide-react";
+import { FileText, Home, ShoppingBag, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -27,6 +27,11 @@ const items = [
     title: "Invoices",
     href: "/invoices",
     icon: FileText,
+  },
+  {
+    title: "Products",
+    href: "/products",
+    icon: ShoppingBag,
   },
 ];
 

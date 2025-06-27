@@ -5,6 +5,7 @@ export interface Product {
   price: number;
   costPrice?: number;
   stock: number;
+  category: string;
   unit: string;
   gstRate: number;
   barcode?: string;

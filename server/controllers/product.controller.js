@@ -4,7 +4,7 @@ import { Product } from "../models/product.model.js";
 export const createProduct = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name, description, price, costPrice, stock, unit, gstRate, barcode } = req.body;
+    const { name, description, price, costPrice, stock, category, unit, gstRate, barcode } = req.body;
 
     const product = await Product.create({
       user: userId,
@@ -13,6 +13,7 @@ export const createProduct = async (req, res) => {
       price,
       costPrice,
       stock,
+      category,
       unit,
       gstRate,
       barcode,
