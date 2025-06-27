@@ -9,6 +9,7 @@ import SubscriptionRoute from "@/routes/SubscriptionRoute";
 import MainLayout from "@/layout/MainLayout";
 import InvoicesPage from "./pages/Invoices";
 import ProductsPage from "./pages/Product";
+import ReportPage from "./pages/Report";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
               <Route path="/invoices" element={<InvoicesPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/products" element={<ProductsPage />} />
+              <Route path="/reports" element={<ReportPage />} />
             </Route>
           </Route>
         </Route>

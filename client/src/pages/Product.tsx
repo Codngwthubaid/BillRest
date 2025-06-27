@@ -49,11 +49,11 @@ export default function ProductsPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold">Products</h1>
-                    <p className="text-gray-600">Manage your product inventory</p>
+                    <p className="">Manage your product inventory</p>
                 </div>
                 <Button
                     onClick={() => setShowCreateDialog(true)}
-                    className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700"
+                    className="flex items-center space-x-2 dark:text-white bg-blue-600 hover:bg-blue-700"
                 >
                     <Plus className="w-4 h-4" />
                     <span>Add Product</span>
@@ -100,7 +100,7 @@ export default function ProductsPage() {
                                         <Package className="w-6 h-6 text-blue-600" />
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                                        <h3 className="font-semibold ">{product.name}</h3>
                                     </div>
                                 </div>
                                 <div className="flex space-x-1">
@@ -108,7 +108,7 @@ export default function ProductsPage() {
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => { setSelectedProduct(product); setShowUpdateDialog(true); }}
-                                        className="text-gray-400 hover:text-blue-600"
+                                        className=" hover:text-blue-600"
                                     >
                                         <Edit className="w-4 h-4" />
                                     </Button>
@@ -116,32 +116,32 @@ export default function ProductsPage() {
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => { setSelectedProduct(product); setShowDeleteDialog(true); }}
-                                        className="text-gray-400 hover:text-red-600"
+                                        className=" hover:text-red-600"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </Button>
                                 </div>
                             </div>
 
-                            <p className="text-sm text-gray-600 mb-4">{product.description}</p>
+                            <p className="text-sm  mb-4">{product.description}</p>
 
                             <div className="space-y-3">
                                 <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Price:</span>
+                                    <span className="text-sm ">Price:</span>
                                     <span className="font-semibold">₹{product.price.toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Category:</span>
+                                    <span className="text-sm ">Category:</span>
                                     <span className="text-sm font-medium">{product.category}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Stock:</span>
+                                    <span className="text-sm ">Stock:</span>
                                     <span className={`text-sm font-medium px-2 py-1 rounded-full ${getStockStatus(product.stock)}`}>
                                         {product.stock} units
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Tax Rate:</span>
+                                    <span className="text-sm ">Tax Rate:</span>
                                     <span className="text-sm font-medium">{product.gstRate}%</span>
                                 </div>
                             </div>
@@ -159,9 +159,9 @@ export default function ProductsPage() {
 
             {filtered.length === 0 && (
                 <div className="text-center py-12">
-                    <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-                    <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+                    <Package className="w-12 h-12  mx-auto mb-4" />
+                    <h3 className="text-lg font-medium  mb-2">No products found</h3>
+                    <p className="">Try adjusting your search or filter criteria</p>
                 </div>
             )}
 
