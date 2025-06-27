@@ -5,6 +5,8 @@ import {
   getInvoiceById,
   downloadInvoicePDF,
   sendInvoiceWhatsApp,
+  updateInvoice,
+  deleteInvoice
 } from "../controllers/invoice.controller.js";
 import { verifyToken, checkRole } from "../middlewares/auth.middleware.js";
 import { checkFeatureAccess } from "../middlewares/feature.middleware.js";
@@ -18,6 +20,8 @@ router.use(verifyToken, checkRole(["customer"]), checkSubscription);
 
 router.post("/", createInvoice);
 router.get("/", getInvoices);
+router.put("/:id", updateInvoice);
+router.delete("/:id", deleteInvoice);
 router.get("/:id", getInvoiceById);
 router.get("/:id/download", downloadInvoicePDF);
 

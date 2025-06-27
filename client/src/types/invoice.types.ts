@@ -40,4 +40,5 @@ export interface CreateInvoicePayload {
   currency: "INR" | "USD" | "AED" | string;
   customerName: string;
   phoneNumber: string;
+  status: 'paid' | 'pending' | 'overdue' | 'draft';
 }

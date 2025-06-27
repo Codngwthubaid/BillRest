@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useInvoiceStore } from "@/store/invoice.store";
 import type { CreateInvoicePayload } from "@/types/invoice.types";
+import { useProductStore } from "@/store/product.store";
+import { useBusinessStore } from "@/store/business.store";
+import { getBusiness } from "@/services/business.service";
+
 
 interface Props {
     open: boolean;
@@ -15,12 +19,16 @@ const defaultForm: CreateInvoicePayload = {
     phoneNumber: "",
     currency: "INR",
     paymentMethod: "Cash",
+    status: "draft",
     products: [{ product: "", quantity: "", price: "", gstRate: "" }],
 };
+
 
 export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
     const [form, setForm] = useState<CreateInvoicePayload>(defaultForm);
     const { createInvoice } = useInvoiceStore();
+    const { products, fetchProducts } = useProductStore();
+    const { business, setBusiness } = useBusinessStore();
 
     const handleAddProduct = () => {
         setForm({
@@ -31,7 +39,21 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
 
     const handleChangeProduct = (index: number, field: string, value: any) => {
         const updated = [...form.products];
-        updated[index] = { ...updated[index], [field]: value };
+
+        if (field === "product") {
+            const selectedProduct = products.find((p) => p._id === value);
+            if (selectedProduct) {
+                updated[index] = {
+                    ...updated[index],
+                    product: selectedProduct._id,
+                    price: String(selectedProduct.price),
+                    gstRate: String(selectedProduct.gstRate),
+                };
+            }
+        } else {
+            updated[index] = { ...updated[index], [field]: value };
+        }
+
         setForm({ ...form, products: updated });
     };
 
@@ -43,6 +65,24 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
             setForm(defaultForm);
         }
     };
+
+    useEffect(() => {
+        if (open) {
+            fetchProducts();
+        }
+    }, [open, fetchProducts]);
+
+    useEffect(() => {
+        if (open) {
+            fetchProducts();
+            getBusiness()
+                .then(setBusiness)
+                .catch((err) => console.error("Failed to fetch business:", err));
+        }
+    }, [open, fetchProducts, setBusiness]);
+
+
+
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -77,7 +117,7 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
                         <div>
                             <label className="text-sm">Currency</label>
                             <select
@@ -103,6 +143,20 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
                                 <option value="Other">Other</option>
                             </select>
                         </div>
+                        <div>
+                            <label className="text-sm">Status</label>
+                            <select
+                                className="w-full border rounded p-2 text-sm"
+                                value={form.status}
+                                onChange={(e) => setForm({ ...form, status: e.target.value as any })}
+                            >
+                                <option value="draft">Draft</option>
+                                <option value="paid">Paid</option>
+                                <option value="pending">Pending</option>
+                                <option value="overdue">Overdue</option>
+                            </select>
+                        </div>
+
                     </div>
 
                     <div>
@@ -110,12 +164,21 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
                         <div className="space-y-2">
                             {form.products.map((p, idx) => (
                                 <div key={idx} className="grid grid-cols-4 gap-2 items-center">
-                                    <Input
-                                        placeholder="Product"
+                                    {/* Product Dropdown */}
+                                    <select
+                                        className="w-full border rounded p-2 text-sm"
                                         value={p.product}
                                         onChange={(e) => handleChangeProduct(idx, "product", e.target.value)}
-                                        className="placeholder:text-gray-400"
-                                    />
+                                    >
+                                        <option value="">Select Product</option>
+                                        {products.map((prod) => (
+                                            <option key={prod._id} value={prod._id}>
+                                                {prod.name}
+                                            </option>
+                                        ))}
+                                    </select>
+
+                                    {/* Quantity */}
                                     <Input
                                         placeholder="Qty"
                                         type="number"
@@ -123,6 +186,8 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
                                         onChange={(e) => handleChangeProduct(idx, "quantity", Number(e.target.value))}
                                         className="placeholder:text-gray-400"
                                     />
+
+                                    {/* Price */}
                                     <Input
                                         placeholder="Price"
                                         type="number"
@@ -130,14 +195,23 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
                                         onChange={(e) => handleChangeProduct(idx, "price", Number(e.target.value))}
                                         className="placeholder:text-gray-400"
                                     />
-                                    <Input
-                                        placeholder="GST %"
-                                        type="number"
+
+                                    {/* GST Dropdown */}
+                                    <select
+                                        className="w-full border rounded p-2 text-sm"
                                         value={p.gstRate}
                                         onChange={(e) => handleChangeProduct(idx, "gstRate", Number(e.target.value))}
-                                        className="placeholder:text-gray-400"
-                                    />
+                                    >
+                                        <option value="">Select GST %</option>
+                                        {business?.gstSlabs?.map((slab) => (
+                                            <option key={slab.value} value={slab.value}>
+                                                {slab.label}
+                                            </option>
+                                        ))}
+                                    </select>
+
                                 </div>
+
                             ))}
                             <Button type="button" variant="outline" onClick={handleAddProduct}>
                                 + Add Product
@@ -146,7 +220,7 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
                     </div>
 
                     <div className="pt-2">
-                        <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
+                        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
                             Create Invoice
                         </Button>
                     </div>

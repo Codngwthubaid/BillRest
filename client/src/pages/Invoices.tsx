@@ -3,17 +3,21 @@ import {
   getInvoices,
   downloadInvoicePDF,
   sendInvoiceOnWhatsApp,
+  updateInvoice,
+  deleteInvoice,
 } from "@/services/invoice.service";
 import { useInvoiceStore } from "@/store/invoice.store";
-import { FileText, DollarSign, Clock, Calendar, Eye, Send, Download } from "lucide-react";
+import { FileText, DollarSign, Clock, Calendar, Eye, Send, Download, PenLine, Trash } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getInvoiceById } from "@/services/invoice.service";
 import type { Invoice } from "@/types/invoice.types";
 import CreateInvoiceDialog from "@/components/invoices/CreateInvoiceDialog";
+import { DeleteInvoiceDialog } from "@/components/invoices/DeleteInvoiceDialog";
+import { UpdateInvoiceDialog } from "@/components/invoices/UpdateInvoiceDialog";
+import ViewInvoiceDialog from "@/components/invoices/ViewInvoiceDialog"
 
 
 export default function InvoicesPage() {
@@ -21,12 +25,25 @@ export default function InvoicesPage() {
   const [search, setSearch] = useState("");
   const [showDialog, setShowDialog] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+
 
   const handleViewInvoice = async (id: string) => {
     const data = await getInvoiceById(id);
     setSelectedInvoice(data);
     setShowDialog(true);
+  };
+
+  const handleUpdateInvoice = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setShowUpdateDialog(true);
+  };
+
+  const handleDeleteInvoice = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setShowDeleteDialog(true);
   };
 
   useEffect(() => {
@@ -73,7 +90,7 @@ export default function InvoicesPage() {
         </div>
         <Button
           onClick={() => setShowCreateDialog(true)}
-          className="bg-green-600 hover:bg-green-700"
+          className="bg-blue-600 hover:bg-blue-700"
         >
           + Create Invoice
         </Button>
@@ -180,15 +197,15 @@ export default function InvoicesPage() {
                 </td>
                 <td>{getStatusBadge(invoice.status)}</td>
                 <td>{invoice.createdAt?.slice(0, 10)}</td>
-                <td className="flex gap-2 p-2 mt-5">
+                <td className="flex gap-2 p-2 mt-5 flex-wrap">
                   <button onClick={() => handleViewInvoice(invoice._id!)}>
                     <Eye className="w-4 h-4 text-primary hover:scale-110 cursor-pointer" />
                   </button>
+
                   <button
                     onClick={async () => {
                       const blob = await downloadInvoicePDF(invoice._id!);
                       if (!blob) return;
-
                       const url = window.URL.createObjectURL(blob);
                       const link = document.createElement("a");
                       link.href = url;
@@ -201,11 +218,21 @@ export default function InvoicesPage() {
                   >
                     <Download className="w-4 h-4 text-green-600 hover:scale-110" />
                   </button>
-                  {/* this feature is pending */}
+
                   <button onClick={() => sendInvoiceOnWhatsApp(invoice._id!)}>
                     <Send className="w-4 h-4 text-purple-600 hover:scale-110" />
                   </button>
+
+                  <button onClick={() => handleUpdateInvoice(invoice)}>
+                    <PenLine className="w-4 h-4 text-emerald-600 hover:scale-110" />
+                  </button>
+
+                  <button onClick={() => handleDeleteInvoice(invoice)}>
+                    <Trash className="w-4 h-4 text-red-600 hover:scale-110" />
+                  </button>
+
                 </td>
+
               </tr>
             ))}
             {filtered.length === 0 && (
@@ -219,57 +246,37 @@ export default function InvoicesPage() {
         </table>
       </div>
 
+      <ViewInvoiceDialog
+        open={showDialog}
+        invoice={selectedInvoice}
+        onClose={() => setShowDialog(false)}
+      />
 
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Invoice Details</DialogTitle>
-          </DialogHeader>
+      <UpdateInvoiceDialog
+        open={showUpdateDialog}
+        invoice={selectedInvoice}
+        onClose={() => setShowUpdateDialog(false)}
+        onUpdate={async (id, updatedFields) => {
+          console.log(id, updatedFields)
+          await updateInvoice(id, updatedFields);
+          const data = await getInvoices();
+          setInvoices(data);
+        }}
+      />
 
-          {selectedInvoice ? (
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Invoice Number</p>
-                <p className="text-lg font-semibold">{selectedInvoice.invoiceNumber}</p>
-              </div>
+      <DeleteInvoiceDialog
+        open={showDeleteDialog}
+        invoiceNumber={selectedInvoice?.invoiceNumber || ""}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirmDelete={async () => {
+          if (!selectedInvoice || !selectedInvoice._id) return;
+          await deleteInvoice(selectedInvoice._id);
+          const data = await getInvoices();
+          setInvoices(data);
+          setShowDeleteDialog(false);
+        }}
+      />
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Customer</p>
-                  <p className="font-medium">{selectedInvoice.customerName}</p>
-                  <p className="text-sm">{selectedInvoice.phoneNumber}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm text-muted-foreground">Payment</p>
-                  <p>{selectedInvoice.paymentMethod}</p>
-                  <p>Status: {getStatusBadge(selectedInvoice.status)}</p>
-                </div>
-              </div>
-
-              <div className="border-t pt-4">
-                <p className="text-sm text-muted-foreground mb-2">Products</p>
-                <ul className="space-y-2">
-                  {selectedInvoice.products.map((p, idx) => (
-                    <li key={idx} className="text-sm border rounded p-2 flex justify-between items-center">
-                      <span>{typeof p.product === "string" ? p.product : p.product.name}</span>
-                      <span>{p.quantity} x ₹{p.price} + {p.gstRate}% GST</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="border-t pt-4">
-                <p>Subtotal: ₹{selectedInvoice.subTotal.toFixed(2)}</p>
-                <p>GST: ₹{selectedInvoice.gstAmount.toFixed(2)}</p>
-                <p className="font-bold">Total: ₹{selectedInvoice.totalAmount.toFixed(2)}</p>
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">Loading...</p>
-          )}
-        </DialogContent>
-      </Dialog>
 
     </div>
   );

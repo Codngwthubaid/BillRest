@@ -14,6 +14,21 @@ export const getInvoices = async (): Promise<Invoice[]> => {
   return res.data;
 };
 
+// ✅ Update invoice
+export const updateInvoice = async (
+  id: string,
+  payload: Partial<Invoice>
+): Promise<{ message: string; invoice: Invoice }> => {
+  const res = await axiosInstance.put(`/invoices/${id}`, payload);
+  return res.data;
+};
+
+// ✅ Delete invoice
+export const deleteInvoice = async (id: string): Promise<{ message: string }> => {
+  const res = await axiosInstance.delete(`/invoices/${id}`);
+  return res.data;
+};
+
 // ✅ Get invoice by ID
 export const getInvoiceById = async (id: string): Promise<Invoice> => {
   const res = await axiosInstance.get(`/invoices/${id}`);

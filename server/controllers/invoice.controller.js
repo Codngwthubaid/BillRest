@@ -12,7 +12,7 @@ export const createInvoice = async (req, res) => {
   try {
     const userId = req.user.id;
     const {
-      products, paymentMethod, currency, customerName, phoneNumber
+      products, paymentMethod, currency, customerName, phoneNumber, status
     } = req.body;
 
     let subTotal = 0;
@@ -44,9 +44,78 @@ export const createInvoice = async (req, res) => {
       currency,
       customerName,
       phoneNumber,
+      status: status || "draft"
     });
 
     res.status(201).json({ message: "Invoice created", invoice });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Update Invoice
+export const updateInvoice = async (req, res) => {
+  try {
+    const invoiceId = req.params.id;
+    const userId = req.user.id;
+    const updateData = req.body;
+
+    // If products are being updated, recalculate totals
+    if (updateData.products) {
+      let subTotal = 0;
+      let gstAmount = 0;
+
+      for (const item of updateData.products) {
+        const product = await Product.findById(item.product);
+        if (!product) {
+          return res.status(404).json({ message: "Product not found" });
+        }
+
+        const productTotal = item.price * item.quantity;
+        const gst = (productTotal * item.gstRate) / 100;
+
+        subTotal += productTotal;
+        gstAmount += gst;
+      }
+
+      updateData.subTotal = subTotal;
+      updateData.gstAmount = gstAmount;
+      updateData.totalAmount = subTotal + gstAmount;
+    }
+
+    const updatedInvoice = await Invoice.findOneAndUpdate(
+      { _id: invoiceId, user: userId },
+      updateData,
+      { new: true }
+    );
+
+    if (!updatedInvoice) {
+      return res.status(404).json({ message: "Invoice not found" });
+    }
+
+    res.status(200).json({
+      message: "Invoice updated successfully",
+      invoice: updatedInvoice
+    });
+  } catch (err) {
+    console.error("Update failed:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Delete Invoice
+export const deleteInvoice = async (req, res) => {
+  try {
+    const invoiceId = req.params.id;
+    const userId = req.user.id;
+
+    const deletedInvoice = await Invoice.findOneAndDelete({ _id: invoiceId, user: userId });
+
+    if (!deletedInvoice) {
+      return res.status(404).json({ message: "Invoice not found" });
+    }
+
+    res.status(200).json({ message: "Invoice deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

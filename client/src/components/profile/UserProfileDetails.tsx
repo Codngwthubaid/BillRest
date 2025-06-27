@@ -84,7 +84,7 @@ export default function UserProfileDetails() {
         <CardContent className="p-6">
           <div className="flex items-center space-x-6 mb-6">
             <div className="relative">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-green-600 rounded-full flex items-center justify-center">
+              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
                 <span className="text-2xl font-bold text-white">
                   {user?.name?.charAt(0) || "?"}
                 </span>
@@ -156,7 +156,7 @@ export default function UserProfileDetails() {
           <div className="mt-6">
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                <Button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                   <Edit className="w-4 h-4" />
                   <span>Edit Profile</span>
                 </Button>
@@ -173,7 +173,7 @@ export default function UserProfileDetails() {
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:-green-500"
+                      className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
                     />
                   </div>
                   <div>
@@ -183,7 +183,7 @@ export default function UserProfileDetails() {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:-green-500"
+                      className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
                     />
                   </div>
                   <div>
@@ -193,7 +193,7 @@ export default function UserProfileDetails() {
                       name="businessName"
                       value={formData.businessName}
                       onChange={handleChange}
-                      className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:-green-500"
+                      className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
                     />
                   </div>
                   <div>
@@ -203,7 +203,7 @@ export default function UserProfileDetails() {
                       name="address"
                       value={formData.address || ""}
                       onChange={handleChange}
-                      className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:-green-500"
+                      className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
                     />
                   </div>
                   <div>
@@ -212,7 +212,7 @@ export default function UserProfileDetails() {
                       name="defaultCurrency"
                       value={formData.defaultCurrency}
                       onChange={handleChange}
-                      className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:-green-500"
+                      className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
                     >
                       <option value="INR">INR</option>
                       <option value="USD">USD</option>
@@ -232,14 +232,14 @@ export default function UserProfileDetails() {
                             return { ...prev, gstSlabs: updated };
                           });
                         }}
-                        className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:-green-500"
+                        className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
                       />
                       <Input
                         placeholder="GST Value (%)"
                         type="number"
                         value={slab.value}
                         onChange={(e) => handleGstSlabChange(index, +e.target.value)}
-                        className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:-green-500"
+                        className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
                       />
                     </div>
                   ))}
@@ -251,7 +251,7 @@ export default function UserProfileDetails() {
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                     Cancel
                   </Button>
-                  <Button onClick={handleSave} className="bg-green-600 text-white hover:bg-green-700">
+                  <Button onClick={handleSave} className="bg-blue-600 text-white hover:bg-blue-700">
                     <Save className="w-4 h-4 mr-2" />
                     Save
                   </Button>
@@ -261,15 +261,15 @@ export default function UserProfileDetails() {
           </div>
         </CardContent>
       </Card>
-      <Card className="rounded-lg shadow-sm  -gray-200">
+      <Card className="pt-6 rounded-lg shadow-sm">
         <CardHeader>
           <CardTitle className="text-lg font-semibold ">Recent Activity</CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="pb-6">
           <div className="space-y-4">
             {reportData?.invoices?.slice(0, 5).map((invoice) => (
               <div key={invoice._id} className="flex items-center space-x-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center bg-green-100 text-green-600`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center bg-blue-100 text-blue-600`}>
                   <FileText className="w-4 h-4" />
                 </div>
                 <div className="flex-1">

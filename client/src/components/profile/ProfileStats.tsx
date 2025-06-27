@@ -76,11 +76,11 @@ export default function ProfileStats() {
 
     return (
         <div className="space-y-6">
-            <Card className=" rounded-lg shadow-sm ">
+            <Card className="pt-6 rounded-lg shadow-sm ">
                 <CardHeader>
                     <CardTitle className="text-lg font-semibold ">Quick Stats</CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
+                <CardContent className="pb-6">
                     <div className="space-y-4">
                         {stats.map((stat, index) => {
                             const Icon = stat.icon;
@@ -99,11 +99,11 @@ export default function ProfileStats() {
                     </div>
                 </CardContent>
             </Card>
-            <Card className=" rounded-lg shadow-sm ">
+            <Card className="pt-6 rounded-lg shadow-sm ">
                 <CardHeader>
                     <CardTitle className="text-lg font-semibold ">Recent Invoices</CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
+                <CardContent className="pb-6">
                     <div className="space-y-4">
                         {reportData?.invoices?.slice(0, 5).map((invoice) => (
                             <div key={invoice._id} className="flex items-center space-x-4">

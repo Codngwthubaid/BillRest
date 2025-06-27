@@ -6,6 +6,8 @@ import {
   getInvoiceById as apiGetInvoiceById,
   downloadInvoicePDF as apiDownloadPDF,
   sendInvoiceOnWhatsApp as apiSendWhatsApp,
+  updateInvoice,
+  deleteInvoice,
 } from "@/services/invoice.service";
 
 interface InvoiceState {
@@ -17,6 +19,8 @@ interface InvoiceState {
   // Actions
   fetchInvoices: () => Promise<void>;
   fetchInvoiceById: (id: string) => Promise<void>;
+  updateInvoice: (id: string, payload: Partial<Invoice>) => Promise<Invoice | null>;
+  deleteInvoice: (id: string) => Promise<boolean>;
   createInvoice: (payload: CreateInvoicePayload) => Promise<Invoice | null>;
   downloadInvoicePDF: (id: string) => Promise<Blob | null>;
   sendInvoiceOnWhatsApp: (id: string) => Promise<string | null>;
@@ -64,9 +68,43 @@ export const useInvoiceStore = create<InvoiceState>((set) => ({
       }));
       return invoice;
     } catch (err: any) {
-      console.error("🔥 Create Invoice Error:", err); 
+      console.error("🔥 Create Invoice Error:", err);
       set({ error: err.message || "Failed to create invoice", loading: false });
       return null;
+    }
+  },
+
+  updateInvoice: async (id, payload) => {
+    set({ loading: true, error: null });
+    try {
+      const { invoice } = await updateInvoice(id, payload);
+      set((state) => ({
+        invoices: state.invoices.map((inv) => (inv._id === id ? invoice : inv)),
+        selectedInvoice: state.selectedInvoice?._id === id ? invoice : state.selectedInvoice,
+        loading: false,
+      }));
+      return invoice;
+    } catch (err: any) {
+      console.error("🔥 Update Invoice Error:", err);
+      set({ error: err.message || "Failed to update invoice", loading: false });
+      return null;
+    }
+  },
+
+  deleteInvoice: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      await deleteInvoice(id);
+      set((state) => ({
+        invoices: state.invoices.filter((inv) => inv._id !== id),
+        selectedInvoice: state.selectedInvoice?._id === id ? null : state.selectedInvoice,
+        loading: false,
+      }));
+      return true;
+    } catch (err: any) {
+      console.error("🔥 Delete Invoice Error:", err);
+      set({ error: err.message || "Failed to delete invoice", loading: false });
+      return false;
     }
   },
 
