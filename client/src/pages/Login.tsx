@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginUser } from "@/services/auth.service";
-import { getSubscription } from "@/services/subscription.service";
 import { useAuthStore } from "@/store/auth.store";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import { useSubscriptionStore } from "@/store/subscription.store";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -24,9 +24,9 @@ export default function Login() {
   const login = useAuthStore((state) => state.login);
   const token = useAuthStore((state) => state.token);
   const setSubscription = useAuthStore((state) => state.setSubscription);
-
   const emailInputRef = useRef<HTMLInputElement>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const { currentSubscription, fetchUserSubscription } = useSubscriptionStore();
 
   // Autofocus email on mount
   useEffect(() => {
@@ -37,13 +37,18 @@ export default function Login() {
   useEffect(() => {
     if (token) {
       const currentUser = useAuthStore.getState().user;
+      
       if (currentUser?.role === "customer") {
-        navigate("/plans");
+        if (currentSubscription) {
+          navigate("/dashboard");
+        } else {
+          navigate("/plans");
+        }
       } else {
         navigate("/profile");
       }
     }
-  }, [token, navigate]);
+  }, [token, currentSubscription, navigate]);
 
   const {
     register,
@@ -53,22 +58,26 @@ export default function Login() {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: LoginValues) => {
+const onSubmit = async (data: LoginValues) => {
     try {
       const res = await loginUser(data);
       login(res.user, res.token);
 
       try {
-        const { subscription } = await getSubscription();
-        setSubscription(subscription);
+        await fetchUserSubscription();
       } catch {
         setSubscription(null);
       }
 
       toast.success("Logged in successfully");
 
-      if (res.user.role === "customer") {
-        navigate("/plans");
+      const userRole = res.user.role;
+      if (userRole === "customer") {
+        if (useSubscriptionStore.getState().currentSubscription) {
+          navigate("/dashboard");
+        } else {
+          navigate("/plans");
+        }
       } else {
         navigate("/profile");
       }
