@@ -15,6 +15,7 @@ export default function Plans() {
     fetchIndividualPlans
   } = usePlanStore();
 
+
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
 
@@ -22,9 +23,6 @@ export default function Plans() {
     fetchPackagePlans();
     fetchIndividualPlans();
   }, [fetchPackagePlans, fetchIndividualPlans]);
-
-  console.log("Package Plans:", packagePlans);
-  console.log("Individual Plans:", individualPlans);
 
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
@@ -96,7 +94,7 @@ export default function Plans() {
                   <p>Duration: {plan.durationInDays} days</p>
                   <p>₹{plan.pricePerMonth}/month - ₹{plan.totalPrice} total</p>
                   {plan.description && <p className="text-sm text-gray-500">{plan.description}</p>}
-                  <Button className="w-full mt-2 bg-blue-600 hover:bg-blue-700" onClick={() => handleBuyPlan(plan._id)}>
+                  <Button className="dark:text-white w-full mt-2 bg-blue-600 hover:bg-blue-700" onClick={() => handleBuyPlan(plan._id)}>
                     Buy Now
                   </Button>
                 </CardContent>
@@ -118,7 +116,7 @@ export default function Plans() {
                 <CardContent className="space-y-2">
                   <p>₹{plan.pricePerMonth}/month</p>
                   {plan.description && <p className="text-sm text-gray-500">{plan.description}</p>}
-                  <Button className="w-full mt-2 bg-blue-600 hover:bg-blue-700" onClick={() => handleBuyPlan(plan._id)}>
+                  <Button className="dark:text-white w-full mt-2 bg-blue-600 hover:bg-blue-700" onClick={() => handleBuyPlan(plan._id)}>
                     Buy Now
                   </Button>
                 </CardContent>
