@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -24,10 +25,23 @@ export default function Login() {
   const token = useAuthStore((state) => state.token);
   const setSubscription = useAuthStore((state) => state.setSubscription);
 
-  // 🚫 Prevent access if already logged in
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Autofocus email on mount
+  useEffect(() => {
+    emailInputRef.current?.focus();
+  }, []);
+
+  // Redirect based on role after login
   useEffect(() => {
     if (token) {
-      navigate("/profile");
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser?.role === "customer") {
+        navigate("/plans");
+      } else {
+        navigate("/profile");
+      }
     }
   }, [token, navigate]);
 
@@ -48,11 +62,16 @@ export default function Login() {
         const { subscription } = await getSubscription();
         setSubscription(subscription);
       } catch {
-        setSubscription(null); // No active plan
+        setSubscription(null);
       }
 
       toast.success("Logged in successfully");
-      navigate("/profile");
+
+      if (res.user.role === "customer") {
+        navigate("/plans");
+      } else {
+        navigate("/profile");
+      }
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Login failed");
     }
@@ -62,33 +81,47 @@ export default function Login() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-background px-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Login - BillRest</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <Input placeholder="Email" type="email" {...register("email")} />
+              <Input
+                placeholder="Email"
+                type="email"
+                {...register("email")}
+                ref={(e) => {
+                  register("email").ref(e);
+                  emailInputRef.current = e;
+                }}
+              />
               {errors.email && (
                 <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
               )}
             </div>
-            <div>
+            <div className="relative">
               <Input
                 placeholder="Password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 {...register("password")}
               />
+              <span
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </span>
               {errors.password && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.password.message}
                 </p>
               )}
             </div>
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
               {isSubmitting ? "Logging in..." : "Login"}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
-              Don’t have an account?{" "}
+              Don&apos;t have an account?{" "}
               <span
                 className="text-primary cursor-pointer hover:underline"
                 onClick={() => navigate("/register")}

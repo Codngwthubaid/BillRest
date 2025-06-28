@@ -18,7 +18,7 @@ import CreateInvoiceDialog from "@/components/invoices/CreateInvoiceDialog";
 import { DeleteInvoiceDialog } from "@/components/invoices/DeleteInvoiceDialog";
 import { UpdateInvoiceDialog } from "@/components/invoices/UpdateInvoiceDialog";
 import ViewInvoiceDialog from "@/components/invoices/ViewInvoiceDialog"
-
+import ProtectedPinDialog from "@/components/invoices/ProtectedPinDialog";
 
 export default function InvoicesPage() {
   const { invoices, setInvoices } = useInvoiceStore();
@@ -28,7 +28,13 @@ export default function InvoicesPage() {
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [showPinDialog, setShowPinDialog] = useState(false);
+  const [pinCallback, setPinCallback] = useState<() => void>(() => () => { });
 
+  const askForPin = (callback: () => void) => {
+    setPinCallback(() => callback);
+    setShowPinDialog(true);
+  };
 
   const handleViewInvoice = async (id: string) => {
     const data = await getInvoiceById(id);
@@ -223,13 +229,19 @@ export default function InvoicesPage() {
                     <Send className="w-4 h-4 text-purple-600 hover:scale-110" />
                   </button>
 
-                  <button onClick={() => handleUpdateInvoice(invoice)}>
+                  <button onClick={() =>
+                    askForPin(() => handleUpdateInvoice(invoice))
+                  }>
                     <PenLine className="w-4 h-4 text-emerald-600 hover:scale-110" />
                   </button>
 
-                  <button onClick={() => handleDeleteInvoice(invoice)}>
+
+                  <button onClick={() =>
+                    askForPin(() => handleDeleteInvoice(invoice))
+                  }>
                     <Trash className="w-4 h-4 text-red-600 hover:scale-110" />
                   </button>
+
 
                 </td>
 
@@ -277,7 +289,13 @@ export default function InvoicesPage() {
         }}
       />
 
-
+      <ProtectedPinDialog
+        open={showPinDialog}
+        onClose={() => setShowPinDialog(false)}
+        onVerified={() => {
+          pinCallback();
+        }}
+      />
     </div>
   );
 }

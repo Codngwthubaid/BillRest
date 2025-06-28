@@ -1,25 +1,16 @@
 import { create } from "zustand";
-import type {
-  Plan,
-  Subscription,
-  RazorpayOrderResponse,
-} from "@/types/subscription.types";
+import type { Subscription, RazorpayOrderResponse } from "@/types/subscription.types";
 import {
   createOrder as apiCreateOrder,
   verifyAndActivate,
   getSubscription,
-  getAllPlans,
 } from "@/services/subscription.service";
 
 interface SubscriptionState {
   currentSubscription: Subscription | null;
-  availablePlans: Plan[];
 
   setSubscription: (subscription: Subscription | null) => void;
-  setPlans: (plans: Plan[]) => void;
-
   fetchUserSubscription: () => Promise<void>;
-  fetchAllPlans: () => Promise<void>; // ✅ NEW
   createOrder: (planId: string) => Promise<RazorpayOrderResponse>;
   handlePaymentVerification: (
     details: {
@@ -33,10 +24,8 @@ interface SubscriptionState {
 
 export const useSubscriptionStore = create<SubscriptionState>((set) => ({
   currentSubscription: null,
-  availablePlans: [],
 
   setSubscription: (subscription) => set({ currentSubscription: subscription }),
-  setPlans: (plans) => set({ availablePlans: plans }),
 
   fetchUserSubscription: async () => {
     try {
@@ -44,17 +33,6 @@ export const useSubscriptionStore = create<SubscriptionState>((set) => ({
       set({ currentSubscription: subscription });
     } catch {
       set({ currentSubscription: null });
-    }
-  },
-
-  // ✅ NEW: Fetch All Plans
-  fetchAllPlans: async () => {
-    try {
-      const plans = await getAllPlans();
-      set({ availablePlans: plans });
-    } catch (err) {
-      console.error("Failed to fetch plans:", err);
-      set({ availablePlans: [] });
     }
   },
 

@@ -1,14 +1,7 @@
-export interface Plan {
-  _id: string;
-  name: string;
-  durationInDays: number;
-  price: number;
-}
-
 export interface Subscription {
   _id: string;
   user: string;
-  plan: Plan;
+  planId: string; // just keep planId as string
   startDate: string;
   endDate: string;
   razorpayOrderId: string;

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -24,6 +26,8 @@ type RegisterValues = z.infer<typeof registerSchema>;
 export default function Register() {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -48,7 +52,7 @@ export default function Register() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-background px-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
-          <CardTitle className="text-2xl">Create an account</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Register - BillRest</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -70,19 +74,25 @@ export default function Register() {
                 <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
               )}
             </div>
-            <div>
+            <div className="relative">
               <Input
                 placeholder="Password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 {...register("password")}
               />
+              <span
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </span>
               {errors.password && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.password.message}
                 </p>
               )}
             </div>
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
               {isSubmitting ? "Registering..." : "Register"}
             </Button>
             <p className="text-center text-sm text-muted-foreground">

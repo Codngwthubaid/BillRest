@@ -1,5 +1,5 @@
 import { axiosInstance } from "@/lib/axiosInstance";
-import type { Plan, Subscription, RazorpayOrderResponse } from "@/types/subscription.types";
+import type { Subscription, RazorpayOrderResponse } from "@/types/subscription.types";
 
 // ✅ Create Razorpay Order
 export const createOrder = async (planId: string): Promise<RazorpayOrderResponse> => {
@@ -22,9 +22,4 @@ export const verifyAndActivate = async (data: {
 export const getSubscription = async (): Promise<{ subscription: Subscription }> => {
   const res = await axiosInstance.get("/subscription");
   return res.data;
-};
-
-export const getAllPlans = async (): Promise<Plan[]> => {
-  const res = await axiosInstance.get("/plans");
-  return res.data.plans; // your backend sends { plans: [...] }
 };

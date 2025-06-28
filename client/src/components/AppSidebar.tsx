@@ -1,13 +1,3 @@
-import {
-  ChartColumn,
-  FileText,
-  Home,
-  ShoppingBag,
-  User,
-  LogOut,
-  HelpCircle,
-  Mail
-} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -21,48 +11,32 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth.store";
-
-const items = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: Home,
-  },
-  {
-    title: "Invoices",
-    href: "/invoices",
-    icon: FileText,
-  },
-  {
-    title: "Products",
-    href: "/products",
-    icon: ShoppingBag,
-  },
-  {
-    title: "Reports",
-    href: "/reports",
-    icon: ChartColumn,
-  },
-  {
-    title: "Profile",
-    href: "/profile",
-    icon: User,
-  },
-  {
-    title: "Contact",
-    href: "/contact",
-    icon: Mail,
-  },
-  {
-    title: "Help",
-    href: "/help",
-    icon: HelpCircle,
-  },
-];
+import { useSubscriptionStore } from "@/store/subscription.store";
+import { useEffect } from "react";
+import { items } from "@/constants/index";
+import { LogOut } from "lucide-react";
 
 export function AppSidebar() {
   const location = useLocation();
-  const { user, logout } = useAuthStore()
+  const { user, logout } = useAuthStore();
+  const { currentSubscription, fetchUserSubscription } = useSubscriptionStore();
+
+  useEffect(() => {
+    fetchUserSubscription();
+  }, [fetchUserSubscription]);
+
+  const isSubscribed = currentSubscription?.status === "active";
+
+  let menuItems = [];
+  if (user?.role === "customer") {
+    menuItems = items.sidebarOfCustomer;
+  } else if (user?.role === "support") {
+    menuItems = items.sidebarOfSupport;
+  } else if (user?.role === "master") {
+    menuItems = items.sidebarOfAdmin;
+  } else {
+    menuItems = items.sidebarOfCustomer;
+  }
 
   return (
     <Sidebar className="w-64 h-screen fixed top-0 left-0 border-r bg-white shadow-lg">
@@ -73,23 +47,29 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
-                      location.pathname === item.href && "bg-blue-100 text-blue-600"
-                    )}
-                  >
-                    <Link to={item.href} className="flex items-center w-full py-5">
-                      <item.icon className="w-5 h-5" />
-                      <span className="text-base">{item.title}</span>
-                      <span className="ml-auto text-xs text-gray-400">{item.title[0]}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {menuItems.map((item) => {
+                const isDisabled =
+                  user?.role === "customer" && !isSubscribed && item.href !== "/plans";
+
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      className={cn(
+                        "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
+                        location.pathname === item.href && "bg-blue-100 text-blue-600",
+                        isDisabled && "opacity-50 pointer-events-none cursor-not-allowed"
+                      )}
+                    >
+                      <Link to={item.href}>
+                        <item.icon className="w-5 h-5" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -105,7 +85,10 @@ export function AppSidebar() {
               </div>
             </div>
           </Link>
-          <div onClick={logout} className="flex items-center gap-2 text-sm text-gray-600 hover:bg-gray-100 p-2 rounded-md cursor-pointer">
+          <div
+            onClick={logout}
+            className="flex items-center gap-2 text-sm text-gray-600 hover:bg-gray-100 p-2 rounded-md cursor-pointer"
+          >
             <LogOut className="w-5 h-5" />
             <span>Logout</span>
           </div>
