@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/auth.store";
 import { useBusinessStore } from "@/store/business.store";
 import { useReportStore } from "@/store/report.store";
-import { getBusiness, upsertBusiness } from "@/services/business.service";
+import { upsertBusiness } from "@/services/business.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,11 +15,12 @@ import { format } from "date-fns";
 
 export default function UserProfileDetails() {
   const { user } = useAuthStore();
-  const { setBusiness } = useBusinessStore();
+  const { business, loading, error, fetchBusiness } = useBusinessStore();
   const { data: reportData } = useReportStore();
   const [open, setOpen] = useState(false);
   const [localPin, setLocalPin] = useState("");
   const [showPin, setShowPin] = useState(false);
+
   const [formData, setFormData] = useState<BusinessPayload & { protectedPin?: string }>({
     name: user?.name || "",
     phone: user?.phone || "",
@@ -30,28 +31,19 @@ export default function UserProfileDetails() {
     protectedPin: "",
   });
 
-
   useEffect(() => {
-    const fetchBusiness = async () => {
-      try {
-        const data = await getBusiness();
-        setBusiness(data);
-        setFormData({
-          name: user?.name || "",
-          phone: user?.phone || "",
-          businessName: data.businessName,
-          address: data.address || "",
-          defaultCurrency: data.defaultCurrency,
-          gstSlabs: data.gstSlabs,
-          protectedPin: data.protectedPin || "",
-        });
-
-      } catch (err) {
-        console.error("Failed to fetch business", err);
-      }
-    };
-    fetchBusiness();
-  }, [setBusiness, user]);
+    if (business) {
+      setFormData({
+        name: user?.name || "",
+        phone: user?.phone || "",
+        businessName: business.businessName,
+        address: business.address || "",
+        defaultCurrency: business.defaultCurrency,
+        gstSlabs: business.gstSlabs,
+        protectedPin: business.protectedPin || "",
+      });
+    }
+  }, [business, user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -79,8 +71,8 @@ export default function UserProfileDetails() {
         formData.protectedPin = localPin;
       }
 
-      const res = await upsertBusiness(formData);
-      setBusiness(res.business);
+      await upsertBusiness(formData);
+      await fetchBusiness();  // 🔥 replace setBusiness
       toast.success("Profile updated successfully");
       setOpen(false);
     } catch (err: any) {
@@ -88,7 +80,10 @@ export default function UserProfileDetails() {
     }
   };
 
-
+  // Loading or error states
+  if (loading) return <div>Loading business profile...</div>;
+  if (error) return <div>Error loading business: {error}</div>;
+  if (!business) return <div>No business profile found.</div>;
   return (
     <div className="lg:col-span-2 space-y-6">
       <Card className="rounded-lg shadow-sm ">
@@ -150,27 +145,27 @@ export default function UserProfileDetails() {
             <div>
               <Label className="text-sm font-medium mb-2">Protected PIN</Label>
               <div className="flex items-center space-x-3">
-              <FileText className="w-4 h-4" />
-              <span>
-                {formData.protectedPin
-                ? showPin
-                  ? formData.protectedPin
-                  : "******"
-                : "N/A"}
-              </span>
-              {formData.protectedPin && (
-                <button
-                type="button"
-                className="ml-2 focus:outline-none"
-                onClick={() => setShowPin((prev) => !prev)}
-                >
-                {showPin ? (
-                  <EyeOff className="w-4 h-4 text-muted-foreground" />
-                ) : (
-                  <Eye className="w-4 h-4 text-muted-foreground" />
+                <FileText className="w-4 h-4" />
+                <span>
+                  {formData.protectedPin
+                    ? showPin
+                      ? formData.protectedPin
+                      : "******"
+                    : "N/A"}
+                </span>
+                {formData.protectedPin && (
+                  <button
+                    type="button"
+                    className="ml-2 focus:outline-none"
+                    onClick={() => setShowPin((prev) => !prev)}
+                  >
+                    {showPin ? (
+                      <EyeOff className="w-4 h-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="w-4 h-4 text-muted-foreground" />
+                    )}
+                  </button>
                 )}
-                </button>
-              )}
               </div>
             </div>
 

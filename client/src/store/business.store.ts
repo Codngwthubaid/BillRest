@@ -1,14 +1,42 @@
 import { create } from "zustand";
+import { getBusiness } from "@/services/business.service";
 import type { Business } from "@/types/business.types";
+
 
 interface BusinessState {
   business: Business | null;
-  setBusiness: (business: Business) => void;
+  loading: boolean;
+  error: string | null;
+  isPinVerified: boolean;
+  verifyPin: () => void;
+  resetPinVerification: () => void;
+  fetchBusiness: () => Promise<void>;
   clearBusiness: () => void;
 }
 
-export const useBusinessStore = create<BusinessState>((set) => ({
-  business: null,
-  setBusiness: (business) => set({ business }),
-  clearBusiness: () => set({ business: null }),
-}));
+export const useBusinessStore = create<BusinessState>((set) => {
+  const loadBusiness = async () => {
+    set({ loading: true, error: null });
+    try {
+      const data = await getBusiness();
+      console.log("Loaded business:", data);
+      set({ business: data, loading: false });
+    } catch (err: any) {
+      console.error("Failed to load business:", err);
+      set({ error: err?.message || "Failed to load", loading: false });
+    }
+  };
+
+  loadBusiness();
+
+  return {
+    business: null,
+    loading: true,
+    error: null,
+    isPinVerified: false,
+    verifyPin: () => set({ isPinVerified: true }),
+    resetPinVerification: () => set({ isPinVerified: false }),
+    fetchBusiness: loadBusiness,
+    clearBusiness: () => set({ business: null }),
+  };
+});

@@ -63,7 +63,7 @@ const ContactSupportPage: React.FC = () => {
                         onChange={(e) => setMessage(e.target.value)}
                         required
                     />
-                    <Button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700">
+                    <Button type="submit" disabled={loading} className="w-full dark:text-white bg-blue-600 hover:bg-blue-700">
                         {loading ? (
                             <>
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />

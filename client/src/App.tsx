@@ -12,6 +12,7 @@ import ProductsPage from "./pages/Product";
 import ReportPage from "./pages/Report";
 import HelpPage from "./pages/Help";
 import ContactPage from "./pages/contact";
+import ProtectedPinRoute from "./routes/ProtectedPinRoute";
 
 function App() {
   return (
@@ -24,8 +25,12 @@ function App() {
         {/* Protected Layout + Pages */}
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
-            <Route path="/profile" element={<Profile />} />
             <Route path="/plans" element={<Plans />} />
+
+            <Route element={<ProtectedPinRoute />}>
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/reports" element={<ReportPage />} />
+            </Route>
 
             <Route element={<SubscriptionRoute />}>
               <Route path="/invoices" element={<InvoicesPage />} />
