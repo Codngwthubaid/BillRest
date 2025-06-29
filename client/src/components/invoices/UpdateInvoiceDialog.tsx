@@ -11,13 +11,21 @@ interface UpdateInvoiceDialogProps {
   onUpdate: (id: string, updatedFields: Partial<Invoice>) => void;
 }
 
-export function UpdateInvoiceDialog({ open, invoice, onClose, onUpdate }: UpdateInvoiceDialogProps) {
+export function UpdateInvoiceDialog({
+  open,
+  invoice,
+  onClose,
+  onUpdate,
+}: UpdateInvoiceDialogProps) {
   const [form, setForm] = useState({
     customerName: "",
     phoneNumber: "",
-    paymentMethod: "",
+    paymentMethod: "Cash",
     status: "draft",
-    currency: "",
+    currency: "INR",
+    customerState: "",
+    businessState: "",
+    posPrint: "A4",
     products: [] as {
       product: string;
       quantity: number;
@@ -31,9 +39,12 @@ export function UpdateInvoiceDialog({ open, invoice, onClose, onUpdate }: Update
       setForm({
         customerName: invoice.customerName || "",
         phoneNumber: invoice.phoneNumber || "",
-        paymentMethod: invoice.paymentMethod || "",
+        paymentMethod: invoice.paymentMethod || "Cash",
         status: invoice.status || "draft",
         currency: invoice.currency || "INR",
+        customerState: invoice.customerState || "",
+        businessState: invoice.businessState || "",
+        posPrint: invoice.posPrint || "A4",
         products: invoice.products.map((p) => ({
           product: typeof p.product === "string" ? p.product : (p.product as any)._id,
           quantity: p.quantity,
@@ -44,7 +55,7 @@ export function UpdateInvoiceDialog({ open, invoice, onClose, onUpdate }: Update
     }
   }, [invoice]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -67,18 +78,86 @@ export function UpdateInvoiceDialog({ open, invoice, onClose, onUpdate }: Update
         </DialogHeader>
 
         <div className="space-y-4">
-          <Input name="customerName" value={form.customerName} onChange={handleChange} placeholder="Customer Name" />
-          <Input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} placeholder="Phone Number" />
-          <Input name="paymentMethod" value={form.paymentMethod} onChange={handleChange} placeholder="Payment Method" />
-          <Input name="status" value={form.status} onChange={handleChange} placeholder="Status" />
-          <Input name="currency" value={form.currency} onChange={handleChange} placeholder="Currency (e.g., INR)" />
+          <Input
+            name="customerName"
+            value={form.customerName}
+            onChange={handleChange}
+            placeholder="Customer Name"
+          />
+          <Input
+            name="phoneNumber"
+            value={form.phoneNumber}
+            onChange={handleChange}
+            placeholder="Phone Number"
+          />
+          <Input
+            name="customerState"
+            value={form.customerState}
+            onChange={handleChange}
+            placeholder="Customer State"
+          />
+          <Input
+            name="businessState"
+            value={form.businessState}
+            onChange={handleChange}
+            placeholder="Business State"
+          />
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <select
+              name="currency"
+              className="w-full border rounded p-2 text-sm"
+              value={form.currency}
+              onChange={handleChange}
+            >
+              <option value="INR">INR</option>
+              <option value="USD">USD</option>
+              <option value="AED">AED</option>
+            </select>
+
+            <select
+              name="paymentMethod"
+              className="w-full border rounded p-2 text-sm"
+              value={form.paymentMethod}
+              onChange={handleChange}
+            >
+              <option value="Cash">Cash</option>
+              <option value="UPI">UPI</option>
+              <option value="Card">Card</option>
+              <option value="Other">Other</option>
+            </select>
+
+            <select
+              name="status"
+              className="w-full border rounded p-2 text-sm"
+              value={form.status}
+              onChange={handleChange}
+            >
+              <option value="draft">Draft</option>
+              <option value="paid">Paid</option>
+              <option value="pending">Pending</option>
+              <option value="overdue">Overdue</option>
+            </select>
+
+            <select
+              name="posPrint"
+              className="w-full border rounded p-2 text-sm"
+              value={form.posPrint}
+              onChange={handleChange}
+            >
+              <option value="A4">A4</option>
+              <option value="80mm">80mm</option>
+              <option value="58mm">58mm</option>
+              <option value="disabled">Disabled</option>
+            </select>
+          </div>
 
           {form.products.map((product, idx) => (
             <div key={idx} className="grid grid-cols-2 gap-2 border p-2 rounded-md">
               <Input
                 value={product.product}
                 onChange={(e) => handleProductChange(idx, "product", e.target.value)}
-                placeholder="Product Name"
+                placeholder="Product ID"
               />
               <Input
                 type="number"
@@ -103,8 +182,12 @@ export function UpdateInvoiceDialog({ open, invoice, onClose, onUpdate }: Update
         </div>
 
         <DialogFooter className="mt-4">
-          <Button variant="destructive" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">Update Invoice</Button>
+          <Button variant="destructive" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
+            Update Invoice
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -12,13 +12,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getInvoiceById } from "@/services/invoice.service";
 import type { Invoice } from "@/types/invoice.types";
 import CreateInvoiceDialog from "@/components/invoices/CreateInvoiceDialog";
 import { DeleteInvoiceDialog } from "@/components/invoices/DeleteInvoiceDialog";
 import { UpdateInvoiceDialog } from "@/components/invoices/UpdateInvoiceDialog";
-import ViewInvoiceDialog from "@/components/invoices/ViewInvoiceDialog"
 import ProtectedPinDialog from "@/components/invoices/ProtectedPinDialog";
+import ViewInvoiceSizeDialog from "@/components/invoices/ViewInvoiceSizeDialog";
 
 export default function InvoicesPage() {
   const { invoices, setInvoices } = useInvoiceStore();
@@ -36,9 +35,8 @@ export default function InvoicesPage() {
     setShowPinDialog(true);
   };
 
-  const handleViewInvoice = async (id: string) => {
-    const data = await getInvoiceById(id);
-    setSelectedInvoice(data);
+  const handleViewInvoice = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
     setShowDialog(true);
   };
 
@@ -108,58 +106,58 @@ export default function InvoicesPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-6">
-        <Card>
+        <Card className="py-0">
           <CardContent className="p-4 text-sm flex flex-col items-start gap-1">
             <div className="flex items-center gap-2 text-blue-600">
               <FileText className="w-4 h-4" />
               <span>Total Invoices</span>
             </div>
-            <span className="font-bold text-base">{summary.total}</span>
+            <span className="font-bold text-lg">{summary.total}</span>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="py-0">
           <CardContent className="p-4 text-sm flex flex-col items-start gap-1">
             <div className="flex items-center gap-2 text-green-600">
               <DollarSign className="w-4 h-4" />
               <span>Paid</span>
             </div>
-            <span className="font-bold text-base">{summary.paid}</span>
+            <span className="font-bold text-lg">{summary.paid}</span>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="py-0">
           <CardContent className="p-4 text-sm flex flex-col items-start gap-1">
             <div className="flex items-center gap-2 text-yellow-600">
               <Clock className="w-4 h-4" />
               <span>Pending</span>
             </div>
-            <span className="font-bold text-base">{summary.pending}</span>
+            <span className="font-bold text-lg">{summary.pending}</span>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="py-0">
           <CardContent className="p-4 text-sm flex flex-col items-start gap-1">
             <div className="flex items-center gap-2 text-red-600">
               <Calendar className="w-4 h-4" />
               <span>Overdue</span>
             </div>
-            <span className="font-bold text-base">{summary.overdue}</span>
+            <span className="font-bold text-lg">{summary.overdue}</span>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="py-0">
           <CardContent className="p-4 text-sm flex flex-col items-start gap-1">
             <div className="flex items-center gap-2 text-gray-600">
               <Calendar className="w-4 h-4" />
               <span>Draft</span>
             </div>
-            <span className="font-bold text-base">{summary.draft}</span>
+            <span className="font-bold text-lg">{summary.draft}</span>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="py-0">
           <CardContent className="p-4 text-sm flex flex-col items-start gap-1">
             <div className="flex items-center gap-2 text-primary">
               <DollarSign className="w-4 h-4" />
               <span>Total Amount</span>
             </div>
-            <span className="font-bold text-base">₹{summary.totalAmount.toLocaleString()}</span>
+            <span className="font-bold text-lg">₹{summary.totalAmount.toLocaleString()}</span>
           </CardContent>
         </Card>
       </div>
@@ -204,9 +202,10 @@ export default function InvoicesPage() {
                 <td>{getStatusBadge(invoice.status)}</td>
                 <td>{invoice.createdAt?.slice(0, 10)}</td>
                 <td className="flex gap-2 p-2 mt-5 flex-wrap">
-                  <button onClick={() => handleViewInvoice(invoice._id!)}>
+                  <button onClick={() => handleViewInvoice(invoice)}>
                     <Eye className="w-4 h-4 text-primary hover:scale-110 cursor-pointer" />
                   </button>
+
 
                   <button
                     onClick={async () => {
@@ -258,12 +257,6 @@ export default function InvoicesPage() {
         </table>
       </div>
 
-      <ViewInvoiceDialog
-        open={showDialog}
-        invoice={selectedInvoice}
-        onClose={() => setShowDialog(false)}
-      />
-
       <UpdateInvoiceDialog
         open={showUpdateDialog}
         invoice={selectedInvoice}
@@ -295,6 +288,12 @@ export default function InvoicesPage() {
         onVerified={() => {
           pinCallback();
         }}
+      />
+
+      <ViewInvoiceSizeDialog
+        open={showDialog}
+        invoice={selectedInvoice}
+        onClose={() => setShowDialog(false)}
       />
     </div>
   );

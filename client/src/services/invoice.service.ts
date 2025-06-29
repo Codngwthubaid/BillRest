@@ -1,4 +1,5 @@
 import { axiosInstance } from "@/lib/axiosInstance";
+import { useAuthStore } from "@/store/auth.store";
 import type { CreateInvoicePayload, Invoice } from "@/types/invoice.types";
 
 // ✅ Create new invoice
@@ -14,7 +15,7 @@ export const getInvoices = async (): Promise<Invoice[]> => {
   return res.data;
 };
 
-// ✅ Update invoice
+// ✅ Update invoicev
 export const updateInvoice = async (
   id: string,
   payload: Partial<Invoice>
@@ -48,3 +49,13 @@ export const sendInvoiceOnWhatsApp = async (invoiceId: string): Promise<{ messag
   const res = await axiosInstance.post(`/invoices/send-whatsapp/${invoiceId}`);
   return res.data;
 };
+
+// ✅ Trigger POS print by opening in new tab (browser handles printing)
+
+export const printPOSReceipt = (invoiceId: string, size: "58mm" | "80mm") => {
+  const token = useAuthStore.getState().token;
+  const url = `${import.meta.env.VITE_API_URL}/invoices/${invoiceId}/pos?size=${size}&token=${token}`;
+  window.open(url, "_blank");
+};
+
+

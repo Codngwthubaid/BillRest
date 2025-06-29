@@ -8,6 +8,7 @@ import {
   sendInvoiceOnWhatsApp as apiSendWhatsApp,
   updateInvoice,
   deleteInvoice,
+  printPOSReceipt as apiPrintPOSReceipt
 } from "@/services/invoice.service";
 
 interface InvoiceState {
@@ -19,11 +20,12 @@ interface InvoiceState {
   // Actions
   fetchInvoices: () => Promise<void>;
   fetchInvoiceById: (id: string) => Promise<void>;
+  createInvoice: (payload: CreateInvoicePayload) => Promise<Invoice | null>;
   updateInvoice: (id: string, payload: Partial<Invoice>) => Promise<Invoice | null>;
   deleteInvoice: (id: string) => Promise<boolean>;
-  createInvoice: (payload: CreateInvoicePayload) => Promise<Invoice | null>;
   downloadInvoicePDF: (id: string) => Promise<Blob | null>;
   sendInvoiceOnWhatsApp: (id: string) => Promise<string | null>;
+  printPOSReceipt: (id: string, size: "58mm" | "80mm") => void;
 
   setInvoices: (invoices: Invoice[]) => void;
   setSelectedInvoice: (invoice: Invoice | null) => void;
@@ -44,6 +46,7 @@ export const useInvoiceStore = create<InvoiceState>((set) => ({
       const data = await apiGetInvoices();
       set({ invoices: data, loading: false });
     } catch (err: any) {
+      console.error("Fetch invoices error:", err);
       set({ error: err.message || "Failed to fetch invoices", loading: false });
     }
   },
@@ -54,6 +57,7 @@ export const useInvoiceStore = create<InvoiceState>((set) => ({
       const data = await apiGetInvoiceById(id);
       set({ selectedInvoice: data, loading: false });
     } catch (err: any) {
+      console.error("Fetch invoice by ID error:", err);
       set({ error: err.message || "Failed to fetch invoice", loading: false });
     }
   },
@@ -68,7 +72,7 @@ export const useInvoiceStore = create<InvoiceState>((set) => ({
       }));
       return invoice;
     } catch (err: any) {
-      console.error("🔥 Create Invoice Error:", err);
+      console.error("Create invoice error:", err);
       set({ error: err.message || "Failed to create invoice", loading: false });
       return null;
     }
@@ -85,7 +89,7 @@ export const useInvoiceStore = create<InvoiceState>((set) => ({
       }));
       return invoice;
     } catch (err: any) {
-      console.error("🔥 Update Invoice Error:", err);
+      console.error("Update invoice error:", err);
       set({ error: err.message || "Failed to update invoice", loading: false });
       return null;
     }
@@ -102,7 +106,7 @@ export const useInvoiceStore = create<InvoiceState>((set) => ({
       }));
       return true;
     } catch (err: any) {
-      console.error("🔥 Delete Invoice Error:", err);
+      console.error("Delete invoice error:", err);
       set({ error: err.message || "Failed to delete invoice", loading: false });
       return false;
     }
@@ -113,7 +117,7 @@ export const useInvoiceStore = create<InvoiceState>((set) => ({
       const blob = await apiDownloadPDF(id);
       return blob;
     } catch (err) {
-      console.error("Failed to download PDF", err);
+      console.error("Download PDF error:", err);
       return null;
     }
   },
@@ -123,8 +127,13 @@ export const useInvoiceStore = create<InvoiceState>((set) => ({
       const res = await apiSendWhatsApp(id);
       return res.message;
     } catch (err) {
-      console.error("Failed to send on WhatsApp", err);
+      console.error("Send WhatsApp error:", err);
       return null;
     }
   },
+
+  printPOSReceipt: (id, size) => {
+    apiPrintPOSReceipt(id, size);
+  }
+
 }));

@@ -16,10 +16,19 @@ export const renderPOSReceipt = async (req, res) => {
     const invoice = await Invoice.findOne({ _id: invoiceId, user: userId });
     if (!invoice) return res.status(404).send("Invoice not found");
 
-    // Select width based on POS mode
-    const paperWidth = business.features.posPrint === "58mm" ? "50mm" : "80mm";
+    // Get size from query param or fallback to business default
+    const requestedSize = req.query.size;
+    let paperWidth;
 
-    // Render a simple HTML receipt
+    if (requestedSize === "58mm") {
+      paperWidth = "50mm";
+    } else if (requestedSize === "80mm") {
+      paperWidth = "80mm";
+    } else {
+      // fallback to business settings
+      paperWidth = business.features.posPrint === "58mm" ? "50mm" : "80mm";
+    }
+
     const html = `
       <html>
         <head>

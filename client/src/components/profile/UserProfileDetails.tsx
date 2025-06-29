@@ -21,7 +21,7 @@ export default function UserProfileDetails() {
   const [localPin, setLocalPin] = useState("");
   const [showPin, setShowPin] = useState(false);
 
-  const [formData, setFormData] = useState<BusinessPayload & { protectedPin?: string }>({
+  const [formData, setFormData] = useState<BusinessPayload & { protectedPin?: string; features?: { posPrint?: "58mm" | "80mm" | "disabled" } }>({
     name: user?.name || "",
     phone: user?.phone || "",
     businessName: "",
@@ -29,7 +29,9 @@ export default function UserProfileDetails() {
     defaultCurrency: "INR",
     gstSlabs: [],
     protectedPin: "",
+    features: { posPrint: "disabled" }
   });
+
 
   useEffect(() => {
     if (business) {
@@ -41,9 +43,13 @@ export default function UserProfileDetails() {
         defaultCurrency: business.defaultCurrency,
         gstSlabs: business.gstSlabs,
         protectedPin: business.protectedPin || "",
+        features: {
+          posPrint: business.features?.posPrint || "disabled"
+        }
       });
     }
   }, [business, user]);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -185,6 +191,15 @@ export default function UserProfileDetails() {
                 </span>
               </div>
             </div>
+            <div>
+              <Label className="text-sm font-medium mb-2">POS Print</Label>
+              <div className="flex items-center space-x-3">
+                <FileText className="w-4 h-4" />
+                <span>
+                  {formData.features?.posPrint || "disabled"}
+                </span>
+              </div>
+            </div>
           </div>
           <div className="mt-6">
             <Dialog open={open} onOpenChange={setOpen}>
@@ -206,7 +221,7 @@ export default function UserProfileDetails() {
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
+                      className="w-full px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
                     />
                   </div>
                   <div>
@@ -216,7 +231,7 @@ export default function UserProfileDetails() {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
+                      className="w-full px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
                     />
                   </div>
                   <div>
@@ -226,7 +241,7 @@ export default function UserProfileDetails() {
                       name="businessName"
                       value={formData.businessName}
                       onChange={handleChange}
-                      className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
+                      className="w-full px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
                     />
                   </div>
                   <div>
@@ -236,7 +251,7 @@ export default function UserProfileDetails() {
                       name="address"
                       value={formData.address || ""}
                       onChange={handleChange}
-                      className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
+                      className="w-full px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
                     />
                   </div>
                   {!formData.protectedPin ? (
@@ -276,7 +291,7 @@ export default function UserProfileDetails() {
                       name="defaultCurrency"
                       value={formData.defaultCurrency}
                       onChange={handleChange}
-                      className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
+                      className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:-blue-500"
                     >
                       <option value="INR">INR</option>
                       <option value="USD">USD</option>
@@ -296,20 +311,38 @@ export default function UserProfileDetails() {
                             return { ...prev, gstSlabs: updated };
                           });
                         }}
-                        className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
+                        className="w-full px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
                       />
                       <Input
                         placeholder="GST Value (%)"
                         type="number"
                         value={slab.value}
                         onChange={(e) => handleGstSlabChange(index, +e.target.value)}
-                        className="w-full px-3 py-2  -gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
+                        className="w-full px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
                       />
                     </div>
                   ))}
                   <Button onClick={handleAddGstSlab} type="button" variant="outline" className="w-full">
                     + Add GST Slab
                   </Button>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2">POS Print</Label>
+                  <select
+                    name="posPrint"
+                    value={formData.features?.posPrint}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        features: { ...prev.features, posPrint: e.target.value as "58mm" | "80mm" | "disabled" }
+                      }))
+                    }
+                    className="border w-full px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="disabled">Disabled</option>
+                    <option value="58mm">58mm</option>
+                    <option value="80mm">80mm</option>
+                  </select>
                 </div>
                 <DialogFooter className="mt-4">
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>

@@ -1,6 +1,6 @@
 export interface GstSlab {
-  label: string; // e.g., "5%"
-  value: number; // e.g., 5
+  label: string;
+  value: number;
 }
 
 export interface Business {
@@ -11,7 +11,10 @@ export interface Business {
   defaultCurrency: "INR" | "USD" | "AED";
   gstSlabs: GstSlab[];
   isOnboarded: boolean;
-  protectedPin?: string; // Add this
+  protectedPin?: string;
+  features: {
+    posPrint: "58mm" | "80mm" | "disabled";
+  };
   createdAt?: string;
   updatedAt?: string;
 }
@@ -23,5 +26,8 @@ export interface BusinessPayload {
   address?: string;
   defaultCurrency: "INR" | "USD" | "AED";
   gstSlabs: GstSlab[];
-  protectedPin?: string; // Optional (only on first setup)
+  protectedPin?: string;
+  features?: {
+    posPrint?: "58mm" | "80mm" | "disabled";
+  };
 }
