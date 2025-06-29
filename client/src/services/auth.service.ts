@@ -1,3 +1,4 @@
+import type { Subscription } from "@/types/subscription.types";
 import { axiosInstance } from "@/lib/axiosInstance";
 import type { AuthResponse } from "@/types/user.types";
 
@@ -21,4 +22,9 @@ export const registerUser = async (data: RegisterPayload): Promise<AuthResponse>
 export const loginUser = async (data: LoginPayload): Promise<AuthResponse> => {
   const res = await axiosInstance.post("/auth/login", data);
   return res.data;
+};
+
+export const getUserSubscription = async (): Promise<Subscription | null> => {
+  const res = await axiosInstance.get("/auth/subscription");
+  return res.data.subscription;
 };

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginUser } from "@/services/auth.service";
+import { loginUser, getUserSubscription } from "@/services/auth.service"; // <-- make sure you have this
 import { useAuthStore } from "@/store/auth.store";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import { useSubscriptionStore } from "@/store/subscription.store";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -22,33 +21,14 @@ type LoginValues = z.infer<typeof loginSchema>;
 export default function Login() {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
-  const token = useAuthStore((state) => state.token);
   const setSubscription = useAuthStore((state) => state.setSubscription);
+
   const emailInputRef = useRef<HTMLInputElement>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const { currentSubscription, fetchUserSubscription } = useSubscriptionStore();
 
-  // Autofocus email on mount
   useEffect(() => {
     emailInputRef.current?.focus();
   }, []);
-
-  // Redirect based on role after login
-  useEffect(() => {
-    if (token) {
-      const currentUser = useAuthStore.getState().user;
-      
-      if (currentUser?.role === "customer") {
-        if (currentSubscription) {
-          navigate("/dashboard");
-        } else {
-          navigate("/plans");
-        }
-      } else {
-        navigate("/profile");
-      }
-    }
-  }, [token, currentSubscription, navigate]);
 
   const {
     register,
@@ -58,22 +38,18 @@ export default function Login() {
     resolver: zodResolver(loginSchema),
   });
 
-const onSubmit = async (data: LoginValues) => {
+  const onSubmit = async (data: LoginValues) => {
     try {
       const res = await loginUser(data);
       login(res.user, res.token);
 
-      try {
-        await fetchUserSubscription();
-      } catch {
-        setSubscription(null);
-      }
-
+      const subscription = await getUserSubscription();
+      console.log("Fetched subscription:", subscription);
+      setSubscription(subscription);
       toast.success("Logged in successfully");
 
-      const userRole = res.user.role;
-      if (userRole === "customer") {
-        if (useSubscriptionStore.getState().currentSubscription) {
+      if (res.user.role === "customer") {
+        if (subscription && subscription?.planId) {
           navigate("/dashboard");
         } else {
           navigate("/plans");
