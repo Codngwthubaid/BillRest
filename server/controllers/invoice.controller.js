@@ -8,11 +8,63 @@ let counter = 1;
 const generateInvoiceNumber = () => `INV${String(counter++).padStart(4, "0")}`;
 
 // Create Invoice
+// export const createInvoice = async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+//     const {
+//       products, paymentMethod, currency, customerName, phoneNumber, status
+//     } = req.body;
+
+//     let subTotal = 0;
+//     let gstAmount = 0;
+
+//     for (const item of products) {
+//       const product = await Product.findById(item.product);
+//       if (!product) {
+//         return res.status(404).json({ message: "Product not found" });
+//       }
+
+//       const productTotal = item.price * item.quantity;
+//       const gst = (productTotal * item.gstRate) / 100;
+
+//       subTotal += productTotal;
+//       gstAmount += gst;
+//     }
+
+//     const totalAmount = subTotal + gstAmount;
+
+//     const invoice = await Invoice.create({
+//       user: userId,
+//       invoiceNumber: generateInvoiceNumber(),
+//       products,
+//       subTotal,
+//       gstAmount,
+//       totalAmount,
+//       paymentMethod,
+//       currency,
+//       customerName,
+//       phoneNumber,
+//       status: status || "draft"
+//     });
+
+//     res.status(201).json({ message: "Invoice created", invoice });
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
 export const createInvoice = async (req, res) => {
   try {
     const userId = req.user.id;
     const {
-      products, paymentMethod, currency, customerName, phoneNumber, status
+      products,
+      paymentMethod,
+      currency,
+      customerName,
+      phoneNumber,
+      status,
+      customerState,
+      businessState
     } = req.body;
 
     let subTotal = 0;
@@ -31,6 +83,17 @@ export const createInvoice = async (req, res) => {
       gstAmount += gst;
     }
 
+    let cgstAmount = 0;
+    let sgstAmount = 0;
+    let igstAmount = 0;
+
+    if (customerState === businessState) {
+      cgstAmount = gstAmount / 2;
+      sgstAmount = gstAmount / 2;
+    } else {
+      igstAmount = gstAmount;
+    }
+
     const totalAmount = subTotal + gstAmount;
 
     const invoice = await Invoice.create({
@@ -39,6 +102,9 @@ export const createInvoice = async (req, res) => {
       products,
       subTotal,
       gstAmount,
+      cgstAmount,
+      sgstAmount,
+      igstAmount,
       totalAmount,
       paymentMethod,
       currency,
@@ -47,20 +113,73 @@ export const createInvoice = async (req, res) => {
       status: status || "draft"
     });
 
-    res.status(201).json({ message: "Invoice created", invoice });
+    res.status(201).json({
+      message: "Invoice created successfully",
+      invoice
+    });
   } catch (err) {
+    console.error("Create invoice error:", err);
     res.status(500).json({ message: err.message });
   }
 };
 
 // Update Invoice
+// export const updateInvoice = async (req, res) => {
+//   try {
+//     const invoiceId = req.params.id;
+//     const userId = req.user.id;
+//     const updateData = req.body;
+
+//     // If products are being updated, recalculate totals
+//     if (updateData.products) {
+//       let subTotal = 0;
+//       let gstAmount = 0;
+
+//       for (const item of updateData.products) {
+//         const product = await Product.findById(item.product);
+//         if (!product) {
+//           return res.status(404).json({ message: "Product not found" });
+//         }
+
+//         const productTotal = item.price * item.quantity;
+//         const gst = (productTotal * item.gstRate) / 100;
+
+//         subTotal += productTotal;
+//         gstAmount += gst;
+//       }
+
+//       updateData.subTotal = subTotal;
+//       updateData.gstAmount = gstAmount;
+//       updateData.totalAmount = subTotal + gstAmount;
+//     }
+
+//     const updatedInvoice = await Invoice.findOneAndUpdate(
+//       { _id: invoiceId, user: userId },
+//       updateData,
+//       { new: true }
+//     );
+
+//     if (!updatedInvoice) {
+//       return res.status(404).json({ message: "Invoice not found" });
+//     }
+
+//     res.status(200).json({
+//       message: "Invoice updated successfully",
+//       invoice: updatedInvoice
+//     });
+//   } catch (err) {
+//     console.error("Update failed:", err);
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
 export const updateInvoice = async (req, res) => {
   try {
     const invoiceId = req.params.id;
     const userId = req.user.id;
     const updateData = req.body;
 
-    // If products are being updated, recalculate totals
+    // If products are updated, recalculate totals
     if (updateData.products) {
       let subTotal = 0;
       let gstAmount = 0;
@@ -78,8 +197,25 @@ export const updateInvoice = async (req, res) => {
         gstAmount += gst;
       }
 
+      // Handle CGST / SGST / IGST
+      let cgstAmount = 0;
+      let sgstAmount = 0;
+      let igstAmount = 0;
+
+      if (updateData.customerState && updateData.businessState) {
+        if (updateData.customerState === updateData.businessState) {
+          cgstAmount = gstAmount / 2;
+          sgstAmount = gstAmount / 2;
+        } else {
+          igstAmount = gstAmount;
+        }
+      }
+
       updateData.subTotal = subTotal;
       updateData.gstAmount = gstAmount;
+      updateData.cgstAmount = cgstAmount;
+      updateData.sgstAmount = sgstAmount;
+      updateData.igstAmount = igstAmount;
       updateData.totalAmount = subTotal + gstAmount;
     }
 
@@ -98,7 +234,7 @@ export const updateInvoice = async (req, res) => {
       invoice: updatedInvoice
     });
   } catch (err) {
-    console.error("Update failed:", err);
+    console.error("Update invoice error:", err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -143,15 +279,60 @@ export const getInvoiceById = async (req, res) => {
 };
 
 // Download Invoice as PDF
+// export const downloadInvoicePDF = async (req, res) => {
+//   try {
+//     const invoice = await Invoice.findOne({
+//       _id: req.params.id,
+//       user: req.user.id
+//     }).populate("products.product", "name price gstRate");
+
+//     if (!invoice) return res.status(404).json({ message: "Invoice not found" });
+
+//     const pdfBuffer = await generateInvoicePDF(invoice);
+
+//     res.set({
+//       "Content-Type": "application/pdf",
+//       "Content-Disposition": `attachment; filename=${invoice.invoiceNumber}.pdf`,
+//       "Content-Length": pdfBuffer.length
+//     });
+
+//     res.send(pdfBuffer);
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+
 export const downloadInvoicePDF = async (req, res) => {
   try {
     const invoice = await Invoice.findOne({
       _id: req.params.id,
       user: req.user.id
-    }).populate("products.product", "name price gstRate");
+    });
 
     if (!invoice) return res.status(404).json({ message: "Invoice not found" });
 
+    // Manually look up product names
+    const enrichedProducts = await Promise.all(invoice.products.map(async (item) => {
+      let productName = "Unknown";
+      try {
+        const productDoc = await Product.findById(item.product).select("name");
+        if (productDoc) {
+          productName = productDoc.name;
+        }
+      } catch (err) {
+        console.log(`Error fetching product ${item.product}:`, err.message);
+      }
+      return {
+        ...item.toObject(),
+        productName
+      };
+    }));
+
+    // Attach to invoice
+    invoice.products = enrichedProducts;
+
+    // Generate the PDF
     const pdfBuffer = await generateInvoicePDF(invoice);
 
     res.set({
@@ -162,9 +343,11 @@ export const downloadInvoicePDF = async (req, res) => {
 
     res.send(pdfBuffer);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Download PDF error:", err);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 // Send Invoice via WhatsApp
 export const sendInvoiceWhatsApp = async (req, res) => {

@@ -5,7 +5,6 @@ export const checkSubscription = async (req, res, next) => {
         .populate("plan")
         .sort({ endDate: -1 });
         
-    console.log("📅 Subscription found:", subscription);
     if (!subscription || subscription.endDate < new Date()) {
         console.warn(`Blocked user: ${req.user.id}, Expired: ${subscription?.endDate}`);
         return res.status(403).json({ message: "⛔ Subscription expired or not found" });

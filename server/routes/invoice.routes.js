@@ -8,6 +8,7 @@ import {
   updateInvoice,
   deleteInvoice
 } from "../controllers/invoice.controller.js";
+import { renderPOSReceipt } from "../controllers/pos.controller.js";
 import { verifyToken, checkRole } from "../middlewares/auth.middleware.js";
 import { checkFeatureAccess } from "../middlewares/feature.middleware.js";
 import { checkSubscription } from "../middlewares/subscription.middleware.js";
@@ -24,6 +25,7 @@ router.put("/:id", updateInvoice);
 router.delete("/:id", deleteInvoice);
 router.get("/:id", getInvoiceById);
 router.get("/:id/download", downloadInvoicePDF);
+router.get("/:id/pos", renderPOSReceipt);
 
 // ✅ Feature-gated route for WhatsApp invoice sending
 router.post(

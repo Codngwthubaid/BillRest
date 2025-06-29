@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { Invoice } from "@/types/invoice.types";
 import { Badge } from "@/components/ui/badge";
+import { POSPrintButton } from "@/components/invoices/POSPrintButton";
 
 interface ViewInvoiceDialogProps {
   open: boolean;
@@ -71,6 +72,8 @@ export default function ViewInvoiceDialog({ open, invoice, onClose }: ViewInvoic
         ) : (
           <p className="text-sm text-muted-foreground">Loading...</p>
         )}
+
+        <POSPrintButton invoiceId={invoice._id} />
       </DialogContent>
     </Dialog>
   );

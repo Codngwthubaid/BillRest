@@ -5,6 +5,34 @@ const gstSlabSchema = new mongoose.Schema({
   value: { type: Number, required: true }, // e.g., 5
 });
 
+// const businessSchema = new mongoose.Schema(
+//   {
+//     user: {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: "User",
+//       required: true,
+//       unique: true,
+//     },
+//     businessName: { type: String, required: true },
+//     address: { type: String },
+//     defaultCurrency: {
+//       type: String,
+//       enum: ["INR", "USD", "AED"],
+//       default: "INR",
+//     },
+//     gstSlabs: [gstSlabSchema],
+//     isOnboarded: { type: Boolean, default: false },
+//     protectedPin: {
+//       type: String,
+//       minlength: 4,
+//       maxlength: 6,
+//       unique: true,
+//       sparse: true,
+//     },
+//   },
+//   { timestamps: true }
+// );
+
 const businessSchema = new mongoose.Schema(
   {
     user: {
@@ -28,6 +56,13 @@ const businessSchema = new mongoose.Schema(
       maxlength: 6,
       unique: true,
       sparse: true,
+    },
+    features: {
+      posPrint: {
+        type: String,
+        enum: ["58mm", "80mm", "disabled"],
+        default: "disabled",
+      },
     },
   },
   { timestamps: true }

@@ -10,6 +10,7 @@ import { User } from "../models/user.model.js";
 //       address,
 //       defaultCurrency,
 //       gstSlabs,
+//       protectedPin,
 //     } = req.body;
 
 //     const userId = req.user.id;
@@ -25,11 +26,20 @@ import { User } from "../models/user.model.js";
 //     let business = await Business.findOne({ user: userId });
 
 //     if (business) {
+//       if (business.protectedPin && protectedPin && business.protectedPin !== protectedPin) {
+//         return res.status(400).json({ message: "Protected PIN is already set and cannot be changed." });
+//       }
+
 //       business.businessName = businessName;
 //       business.address = address;
 //       business.defaultCurrency = defaultCurrency;
 //       business.gstSlabs = gstSlabs;
 //       business.isOnboarded = true;
+
+//       if (!business.protectedPin && protectedPin) {
+//         business.protectedPin = protectedPin;
+//       }
+
 //       await business.save();
 //     } else {
 //       business = await Business.create({
@@ -39,6 +49,7 @@ import { User } from "../models/user.model.js";
 //         defaultCurrency,
 //         gstSlabs,
 //         isOnboarded: true,
+//         protectedPin,
 //       });
 //     }
 
@@ -63,6 +74,7 @@ export const createOrUpdateBusiness = async (req, res) => {
       defaultCurrency,
       gstSlabs,
       protectedPin,
+      features, // will carry posPrint
     } = req.body;
 
     const userId = req.user.id;
@@ -92,6 +104,11 @@ export const createOrUpdateBusiness = async (req, res) => {
         business.protectedPin = protectedPin;
       }
 
+      // ✅ set posPrint if provided
+      if (features?.posPrint) {
+        business.features.posPrint = features.posPrint;
+      }
+
       await business.save();
     } else {
       business = await Business.create({
@@ -102,6 +119,9 @@ export const createOrUpdateBusiness = async (req, res) => {
         gstSlabs,
         isOnboarded: true,
         protectedPin,
+        features: {
+          posPrint: features?.posPrint || "disabled"
+        }
       });
     }
 
