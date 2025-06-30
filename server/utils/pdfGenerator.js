@@ -16,7 +16,7 @@ const fonts = {
 
 const printer = new PdfPrinter(fonts);
 
-export const generateInvoicePDF = async (invoice) => {
+export const generateInvoicePDF = async (invoice, business, user) => {
   // Build table header
   const productTableBody = [
     [
@@ -47,121 +47,114 @@ export const generateInvoicePDF = async (invoice) => {
   });
 
   // Amount in words (simple example)
-  const amountWords = `FOURTEEN THOUSAND THREE HUNDRED FORTY THREE`;
+  const amountWords = invoice.totalAmount;
 
   const docDefinition = {
     content: [
-      // Header with company & invoice meta
+      // Header
       {
         columns: [
           [
-            { text: "YOUR BUSINESS NAME", style: "businessName" },
-            { text: "Address: Your Business Address Line", style: "small" },
-            { text: "GST: YOURGST1234XYZ", style: "small" },
-            { text: "Phone: +91 9876543210", style: "small" },
-            { text: "Email: business@example.com", style: "small" },
+            { text: business?.businessName || "YOUR BUSINESS NAME", style: "header" },
+            { text: `Address: ${business?.address || "Your Business Address"}`, style: "subheader" },
+            { text: `Phone: ${user?.phone || "+91 9876543210"}`, style: "subheader" },
+            { text: `Email: ${user?.email || "business@example.com"}`, style: "subheader" }
           ],
-          [
-            {
-              stack: [
-                { text: "Proforma Invoice", style: "invoiceTitle" },
-                { text: `Invoice: ${invoice.invoiceNumber}` },
-                { text: `Date: ${new Date(invoice.createdAt).toLocaleDateString()}` },
-                { text: `Due Date: ${new Date(invoice.createdAt).toLocaleDateString()}` }
-              ],
-              alignment: "right"
-            }
-          ]
+          {
+            alignment: "right",
+            stack: [
+              { text: "BillRest Invoice", style: "invoiceTitle" },
+              { text: `Invoice: ${invoice.invoiceNumber}` },
+              { text: `Date: ${new Date(invoice.createdAt).toLocaleDateString()}` },
+              { text: `Due Date: ${new Date(invoice.createdAt).toLocaleDateString()}` }
+            ]
+          }
         ]
       },
       "\n",
-      // Customer Info
+
+      // Customer info
       {
         text: `${invoice.customerName}\n${invoice.phoneNumber}`,
-        margin: [0, 0, 0, 10]
+        style: "customerInfo"
       },
-      // Table
+      "\n",
+
+      // Products Table
       {
         table: {
           headerRows: 1,
-          widths: ["*", "auto", "auto", "auto", "auto", "auto", "auto"],
-          body: productTableBody
+          widths: ["*", "auto", "auto", "auto", "auto", "auto"],
+          body: [
+            [
+              { text: "Product Name", style: "tableHeader" },
+              { text: "Qty", style: "tableHeader" },
+              { text: "Price", style: "tableHeader" },
+              { text: "SGST", style: "tableHeader" },
+              { text: "CGST", style: "tableHeader" },
+              { text: "Amount", style: "tableHeader" }
+            ],
+            ...invoice.products.map(item => {
+              const quantity = Number(item.quantity);
+              const price = Number(item.price);
+              const sgst = (item.gstRate / 2).toFixed(1);
+              const cgst = (item.gstRate / 2).toFixed(1);
+              const amount = (quantity * price).toFixed(2);
+
+              return [
+                item.name,
+                `${quantity}`,
+                `₹${price.toFixed(2)}`,
+                `${sgst}%`,
+                `${cgst}%`,
+                `₹${amount}`
+              ];
+            })
+          ]
         },
         layout: {
           fillColor: (rowIndex) => rowIndex === 0 ? '#d3f6ec' : null
         }
       },
+
       "\n",
-      // Totals & amount in words
+
+      // Totals and amount in words
       {
         columns: [
-          [
-            { text: `Amount in words: ${amountWords}`, italics: true }
-          ],
           {
-            width: "auto",
+            text: `Amount in words: ${amountWords} only`,
+            italics: true,
+            margin: [0, 5, 0, 0]
+          },
+          {
+            alignment: "right",
             table: {
+              widths: ["auto", "auto"],
               body: [
                 ["Subtotal:", `₹${invoice.subTotal.toFixed(2)}`],
                 ["Total Tax:", `₹${invoice.gstAmount.toFixed(2)}`],
-                ["Total Amount:", `₹${invoice.totalAmount.toFixed(2)}`],
-                ["Amount Received:", `₹0.00`],
-                ["Balance Due:", `₹${invoice.totalAmount.toFixed(2)}`]
+                [{ text: "Total Amount:", bold: true }, { text: `₹${invoice.totalAmount.toFixed(2)}`, bold: true }]
               ]
             },
             layout: "noBorders"
           }
         ]
-      },
-      "\n",
-      // Bank details
-      {
-        table: {
-          widths: ["*"],
-          body: [
-            [{ text: "Bank/Account Details", style: "subheader" }],
-            ["Bank Name: Axis Bank"],
-            ["Account Number: 9230020048749817"],
-            ["IFSC: UTIB0002972"],
-            ["Account Name: Noddy Panda"]
-          ]
-        }
-      },
-      "\n",
-      // Terms
-      {
-        text: `Terms & Conditions\nOur responsibility ceases as soon as goods leave our premises.\nProducts once sold will not be returned/exchanged.\nDelivery charges must be paid by customer.`,
-        style: "terms"
       }
     ],
     styles: {
-      businessName: { fontSize: 14, bold: true },
-      small: { fontSize: 9 },
-      invoiceTitle: {
-        fontSize: 13,
-        bold: true,
-        color: '#089981',
-        margin: [0,0,0,5]
-      },
-      tableHeader: {
-        fillColor: '#d3f6ec',
-        bold: true,
-        fontSize: 10
-      },
-      subheader: {
-        fontSize: 11,
-        bold: true
-      },
-      terms: {
-        fontSize: 8,
-        margin: [0,5,0,0]
-      }
+      header: { fontSize: 14, bold: true },
+      subheader: { fontSize: 9 },
+      invoiceTitle: { fontSize: 13, bold: true, color: '#089981', margin: [0, 0, 0, 5] },
+      customerInfo: { margin: [0, 0, 0, 10] },
+      tableHeader: { fillColor: '#d3f6ec', bold: true, fontSize: 10 }
     },
     defaultStyle: {
       font: "Roboto",
       fontSize: 10
     }
   };
+
 
   const pdfDoc = printer.createPdfKitDocument(docDefinition);
 

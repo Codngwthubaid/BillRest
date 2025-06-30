@@ -1,34 +1,23 @@
+import puppeteer from "puppeteer";
 import { Invoice } from "../models/invoice.model.js";
 import { Business } from "../models/business.model.js";
 
-export const renderPOSReceipt = async (req, res) => {
+export const downloadPOSReceiptPDF = async (req, res) => {
   try {
     const userId = req.user.id;
     const invoiceId = req.params.id;
+    const size = req.query.size || "80mm";
 
     const business = await Business.findOne({ user: userId });
     if (!business) return res.status(404).send("Business not found");
 
-    if (!business.features?.posPrint || business.features.posPrint === "disabled") {
-      return res.status(400).send("POS printing is disabled for your account.");
-    }
-
     const invoice = await Invoice.findOne({ _id: invoiceId, user: userId });
     if (!invoice) return res.status(404).send("Invoice not found");
 
-    // Get size from query param or fallback to business default
-    const requestedSize = req.query.size;
-    let paperWidth;
+    let paperWidth = "80mm";
+    if (size === "58mm") paperWidth = "58mm";
 
-    if (requestedSize === "58mm") {
-      paperWidth = "50mm";
-    } else if (requestedSize === "80mm") {
-      paperWidth = "80mm";
-    } else {
-      // fallback to business settings
-      paperWidth = business.features.posPrint === "58mm" ? "50mm" : "80mm";
-    }
-
+    // Build your HTML
     const html = `
       <html>
         <head>
@@ -39,7 +28,7 @@ export const renderPOSReceipt = async (req, res) => {
             .center { text-align: center; }
           </style>
         </head>
-        <body onload="window.print()">
+        <body>
           <div class="center">
             <h3>${business.businessName}</h3>
             <p>${business.address || ""}</p>
@@ -61,9 +50,32 @@ export const renderPOSReceipt = async (req, res) => {
       </html>
     `;
 
-    res.send(html);
+    // Generate PDF with puppeteer
+    const browser = await puppeteer.launch({
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    });
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: "networkidle0" });
+
+    const pdfBuffer = await page.pdf({
+      width: paperWidth,
+      printBackground: true,
+      margin: { top: "5mm", right: "5mm", bottom: "5mm", left: "5mm" }
+    });
+
+    await browser.close();
+
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename=${invoice.invoiceNumber}-${size}.pdf`,
+      "Content-Length": pdfBuffer.length
+    });
+
+    res.send(pdfBuffer);
+
   } catch (err) {
-    console.error("POS print failed:", err);
-    res.status(500).send("Failed to render POS receipt.");
+    console.error("POS PDF generation failed:", err);
+    res.status(500).send("Failed to generate POS receipt PDF.");
   }
 };

@@ -1,5 +1,7 @@
 import { Invoice } from "../models/invoice.model.js";
 import { Product } from "../models/product.model.js";
+import { Business } from "../models/business.model.js";
+import { User } from "../models/user.model.js";
 import { sendInvoiceViaWhatsApp } from "../utils/sendWhatsApp.js";
 import { generateInvoicePDF } from "../utils/pdfGenerator.js";
 
@@ -184,7 +186,6 @@ export const getInvoices = async (req, res) => {
     const invoices = await Invoice.find({ user: req.user.id })
       .populate("products")
       .sort({ createdAt: -1 });
-    console.log("Invoices from backend :", invoices)
     res.status(200).json(invoices);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -233,7 +234,9 @@ export const downloadInvoicePDF = async (req, res) => {
     invoice.products = enrichedProducts;
 
     // Generate the PDF
-    const pdfBuffer = await generateInvoicePDF(invoice);
+    const business = await Business.findOne({ user: req.user.id });
+    const user = await User.findOne({ user: req.user.id })
+    const pdfBuffer = await generateInvoicePDF(invoice, business);
 
     res.set({
       "Content-Type": "application/pdf",

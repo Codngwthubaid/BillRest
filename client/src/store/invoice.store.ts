@@ -8,7 +8,7 @@ import {
   sendInvoiceOnWhatsApp as apiSendWhatsApp,
   updateInvoice,
   deleteInvoice,
-  printPOSReceipt as apiPrintPOSReceipt
+  downloadPOSReceiptPDF as apiPrintPOSReceipt
 } from "@/services/invoice.service";
 
 interface InvoiceState {

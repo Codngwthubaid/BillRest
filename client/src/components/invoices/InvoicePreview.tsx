@@ -59,16 +59,19 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
           </thead>
           <tbody>
             {invoice.products.map((item, idx) => {
-              const sgst = (item.gstRate / 2).toFixed(1);
-              const cgst = (item.gstRate / 2).toFixed(1);
-              const amount = (item.quantity * item.price).toFixed(2);
+              const gstRate = Number(item.gstRate);
+              const quantity = Number(item.quantity);
+              const price = Number(item.price);
+              const sgst = (gstRate / 2).toFixed(1);
+              const cgst = (gstRate / 2).toFixed(1);
+              const amount = (quantity * price).toFixed(2);
               return (
                 <tr key={idx}>
                   <td className="border px-2 py-1">
                     {item.name}
                   </td>
-                  <td className="border px-2 py-1 text-center">{item.quantity}</td>
-                  <td className="border px-2 py-1 text-right">₹{item.price.toFixed(2)}</td>
+                  <td className="border px-2 py-1 text-center">{quantity}</td>
+                  <td className="border px-2 py-1 text-right">₹{price.toFixed(2)}</td>
                   <td className="border px-2 py-1 text-right">{sgst}%</td>
                   <td className="border px-2 py-1 text-right">{cgst}%</td>
                   <td className="border px-2 py-1 text-right">₹{amount}</td>

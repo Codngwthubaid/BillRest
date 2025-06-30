@@ -18,7 +18,7 @@ const defaultForm: CreateInvoicePayload = {
     currency: "INR",
     paymentMethod: "Cash",
     status: "draft",
-    products: [{ product: "", quantity: "", price: "", gstRate: "" }],
+    products: [{ name: "", quantity: "", price: "", gstRate: "" }],
     customerState: "",
     businessState: "",
     posPrint: "A4" // ✅ default posPrint
@@ -33,7 +33,7 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
     const handleAddProduct = () => {
         setForm({
             ...form,
-            products: [...form.products, { product: "", quantity: "", price: "", gstRate: "" }],
+            products: [...form.products, { name: "", quantity: "", price: "", gstRate: "" }],
         });
     };
 
@@ -45,7 +45,7 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
             if (selectedProduct) {
                 updated[index] = {
                     ...updated[index],
-                    product: selectedProduct._id,
+                    name: selectedProduct._id,
                     price: String(selectedProduct.price),
                     gstRate: String(selectedProduct.gstRate),
                 };
@@ -191,7 +191,7 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
                                 <div key={idx} className="grid grid-cols-4 gap-2 items-center">
                                     <select
                                         className="w-full border rounded p-2 text-sm"
-                                        value={p.product}
+                                        value={p.name}
                                         onChange={(e) => handleChangeProduct(idx, "product", e.target.value)}
                                     >
                                         <option value="">Select Product</option>

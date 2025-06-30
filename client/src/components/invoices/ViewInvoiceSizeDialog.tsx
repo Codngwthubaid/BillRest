@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import InvoicePreview from "./InvoicePreview";
 import POSReceipt58mm from "./POSReceipt58mm";
 import POSReceipt80mm from "./POSReceipt80mm";
 import type { Invoice } from "@/types/invoice.types";
+import { DialogTitle } from "@radix-ui/react-dialog";
+import { File } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -23,16 +25,19 @@ export default function ViewInvoiceSizeDialog({ open, onClose, invoice }: Props)
   return (
     <Dialog open={open} onOpenChange={resetAndClose}>
       <DialogContent className="max-w-fit">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-semibold">View Invoice</DialogTitle>
+        </DialogHeader>
         {viewType === "select" && (
           <div className="flex flex-col gap-4 mt-4">
             <Button onClick={() => setViewType("A4")} className="bg-blue-600 hover:bg-blue-700">
-              📄 View A4 Invoice
+              <File/> View A4 Invoice
             </Button>
             <Button onClick={() => setViewType("58mm")} className="bg-green-600 hover:bg-green-700">
-              🧾 View 58mm POS Receipt
+              <File/> View 58mm POS Receipt
             </Button>
             <Button onClick={() => setViewType("80mm")} className="bg-emerald-600 hover:bg-emerald-700">
-              🧾 View 80mm POS Receipt
+              <File/> View 80mm POS Receipt
             </Button>
           </div>
         )}
@@ -54,6 +59,9 @@ export default function ViewInvoiceSizeDialog({ open, onClose, invoice }: Props)
             )}
           </div>
         )}
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Close</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

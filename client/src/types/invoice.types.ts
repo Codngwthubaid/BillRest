@@ -2,9 +2,9 @@
 
 export interface InvoiceProductOnInvoice {
   name: string;
-  quantity: number;
-  price: number;
-  gstRate: number;
+  quantity: string;
+  price: string;
+  gstRate: string;
 }
 
 export interface Invoice {

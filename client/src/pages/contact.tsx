@@ -10,6 +10,8 @@ import { Loader2 } from 'lucide-react';
 const ContactSupportPage: React.FC = () => {
     const [subject, setSubject] = useState('');
     const [message, setMessage] = useState('');
+    const [pageLoading, setPageLoading] = useState(true);
+
     const {
         tickets,
         loading,
@@ -20,6 +22,11 @@ const ContactSupportPage: React.FC = () => {
 
     useEffect(() => {
         fetchTickets();
+        const timer = setTimeout(() => {
+            setPageLoading(false);
+        }, 1000);
+
+        return () => clearTimeout(timer);
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -42,6 +49,14 @@ const ContactSupportPage: React.FC = () => {
                 return 'bg-gray-100 text-gray-800';
         }
     };
+
+    if (pageLoading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <Loader2 className="animate-spin size-12 text-blue-600" />
+            </div>
+        );
+    }
 
     return (
         <div className="mx-auto px-4 py-8 space-y-8">
@@ -76,7 +91,6 @@ const ContactSupportPage: React.FC = () => {
                     {error && <p className="text-sm text-red-600">{error}</p>}
                 </form>
             </CardContent>
-
 
             {tickets.length > 0 && (
                 <div className="space-y-4 mx-6">

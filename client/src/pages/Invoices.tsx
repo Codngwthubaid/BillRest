@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   getInvoices,
-  downloadInvoicePDF,
   sendInvoiceOnWhatsApp,
   updateInvoice,
   deleteInvoice,
@@ -18,6 +17,8 @@ import { DeleteInvoiceDialog } from "@/components/invoices/DeleteInvoiceDialog";
 import { UpdateInvoiceDialog } from "@/components/invoices/UpdateInvoiceDialog";
 import ProtectedPinDialog from "@/components/invoices/ProtectedPinDialog";
 import ViewInvoiceSizeDialog from "@/components/invoices/ViewInvoiceSizeDialog";
+import DownloadInvoiceDialog from "@/components/invoices/DownloadInvoiceDialog";
+
 
 export default function InvoicesPage() {
   const { invoices, setInvoices } = useInvoiceStore();
@@ -28,6 +29,7 @@ export default function InvoicesPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showPinDialog, setShowPinDialog] = useState(false);
+  const [showDownloadDialog, setShowDownloadDialog] = useState(false);
   const [pinCallback, setPinCallback] = useState<() => void>(() => () => { });
 
   const askForPin = (callback: () => void) => {
@@ -206,21 +208,10 @@ export default function InvoicesPage() {
                     <Eye className="w-4 h-4 text-primary hover:scale-110 cursor-pointer" />
                   </button>
 
-
-                  <button
-                    onClick={async () => {
-                      const blob = await downloadInvoicePDF(invoice._id!);
-                      if (!blob) return;
-                      const url = window.URL.createObjectURL(blob);
-                      const link = document.createElement("a");
-                      link.href = url;
-                      link.download = `${invoice.invoiceNumber}.pdf`;
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                      window.URL.revokeObjectURL(url);
-                    }}
-                  >
+                  <button onClick={() => {
+                    setSelectedInvoice(invoice);
+                    setShowDownloadDialog(true);
+                  }}>
                     <Download className="w-4 h-4 text-green-600 hover:scale-110" />
                   </button>
 
@@ -288,6 +279,12 @@ export default function InvoicesPage() {
         onVerified={() => {
           pinCallback();
         }}
+      />
+
+      <DownloadInvoiceDialog
+        open={showDownloadDialog}
+        invoice={selectedInvoice}
+        onClose={() => setShowDownloadDialog(false)}
       />
 
       <ViewInvoiceSizeDialog

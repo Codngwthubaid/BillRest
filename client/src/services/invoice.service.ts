@@ -1,5 +1,4 @@
 import { axiosInstance } from "@/lib/axiosInstance";
-import { useAuthStore } from "@/store/auth.store";
 import type { CreateInvoicePayload, Invoice } from "@/types/invoice.types";
 
 // ✅ Create new invoice
@@ -51,11 +50,10 @@ export const sendInvoiceOnWhatsApp = async (invoiceId: string): Promise<{ messag
 };
 
 // ✅ Trigger POS print by opening in new tab (browser handles printing)
-
-export const printPOSReceipt = (invoiceId: string, size: "58mm" | "80mm") => {
-  const token = useAuthStore.getState().token;
-  const url = `${import.meta.env.VITE_API_URL}/invoices/${invoiceId}/pos?size=${size}&token=${token}`;
-  window.open(url, "_blank");
+export const downloadPOSReceiptPDF = async (invoiceId: string, size: "58mm" | "80mm"): Promise<Blob> => {
+  console.log("Downloading POS PDF from:", `/invoices/${invoiceId}/pos-pdf?size=${size}`);
+  const res = await axiosInstance.get(`/invoices/${invoiceId}/pos-pdf?size=${size}`, {
+    responseType: "blob"
+  });
+  return res.data;
 };
-
-

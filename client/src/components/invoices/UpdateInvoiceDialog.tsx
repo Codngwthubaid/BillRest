@@ -46,10 +46,10 @@ export function UpdateInvoiceDialog({
         businessState: invoice.businessState || "",
         posPrint: invoice.posPrint || "A4",
         products: invoice.products.map((p) => ({
-          product: typeof p.name === "string" ? p.name : (p.name as any)._id,
-          quantity: p.quantity,
-          price: p.price,
-          gstRate: p.gstRate,
+          product: typeof p.name === "string" ? p.name : (p.name as any),
+          quantity: Number(p.quantity),
+          price: Number(p.price),
+          gstRate: Number(p.gstRate),
         })),
       });
     }
