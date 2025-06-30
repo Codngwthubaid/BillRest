@@ -1,23 +1,34 @@
+import { useAuthStore } from "@/store/auth.store";
+import { useBusinessStore } from "@/store/business.store";
+import { useInvoiceStore } from "@/store/invoice.store";
 import type { Invoice } from "@/types/invoice.types";
+import { ToWords } from 'to-words';
 
 type InvoicePreviewProps = {
   invoice: Invoice;
 };
 
 export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
+
+
+  const toWords = new ToWords();
+  const amountInWords = toWords.convert(invoice.totalAmount);
+  const { invoices } = useInvoiceStore()
+  const { user } = useAuthStore()
+  const { business } = useBusinessStore();
+  console.log(invoices)
   return (
     <div className="mx-auto bg-white rounded-lg text-sm font-sans">
       {/* Header */}
       <div className="flex justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold">YOUR BUSINESS NAME</h2>
-          <p className="text-xs">Address: Your Business Address Line</p>
-          <p className="text-xs">GST: YOURGST1234XYZ</p>
-          <p className="text-xs">Phone: +91 9876543210</p>
-          <p className="text-xs">Email: business@example.com</p>
+          <h2 className="text-xl font-bold">{business?.businessName}</h2>
+          <p className="text-xs">Address: {business?.address}</p>
+          <p className="text-xs">Phone: {user?.phone}</p>
+          <p className="text-xs">Email: {user?.email}</p>
         </div>
         <div className="text-right">
-          <h3 className="text-lg font-bold text-emerald-600 mb-1">Proforma Invoice</h3>
+          <h3 className="text-lg font-bold text-emerald-600 mb-1">BillRest Invoice</h3>
           <p>Invoice: {invoice.invoiceNumber}</p>
           <div>Date: {invoice.createdAt ? new Date(invoice.createdAt).toLocaleDateString() : "N/A"}</div>
           <div>Due Date: {invoice.createdAt ? new Date(invoice.createdAt).toLocaleDateString() : "N/A"}</div>
@@ -39,7 +50,6 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
           <thead className="bg-emerald-100">
             <tr>
               <th className="border px-2 py-1">Product Name</th>
-              <th className="border px-2 py-1">HSN</th>
               <th className="border px-2 py-1">Qty</th>
               <th className="border px-2 py-1">Price</th>
               <th className="border px-2 py-1">SGST</th>
@@ -55,11 +65,8 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
               return (
                 <tr key={idx}>
                   <td className="border px-2 py-1">
-                    {typeof item.product === "string"
-                      ? item.product
-                      : item.product?.name || "Unknown"}
+                    {item.name}
                   </td>
-                  <td className="border px-2 py-1">6109</td>
                   <td className="border px-2 py-1 text-center">{item.quantity}</td>
                   <td className="border px-2 py-1 text-right">₹{item.price.toFixed(2)}</td>
                   <td className="border px-2 py-1 text-right">{sgst}%</td>
@@ -76,7 +83,7 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
       <div className="flex justify-between mt-4">
         <div>
           <p className="italic">
-            Amount in words: FOURTEEN THOUSAND THREE HUNDRED FORTY THREE
+            Amount in words: {amountInWords} only
           </p>
         </div>
         <div>
@@ -85,21 +92,9 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
               <tr><td className="pr-2">Subtotal:</td><td>₹{invoice.subTotal.toFixed(2)}</td></tr>
               <tr><td className="pr-2">Total Tax:</td><td>₹{invoice.gstAmount.toFixed(2)}</td></tr>
               <tr><td className="pr-2 font-semibold">Total Amount:</td><td className="font-semibold">₹{invoice.totalAmount.toFixed(2)}</td></tr>
-              <tr><td className="pr-2">Amount Received:</td><td>₹0.00</td></tr>
-              <tr><td className="pr-2">Balance Due:</td><td>₹{invoice.totalAmount.toFixed(2)}</td></tr>
             </tbody>
           </table>
         </div>
-      </div>
-
-      {/* Terms */}
-      <div className="mt-4 text-[10px] leading-tight">
-        <p className="font-semibold mb-1">Terms & Conditions</p>
-        <p>
-          Our responsibility ceases as soon as goods leave our premises.<br />
-          Products once sold will not be returned/exchanged.<br />
-          Delivery charges must be paid by customer.
-        </p>
       </div>
     </div>
   );

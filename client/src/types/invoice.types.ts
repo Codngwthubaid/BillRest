@@ -1,13 +1,8 @@
-export interface InvoiceProduct {
-  product: string;
-  quantity: string;
-  price: string;
-  gstRate: string;
-}
 
-export interface PopulatedProduct {
-  _id: string;
+
+export interface InvoiceProductOnInvoice {
   name: string;
+  quantity: number;
   price: number;
   gstRate: number;
 }
@@ -16,12 +11,7 @@ export interface Invoice {
   _id?: string;
   user?: string;
   invoiceNumber: string;
-  products: {
-    product: string | PopulatedProduct;
-    quantity: number;
-    price: number;
-    gstRate: number;
-  }[];
+  products: InvoiceProductOnInvoice[];
   subTotal: number;
   gstAmount: number;
   cgstAmount: number;
@@ -41,7 +31,7 @@ export interface Invoice {
 }
 
 export interface CreateInvoicePayload {
-  products: InvoiceProduct[];
+  products: InvoiceProductOnInvoice[];
   paymentMethod: "Cash" | "UPI" | "Card" | "Other";
   currency: "INR" | "USD" | "AED" | string;
   customerName: string;

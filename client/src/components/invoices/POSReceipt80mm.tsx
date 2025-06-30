@@ -1,8 +1,11 @@
 import type { Invoice } from "@/types/invoice.types";
+import { ToWords } from "to-words";
 
 type Business = {
   businessName: string;
   address?: string;
+  phone?: string;
+  email?: string;
 };
 
 type POSReceipt80mmProps = {
@@ -11,6 +14,9 @@ type POSReceipt80mmProps = {
 };
 
 export default function POSReceipt80mm({ business, invoice }: POSReceipt80mmProps) {
+  const toWords = new ToWords();
+  const amountInWords = toWords.convert(invoice.totalAmount);
+
   return (
     <div
       className="w-[80mm] mx-auto p-2 text-xs font-mono border-t border-dashed border-black mt-2 pt-2"
@@ -19,7 +25,9 @@ export default function POSReceipt80mm({ business, invoice }: POSReceipt80mmProp
       {/* Business Info */}
       <div className="text-center mb-2">
         <h3 className="text-base font-bold">{business.businessName}</h3>
-        <p>{business.address || ""}</p>
+        {business.address && <p>{business.address}</p>}
+        {business.phone && <p>Ph: {business.phone}</p>}
+        {business.email && <p>{business.email}</p>}
       </div>
 
       {/* Invoice Meta */}
@@ -29,19 +37,16 @@ export default function POSReceipt80mm({ business, invoice }: POSReceipt80mmProp
       </div>
 
       {/* Customer */}
-      <div className="mb-2">
+      <div className="mb-1">
         Customer: {invoice.customerName || "N/A"}
+        {invoice.phoneNumber && <div>Ph: {invoice.phoneNumber}</div>}
       </div>
 
       {/* Items */}
       <div className="border-t border-dashed border-black pt-1 mb-1">
         {invoice.products.map((item, idx) => (
           <div key={idx} className="flex justify-between">
-            <span>
-              {typeof item.product === "string"
-                ? item.product
-                : item.product?.name || "Unknown"} x{item.quantity}
-            </span>
+            <span>{item.name} x{item.quantity}</span>
             <span>₹{(item.price * item.quantity).toFixed(2)}</span>
           </div>
         ))}
@@ -54,9 +59,16 @@ export default function POSReceipt80mm({ business, invoice }: POSReceipt80mmProp
         <div>IGST: ₹{invoice.igstAmount.toFixed(2)}</div>
       </div>
 
-      {/* Total */}
-      <div className="font-bold mt-1 mb-2">
-        Total: ₹{invoice.totalAmount.toFixed(2)}
+      {/* Totals */}
+      <div className="border-t border-dashed border-black mt-1 pt-1 mb-1">
+        <div>Subtotal: ₹{invoice.subTotal.toFixed(2)}</div>
+        <div>Total Tax: ₹{invoice.gstAmount.toFixed(2)}</div>
+        <div className="font-bold">Total: ₹{invoice.totalAmount.toFixed(2)}</div>
+      </div>
+
+      {/* Amount in words */}
+      <div className="italic mb-1">
+        {amountInWords} only
       </div>
 
       {/* Payment */}

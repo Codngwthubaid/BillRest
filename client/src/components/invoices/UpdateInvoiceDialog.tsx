@@ -46,7 +46,7 @@ export function UpdateInvoiceDialog({
         businessState: invoice.businessState || "",
         posPrint: invoice.posPrint || "A4",
         products: invoice.products.map((p) => ({
-          product: typeof p.product === "string" ? p.product : (p.product as any)._id,
+          product: typeof p.name === "string" ? p.name : (p.name as any)._id,
           quantity: p.quantity,
           price: p.price,
           gstRate: p.gstRate,
@@ -66,7 +66,7 @@ export function UpdateInvoiceDialog({
   };
 
   const handleSubmit = () => {
-    if (invoice?._id) onUpdate(invoice._id, form as Invoice);
+    if (invoice?._id) onUpdate(invoice._id, form as unknown as Invoice);
     onClose();
   };
 

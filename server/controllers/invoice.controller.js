@@ -25,11 +25,19 @@ export const createInvoice = async (req, res) => {
     let subTotal = 0;
     let gstAmount = 0;
 
+    const invoiceProducts = [];
     for (const item of products) {
       const product = await Product.findById(item.product);
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
+
+      invoiceProducts.push({
+        name: product.name,
+        quantity: item.quantity,
+        price: item.price,
+        gstRate: item.gstRate
+      });
 
       const productTotal = item.price * item.quantity;
       const gst = (productTotal * item.gstRate) / 100;
@@ -54,7 +62,7 @@ export const createInvoice = async (req, res) => {
     const invoice = await Invoice.create({
       user: userId,
       invoiceNumber: generateInvoiceNumber(),
-      products,
+      products: invoiceProducts,
       subTotal,
       gstAmount,
       cgstAmount,
@@ -87,18 +95,25 @@ export const updateInvoice = async (req, res) => {
     const updateData = req.body;
 
     if (updateData.products) {
+      const invoiceProducts = [];
       let subTotal = 0;
       let gstAmount = 0;
 
       for (const item of updateData.products) {
-        const product = await Product.findById(item.product);
-        if (!product) {
+        const productDoc = await Product.findById(item.product);
+        if (!productDoc) {
           return res.status(404).json({ message: "Product not found" });
         }
 
+        invoiceProducts.push({
+          name: productDoc.name,
+          quantity: item.quantity,
+          price: item.price,
+          gstRate: item.gstRate
+        });
+
         const productTotal = item.price * item.quantity;
         const gst = (productTotal * item.gstRate) / 100;
-
         subTotal += productTotal;
         gstAmount += gst;
       }
@@ -116,6 +131,7 @@ export const updateInvoice = async (req, res) => {
         }
       }
 
+      updateData.products = invoiceProducts;
       updateData.subTotal = subTotal;
       updateData.gstAmount = gstAmount;
       updateData.cgstAmount = cgstAmount;
@@ -165,7 +181,10 @@ export const deleteInvoice = async (req, res) => {
 // Get All Invoices for User
 export const getInvoices = async (req, res) => {
   try {
-    const invoices = await Invoice.find({ user: req.user.id }).populate("products.product", "name price gstRate").sort({ createdAt: -1 });
+    const invoices = await Invoice.find({ user: req.user.id })
+      .populate("products")
+      .sort({ createdAt: -1 });
+    console.log("Invoices from backend :", invoices)
     res.status(200).json(invoices);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -175,7 +194,7 @@ export const getInvoices = async (req, res) => {
 // Get Single Invoice by ID
 export const getInvoiceById = async (req, res) => {
   try {
-    const invoice = await Invoice.findOne({ _id: req.params.id, user: req.user.id }).populate("products.product", "name price gstRate");
+    const invoice = await Invoice.findOne({ _id: req.params.id, user: req.user.id }).populate("products", "name price gstRate");
     if (!invoice) return res.status(404).json({ message: "Invoice not found" });
     res.status(200).json(invoice);
   } catch (err) {
@@ -228,7 +247,6 @@ export const downloadInvoicePDF = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
 
 // Send Invoice via WhatsApp
 export const sendInvoiceWhatsApp = async (req, res) => {

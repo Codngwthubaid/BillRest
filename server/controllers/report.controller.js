@@ -63,7 +63,7 @@ export const getSalesReport = async (req, res) => {
         const invoices = await Invoice.find({
             user: userId,
             createdAt: { $gte: start, $lte: end },
-        }).populate("products.product");
+        }).populate("products");
 
         // Optional: calculate totals or group by products
         const totalSales = invoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
