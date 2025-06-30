@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePlanStore } from "@/store/plan.store";
 import { useAuthStore } from "@/store/auth.store";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createOrder, verifyAndActivate } from "@/services/subscription.service";
+import { Loader2 } from "lucide-react";
 
 export default function Plans() {
   const {
@@ -15,7 +16,7 @@ export default function Plans() {
     fetchIndividualPlans
   } = usePlanStore();
 
-
+  const [isLoading, setIsLoading] = useState(true)
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
 
@@ -76,6 +77,25 @@ export default function Plans() {
       toast.error("Unable to start payment");
     }
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-xl font-semibold animate-pulse text-blue-600">
+          <Loader2 className="animate-spin size-12" />
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="max-w-6xl mx-auto py-10 px-4">

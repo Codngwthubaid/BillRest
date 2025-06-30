@@ -21,7 +21,6 @@ export const createInvoice = async (req, res) => {
       status,
       customerState,
       businessState,
-      posPrint // ⬅️ added
     } = req.body;
 
     let subTotal = 0;
@@ -76,8 +75,8 @@ export const createInvoice = async (req, res) => {
       customerName,
       phoneNumber,
       status: status || "draft",
-      posPrint: posPrint || "disabled" // ✅ new
     });
+    
 
     res.status(201).json({
       message: "Invoice created successfully",
@@ -96,11 +95,20 @@ export const updateInvoice = async (req, res) => {
     const userId = req.user.id;
     const updateData = req.body;
 
-    if (updateData.products) {
-      const invoiceProducts = [];
-      let subTotal = 0;
-      let gstAmount = 0;
+    // Find existing invoice to fallback on missing fields
+    const existingInvoice = await Invoice.findOne({ _id: invoiceId, user: userId });
+    if (!existingInvoice) {
+      return res.status(404).json({ message: "Invoice not found" });
+    }
 
+    let subTotal = 0;
+    let gstAmount = 0;
+    let cgstAmount = 0;
+    let sgstAmount = 0;
+    let igstAmount = 0;
+    let invoiceProducts = [];
+
+    if (updateData.products) {
       for (const item of updateData.products) {
         const productDoc = await Product.findById(item.product);
         if (!productDoc) {
@@ -120,37 +128,40 @@ export const updateInvoice = async (req, res) => {
         gstAmount += gst;
       }
 
-      let cgstAmount = 0;
-      let sgstAmount = 0;
-      let igstAmount = 0;
-
-      if (updateData.customerState && updateData.businessState) {
-        if (updateData.customerState === updateData.businessState) {
-          cgstAmount = gstAmount / 2;
-          sgstAmount = gstAmount / 2;
-        } else {
-          igstAmount = gstAmount;
-        }
-      }
-
+      // Replace products list
       updateData.products = invoiceProducts;
       updateData.subTotal = subTotal;
       updateData.gstAmount = gstAmount;
-      updateData.cgstAmount = cgstAmount;
-      updateData.sgstAmount = sgstAmount;
-      updateData.igstAmount = igstAmount;
-      updateData.totalAmount = subTotal + gstAmount;
     }
+
+    // Make sure customerState & businessState are set (either from body or existing)
+    const customerState = updateData.customerState ?? existingInvoice.customerState;
+    const businessState = updateData.businessState ?? existingInvoice.businessState;
+
+    // Compute CGST, SGST, IGST
+    if (customerState && businessState) {
+      if (customerState === businessState) {
+        cgstAmount = gstAmount / 2;
+        sgstAmount = gstAmount / 2;
+      } else {
+        igstAmount = gstAmount;
+      }
+    }
+
+    updateData.cgstAmount = cgstAmount;
+    updateData.sgstAmount = sgstAmount;
+    updateData.igstAmount = igstAmount;
+    updateData.totalAmount = subTotal + gstAmount;
+
+    // Ensure customerState and businessState are updated if provided
+    if (updateData.customerState) existingInvoice.customerState = updateData.customerState;
+    if (updateData.businessState) existingInvoice.businessState = updateData.businessState;
 
     const updatedInvoice = await Invoice.findOneAndUpdate(
       { _id: invoiceId, user: userId },
       updateData,
       { new: true }
     );
-
-    if (!updatedInvoice) {
-      return res.status(404).json({ message: "Invoice not found" });
-    }
 
     res.status(200).json({
       message: "Invoice updated successfully",
@@ -161,6 +172,8 @@ export const updateInvoice = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
 
 // Delete Invoice
 export const deleteInvoice = async (req, res) => {

@@ -6,7 +6,7 @@ import {
   deleteInvoice,
 } from "@/services/invoice.service";
 import { useInvoiceStore } from "@/store/invoice.store";
-import { FileText, DollarSign, Clock, Calendar, Eye, Send, Download, PenLine, Trash } from "lucide-react";
+import { FileText, DollarSign, Clock, Calendar, Eye, Send, Download, PenLine, Trash, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,6 +23,7 @@ import DownloadInvoiceDialog from "@/components/invoices/DownloadInvoiceDialog";
 export default function InvoicesPage() {
   const { invoices, setInvoices } = useInvoiceStore();
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
@@ -31,6 +32,7 @@ export default function InvoicesPage() {
   const [showPinDialog, setShowPinDialog] = useState(false);
   const [showDownloadDialog, setShowDownloadDialog] = useState(false);
   const [pinCallback, setPinCallback] = useState<() => void>(() => () => { });
+
 
   const askForPin = (callback: () => void) => {
     setPinCallback(() => callback);
@@ -86,6 +88,24 @@ export default function InvoicesPage() {
         return <Badge variant="outline">Draft</Badge>;
     }
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-xl font-semibold animate-pulse text-blue-600">
+          <Loader2 className="animate-spin size-12" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">

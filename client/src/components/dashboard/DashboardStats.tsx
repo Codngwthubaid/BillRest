@@ -8,8 +8,6 @@ export default function DashboardStats() {
   const { data, fetchReport } = useReportStore();
   const { user } = useAuthStore();
 
-  console.log(data)
-
   useEffect(() => {
     fetchReport("monthly", new Date().toISOString().split("T")[0]);
   }, [fetchReport]);

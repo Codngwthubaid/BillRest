@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useReportStore } from '@/store/report.store';
 import type { ReportFilterType } from '@/services/report.service';
 import {
@@ -34,6 +34,7 @@ import {
     Activity,
     LineChart,
     PieChart,
+    Loader2,
 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -47,7 +48,8 @@ import { RevenueChart } from '@/components/reports/RevenueChart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
 
 
-const ReportPage: React.FC = () => {
+export default function ReportPage() {
+    const [isLoading, setIsLoading] = useState(true)
     const { data, loading, fetchReport } = useReportStore();
     const [filterType, setFilterType] = useState<ReportFilterType>('monthly');
     const [startDate, setStartDate] = useState<string>(
@@ -74,6 +76,24 @@ const ReportPage: React.FC = () => {
             default: return <Filter className="h-4 w-4" />;
         }
     };
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, []);
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="text-xl font-semibold animate-pulse text-blue-600">
+                    <Loader2 className="animate-spin size-12" />
+                </div>
+            </div>
+        );
+    }
+
 
     return (
         <div className="min-h-screen">
@@ -397,5 +417,3 @@ const ReportPage: React.FC = () => {
         </div>
     );
 };
-
-export default ReportPage;

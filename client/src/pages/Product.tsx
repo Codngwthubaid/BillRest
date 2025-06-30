@@ -6,6 +6,7 @@ import {
     Trash2,
     Package,
     Barcode,
+    Loader2,
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,7 @@ export default function ProductsPage() {
     const [showUpdateDialog, setShowUpdateDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchProducts();
@@ -42,6 +44,26 @@ export default function ProductsPage() {
         if (stock <= 10) return 'text-orange-600 bg-orange-100';
         return 'text-green-600 bg-green-100';
     };
+
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setLoading(false);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="text-xl font-semibold animate-pulse text-blue-600">
+                    <Loader2 className="animate-spin size-12" />
+                </div>
+            </div>
+        );
+    }
+
 
     return (
         <div className="space-y-6 p-6">

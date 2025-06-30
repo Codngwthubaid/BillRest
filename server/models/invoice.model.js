@@ -28,13 +28,10 @@ const invoiceSchema = new mongoose.Schema({
     enum: ["Cash", "UPI", "Card", "Other"],
     default: "Cash",
   },
-  posPrint: {
-    type: String,
-    enum: ["58mm", "80mm", "A4"],
-    default: "A4",
-  },
   customerName: String,
   phoneNumber: String,
+  customerState: String,
+  businessState: String,
   createdAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 

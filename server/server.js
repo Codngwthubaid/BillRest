@@ -50,27 +50,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
 
 
-
-
-
-
-
-// 1. **✅ Authentication System** (Completed)
-// 2. **✅ Business Onboarding** (Completed)
-// 3. **🟡 Product Management**
-// 4. **🟡 Invoice System**
-// 5. **🟡 Sales Reports**
-// 6. **🟡 WhatsApp Messaging Integration**
-// 7. **🟡 PWA Sync Logic (optional backend part)**
-// for 7 -
-// ✅ Use Service Workers on frontend to capture offline events.
-
-// ✅ Store offline invoices in IndexedDB or localStorage.
-
-// ✅ When online, hit /api/sync/invoices with offline data.
-
-// ✅ Show sync status in the frontend.
-
-// 8. **🟡 Admin Dashboards Data APIs**
-// 9. **🟡 Deployment Scripts (PM2 + Nginx)**
-

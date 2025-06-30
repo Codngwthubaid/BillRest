@@ -1,5 +1,3 @@
-
-
 export interface InvoiceProductOnInvoice {
   name: string;
   quantity: string;
@@ -21,7 +19,6 @@ export interface Invoice {
   currency: "INR" | "USD" | "AED" | string;
   status: "paid" | "pending" | "overdue" | "draft";
   paymentMethod: "Cash" | "UPI" | "Card" | "Other";
-  posPrint: "58mm" | "80mm" | "A4" | "disabled"; // ✅ NEW
   customerName: string;
   phoneNumber: string;
   customerState?: string;
@@ -31,7 +28,7 @@ export interface Invoice {
 }
 
 export interface CreateInvoicePayload {
-  products: InvoiceProductOnInvoice[];
+  products: InvoiceProductPayload[];
   paymentMethod: "Cash" | "UPI" | "Card" | "Other";
   currency: "INR" | "USD" | "AED" | string;
   customerName: string;
@@ -39,9 +36,26 @@ export interface CreateInvoicePayload {
   status: "paid" | "pending" | "overdue" | "draft";
   customerState: string;
   businessState: string;
-  posPrint: "58mm" | "80mm" | "A4" | "disabled"; // ✅ NEW
 }
 
 export interface POSPrintResponse {
   html: string;
+}
+
+export interface InvoiceProductPayload {
+  product: string;    // product ID
+  quantity: number;
+  price: number;
+  gstRate: number;
+}
+
+export interface UpdateInvoicePayload {
+  customerName: string;
+  phoneNumber: string;
+  paymentMethod: "Cash" | "UPI" | "Card" | "Other";
+  status: "paid" | "pending" | "overdue" | "draft";
+  currency: "INR" | "USD" | "AED" | string;
+  customerState?: string;
+  businessState?: string;
+  products: InvoiceProductPayload[];
 }

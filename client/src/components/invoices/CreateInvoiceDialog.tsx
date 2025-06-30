@@ -18,11 +18,11 @@ const defaultForm: CreateInvoicePayload = {
     currency: "INR",
     paymentMethod: "Cash",
     status: "draft",
-    products: [{ name: "", quantity: "", price: "", gstRate: "" }],
+    products: [{ product: "", quantity: 0, price: 0, gstRate: 0 }],
     customerState: "",
     businessState: "",
-    posPrint: "A4" // ✅ default posPrint
 };
+
 
 export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
     const [form, setForm] = useState<CreateInvoicePayload>(defaultForm);
@@ -33,29 +33,25 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
     const handleAddProduct = () => {
         setForm({
             ...form,
-            products: [...form.products, { name: "", quantity: "", price: "", gstRate: "" }],
+            products: [...form.products, { product: "", quantity: 0, price: 0, gstRate: 0 }],
         });
     };
 
     const handleChangeProduct = (index: number, field: string, value: any) => {
         const updated = [...form.products];
+        updated[index] = { ...updated[index], [field]: field === "product" ? value : Number(value) };
 
         if (field === "product") {
             const selectedProduct = products.find((p) => p._id === value);
             if (selectedProduct) {
-                updated[index] = {
-                    ...updated[index],
-                    name: selectedProduct._id,
-                    price: String(selectedProduct.price),
-                    gstRate: String(selectedProduct.gstRate),
-                };
+                updated[index].price = selectedProduct.price;
+                updated[index].gstRate = selectedProduct.gstRate;
             }
-        } else {
-            updated[index] = { ...updated[index], [field]: value };
         }
 
         setForm({ ...form, products: updated });
     };
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -65,6 +61,7 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
             setForm(defaultForm);
         }
     };
+
 
     useEffect(() => {
         if (open) {
@@ -169,19 +166,6 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
                                 <option value="overdue">Overdue</option>
                             </select>
                         </div>
-                        <div>
-                            <label className="text-sm">POS Print</label>
-                            <select
-                                className="w-full border rounded p-2 text-sm"
-                                value={form.posPrint}
-                                onChange={(e) => setForm({ ...form, posPrint: e.target.value as "58mm" | "80mm" | "A4" | "disabled" })}
-                            >
-                                <option value="A4">A4</option>
-                                <option value="80mm">80mm</option>
-                                <option value="58mm">58mm</option>
-                                <option value="disabled">Disabled</option>
-                            </select>
-                        </div>
                     </div>
 
                     <div>
@@ -191,7 +175,7 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
                                 <div key={idx} className="grid grid-cols-4 gap-2 items-center">
                                     <select
                                         className="w-full border rounded p-2 text-sm"
-                                        value={p.name}
+                                        value={p.product}
                                         onChange={(e) => handleChangeProduct(idx, "product", e.target.value)}
                                     >
                                         <option value="">Select Product</option>
