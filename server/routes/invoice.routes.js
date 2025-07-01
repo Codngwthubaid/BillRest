@@ -6,7 +6,9 @@ import {
   downloadInvoicePDF,
   sendInvoiceWhatsApp,
   updateInvoice,
-  deleteInvoice
+  deleteInvoice,
+  printInvoicePDF,
+  printInvoicePage
 } from "../controllers/invoice.controller.js";
 import { downloadPOSReceiptPDF } from "../controllers/pos.controller.js";
 import { verifyToken, checkRole } from "../middlewares/auth.middleware.js";
@@ -26,6 +28,9 @@ router.delete("/:id", deleteInvoice);
 router.get("/:id", getInvoiceById);
 router.get("/:id/download", downloadInvoicePDF);
 router.get("/:id/pos-pdf", downloadPOSReceiptPDF);
+router.get("/:id/print", verifyToken, printInvoicePDF);
+router.get("/:id/print-page", verifyToken, printInvoicePage);
+
 
 // ✅ Feature-gated route for WhatsApp invoice sending
 router.post(

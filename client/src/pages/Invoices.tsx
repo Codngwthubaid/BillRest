@@ -245,7 +245,6 @@ export default function InvoicesPage() {
                     <PenLine className="w-4 h-4 text-emerald-600 hover:scale-110" />
                   </button>
 
-
                   <button onClick={() =>
                     askForPin(() => handleDeleteInvoice(invoice))
                   }>
@@ -274,7 +273,18 @@ export default function InvoicesPage() {
         onClose={() => setShowUpdateDialog(false)}
         onUpdate={async (id, updatedFields) => {
           console.log(id, updatedFields)
-          await updateInvoice(id, updatedFields);
+          // Map products to include 'name' if missing
+          const mappedFields = {
+            ...updatedFields,
+            products: updatedFields.products?.map((p: any) => ({
+              name: p.name ?? "",
+              quantity: p.quantity,
+              price: p.price,
+              gstRate: p.gstRate,
+              ...p,
+            })),
+          };
+          await updateInvoice(id, mappedFields);
           const data = await getInvoices();
           setInvoices(data);
         }}

@@ -8,7 +8,8 @@ import {
   sendInvoiceOnWhatsApp as apiSendWhatsApp,
   updateInvoice,
   deleteInvoice,
-  downloadPOSReceiptPDF as apiPrintPOSReceipt
+  downloadPOSReceiptPDF as apiPrintPOSReceipt,
+  printInvoicePDF
 } from "@/services/invoice.service";
 
 interface InvoiceState {
@@ -26,6 +27,7 @@ interface InvoiceState {
   downloadInvoicePDF: (id: string) => Promise<Blob | null>;
   sendInvoiceOnWhatsApp: (id: string) => Promise<string | null>;
   printPOSReceipt: (id: string, size: "58mm" | "80mm") => void;
+  printInvoicePDF: (id: string) => void;
 
   setInvoices: (invoices: Invoice[]) => void;
   setSelectedInvoice: (invoice: Invoice | null) => void;
@@ -134,6 +136,9 @@ export const useInvoiceStore = create<InvoiceState>((set) => ({
 
   printPOSReceipt: (id, size) => {
     apiPrintPOSReceipt(id, size);
-  }
+  },
 
+  printInvoicePDF: (id) => {
+    printInvoicePDF(id);
+  },
 }));

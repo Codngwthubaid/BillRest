@@ -1,6 +1,5 @@
 import { useAuthStore } from "@/store/auth.store";
 import { useBusinessStore } from "@/store/business.store";
-import { useInvoiceStore } from "@/store/invoice.store";
 import type { Invoice } from "@/types/invoice.types";
 import { ToWords } from 'to-words';
 
@@ -9,14 +8,11 @@ type InvoicePreviewProps = {
 };
 
 export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
-
-
   const toWords = new ToWords();
   const amountInWords = toWords.convert(invoice.totalAmount);
-  const { invoices } = useInvoiceStore()
-  const { user } = useAuthStore()
+  const { user } = useAuthStore();
   const { business } = useBusinessStore();
-  console.log(invoices)
+
   return (
     <div className="mx-auto bg-white rounded-lg text-sm font-sans">
       {/* Header */}
@@ -52,6 +48,7 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
               <th className="border px-2 py-1">Product Name</th>
               <th className="border px-2 py-1">Qty</th>
               <th className="border px-2 py-1">Price</th>
+              <th className="border px-2 py-1">Discount (%)</th>
               <th className="border px-2 py-1">SGST</th>
               <th className="border px-2 py-1">CGST</th>
               <th className="border px-2 py-1">Amount</th>
@@ -62,16 +59,22 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
               const gstRate = Number(item.gstRate);
               const quantity = Number(item.quantity);
               const price = Number(item.price);
+              const discountPercent = Number(item.discount ?? 0);
+
+              // Correct discount calculation
+              const discountAmountPerItem = price * (discountPercent / 100);
+              const discountedPrice = price - discountAmountPerItem;
+              const amount = (quantity * discountedPrice).toFixed(2);
+
               const sgst = (gstRate / 2).toFixed(1);
               const cgst = (gstRate / 2).toFixed(1);
-              const amount = (quantity * price).toFixed(2);
+
               return (
                 <tr key={idx}>
-                  <td className="border px-2 py-1">
-                    {item.name}
-                  </td>
+                  <td className="border px-2 py-1">{item.name}</td>
                   <td className="border px-2 py-1 text-center">{quantity}</td>
                   <td className="border px-2 py-1 text-right">₹{price.toFixed(2)}</td>
+                  <td className="border px-2 py-1 text-right">{discountPercent}%</td>
                   <td className="border px-2 py-1 text-right">{sgst}%</td>
                   <td className="border px-2 py-1 text-right">{cgst}%</td>
                   <td className="border px-2 py-1 text-right">₹{amount}</td>
@@ -92,9 +95,18 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
         <div>
           <table className="text-xs text-right">
             <tbody>
-              <tr><td className="pr-2">Subtotal:</td><td>₹{invoice.subTotal.toFixed(2)}</td></tr>
-              <tr><td className="pr-2">Total Tax:</td><td>₹{invoice.gstAmount.toFixed(2)}</td></tr>
-              <tr><td className="pr-2 font-semibold">Total Amount:</td><td className="font-semibold">₹{invoice.totalAmount.toFixed(2)}</td></tr>
+              <tr>
+                <td className="pr-2">Subtotal:</td>
+                <td>₹{invoice.subTotal.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td className="pr-2">Total Tax:</td>
+                <td>₹{invoice.gstAmount.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td className="pr-2 font-semibold">Total Amount:</td>
+                <td className="font-semibold">₹{invoice.totalAmount.toFixed(2)}</td>
+              </tr>
             </tbody>
           </table>
         </div>

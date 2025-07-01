@@ -155,7 +155,7 @@ export default function ReportPage() {
                             </Select>
                         </div>
 
-                        <div className="space-y-2">
+                        {/* <div className="space-y-2">
                             <label className="text-sm font-medium flex items-center gap-2">
                                 <Calendar className="h-4 w-4" />
                                 Start Date
@@ -166,7 +166,7 @@ export default function ReportPage() {
                                 onChange={(e) => setStartDate(e.target.value)}
                                 className="border-slate-200"
                             />
-                        </div>
+                        </div> */}
 
                         {filterType === 'custom' && (
                             <div className="space-y-2">

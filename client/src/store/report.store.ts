@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { SalesReportResponse } from "@/types/report.types";
-import { getSalesReport,type ReportFilterType } from "@/services/report.service";
+import { getSalesReport, type ReportFilterType } from "@/services/report.service";
 
 interface ReportState {
   data: SalesReportResponse | null;

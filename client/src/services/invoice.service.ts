@@ -51,9 +51,15 @@ export const sendInvoiceOnWhatsApp = async (invoiceId: string): Promise<{ messag
 
 // ✅ Trigger POS print by opening in new tab (browser handles printing)
 export const downloadPOSReceiptPDF = async (invoiceId: string, size: "58mm" | "80mm"): Promise<Blob> => {
-  console.log("Downloading POS PDF from:", `/invoices/${invoiceId}/pos-pdf?size=${size}`);
   const res = await axiosInstance.get(`/invoices/${invoiceId}/pos-pdf?size=${size}`, {
     responseType: "blob"
   });
   return res.data;
+};
+
+// Print invoice as PDF
+export const printInvoicePDF = async (id: string): Promise<void> => {
+  const printUrl = await axiosInstance.get(`/invoices/${id}/print`);
+  console.log("Opening print invoice at:", printUrl.data);
+  window.open(printUrl.data);
 };

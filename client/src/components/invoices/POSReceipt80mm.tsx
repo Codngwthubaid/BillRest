@@ -47,7 +47,7 @@ export default function POSReceipt80mm({ business, invoice }: POSReceipt80mmProp
         {invoice.products.map((item, idx) => (
           <div key={idx} className="flex justify-between">
             <span>{item.name} x{item.quantity}</span>
-            <span>₹{(item.price * item.quantity).toFixed(2)}</span>
+            <span>₹{(Number(item.price) * Number(item.quantity)).toFixed(2)}</span>
           </div>
         ))}
       </div>
