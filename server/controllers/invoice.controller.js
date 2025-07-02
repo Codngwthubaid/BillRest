@@ -46,6 +46,12 @@ export const createInvoice = async (req, res) => {
       const price = item.price;
       const quantity = item.quantity;
 
+      if (product.stock < quantity) {
+        return res.status(400).json({ message: `Not enough stock for ${product.name}. Available: ${product.stock}` });
+      }
+      product.stock -= quantity;
+      await product.save();
+
       const productBase = price * quantity;
       const discountAmount = (price * discountPercent / 100) * quantity;
       const productTotal = productBase - discountAmount;
@@ -134,12 +140,22 @@ export const updateInvoice = async (req, res) => {
     const userId = req.user.id;
     const updateData = req.body;
 
-    // Find existing invoice to fallback on missing fields
+    // Find existing invoice
     const existingInvoice = await Invoice.findOne({ _id: invoiceId, user: userId });
     if (!existingInvoice) {
       return res.status(404).json({ message: "Invoice not found" });
     }
 
+    // 🔥 STEP 1: Restore old stock
+    for (const oldItem of existingInvoice.products) {
+      const oldProduct = await Product.findOne({ name: oldItem.name, user: userId });
+      if (oldProduct) {
+        oldProduct.stock += oldItem.quantity;
+        await oldProduct.save();
+      }
+    }
+
+    // 🔥 STEP 2: Prepare new totals and adjust stocks
     let subTotal = 0;
     let gstAmount = 0;
     let cgstAmount = 0;
@@ -154,6 +170,18 @@ export const updateInvoice = async (req, res) => {
           return res.status(404).json({ message: "Product not found" });
         }
 
+        // Check stock
+        if (productDoc.stock < item.quantity) {
+          return res.status(400).json({
+            message: `Not enough stock for ${productDoc.name}. Available: ${productDoc.stock}`
+          });
+        }
+
+        // Deduct stock
+        productDoc.stock -= item.quantity;
+        await productDoc.save();
+
+        // Totals
         const discountPercent = item.discount || 0;
         const price = item.price;
         const quantity = item.quantity;
@@ -175,17 +203,15 @@ export const updateInvoice = async (req, res) => {
         gstAmount += gst;
       }
 
-      // Replace products list
       updateData.products = invoiceProducts;
       updateData.subTotal = subTotal;
       updateData.gstAmount = gstAmount;
     }
 
-    // Make sure customerState & businessState are set (either from body or existing)
+    // 🔥 STEP 3: Compute CGST, SGST, IGST
     const customerState = updateData.customerState ?? existingInvoice.customerState;
     const businessState = updateData.businessState ?? existingInvoice.businessState;
 
-    // Compute CGST, SGST, IGST
     if (customerState && businessState) {
       if (customerState === businessState) {
         cgstAmount = gstAmount / 2;
@@ -200,30 +226,28 @@ export const updateInvoice = async (req, res) => {
     updateData.igstAmount = igstAmount;
     updateData.totalAmount = subTotal + gstAmount;
 
+    // 🔥 STEP 4: Update invoice
     const updatedInvoice = await Invoice.findOneAndUpdate(
       { _id: invoiceId, user: userId },
       updateData,
       { new: true }
     );
 
-    // 🔥 Now update the customer side
+    // 🔥 STEP 5: Update customer records
     const oldPhoneNumber = existingInvoice.phoneNumber;
     const newPhoneNumber = updatedInvoice.phoneNumber;
     const customerName = updatedInvoice.customerName;
     const state = updatedInvoice.customerState;
 
-    // Find old customer by old phone number
     let customer = await Customer.findOne({ user: userId, phoneNumber: oldPhoneNumber });
 
     if (customer) {
       if (oldPhoneNumber !== newPhoneNumber) {
-        // Phone number changed, move invoice to new customer
         customer.invoices.pull(updatedInvoice._id);
         await customer.save();
 
         let newCustomer = await Customer.findOne({ user: userId, phoneNumber: newPhoneNumber });
         if (!newCustomer) {
-          // Create new customer if not exists
           newCustomer = await Customer.create({
             user: userId,
             name: customerName,
@@ -232,12 +256,10 @@ export const updateInvoice = async (req, res) => {
             invoices: [updatedInvoice._id]
           });
         } else {
-          // Add invoice to existing customer
           newCustomer.invoices.push(updatedInvoice._id);
           await newCustomer.save();
         }
       } else {
-        // Same phone, just update name/state if changed
         customer.name = customerName;
         customer.state = state;
         await customer.save();
@@ -261,14 +283,27 @@ export const deleteInvoice = async (req, res) => {
     const invoiceId = req.params.id;
     const userId = req.user.id;
 
-    const deletedInvoice = await Invoice.findOneAndDelete({ _id: invoiceId, user: userId });
+    const invoiceToDelete = await Invoice.findOne({ _id: invoiceId, user: userId });
 
-    if (!deletedInvoice) {
+    if (!invoiceToDelete) {
       return res.status(404).json({ message: "Invoice not found" });
     }
 
+    // 🔥 Restore stock
+    for (const item of invoiceToDelete.products) {
+      const productDoc = await Product.findOne({ name: item.name, user: userId });
+      if (productDoc) {
+        productDoc.stock += item.quantity;
+        await productDoc.save();
+      }
+    }
+
+    // Now delete the invoice
+    await Invoice.findOneAndDelete({ _id: invoiceId, user: userId });
+
     res.status(200).json({ message: "Invoice deleted successfully" });
   } catch (err) {
+    console.error("Delete invoice error:", err);
     res.status(500).json({ message: err.message });
   }
 };
