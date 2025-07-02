@@ -11,29 +11,36 @@ const seedPlans = async () => {
 
     await Plan.insertMany([
       {
-        name: "1 Month",
-        type: "package",
-        durationInDays: 30,
-        pricePerMonth: 1249,
-        totalPrice: 1249,
-        includedInvoices: 300
-      },
-      {
         name: "3 Months",
         type: "package",
         durationInDays: 90,
         pricePerMonth: 1199,
         totalPrice: 3597,
-        includedInvoices: 300
+        includedInvoices: 300,
+        description: [
+          "Business Management",
+          "Invoice management (creation, updation, deletion)",
+          "Product management (creation, updation, deletion)",
+          "Customer listing & management",
+          "View Reports for sales, revenue, product, status",
+          "Asked queries from the support panel"
+        ]
       },
-
       {
         name: "6 Months",
         type: "package",
         durationInDays: 180,
         pricePerMonth: 999,
         totalPrice: 5994,
-        includedInvoices: 300
+        includedInvoices: 300,
+        description: [
+          "Business Management",
+          "Invoice management (creation, updation, deletion)",
+          "Product management (creation, updation, deletion)",
+          "Customer listing & management",
+          "View Reports for sales, revenue, product, status",
+          "Asked queries from the support panel"
+        ]
       },
       {
         name: "12 Months",
@@ -41,7 +48,15 @@ const seedPlans = async () => {
         durationInDays: 365,
         pricePerMonth: 799,
         totalPrice: 9588,
-        includedInvoices: 300
+        includedInvoices: 300,
+        description: [
+          "Business Management",
+          "Invoice management (creation, updation, deletion)",
+          "Product management (creation, updation, deletion)",
+          "Customer listing & management",
+          "View Reports for sales, revenue, product, status",
+          "Asked queries from the support panel"
+        ]
       },
       {
         name: "WA Add On",
@@ -58,23 +73,9 @@ const seedPlans = async () => {
         totalPrice: 399,
         description: "DAM support"
       },
-      {
-        name: "Call Support",
-        type: "individual",
-        pricePerMonth: 199,
-        totalPrice: 199,
-        description: "CPS - Call support for software"
-      },
-      {
-        name: "WA + CPS Combo",
-        type: "individual",
-        pricePerMonth: 349,
-        totalPrice: 349,
-        description: "WhatsApp + Call support"
-      },
     ]);
 
-    console.log("✅ Plans with monthly & total prices seeded");
+    console.log("✅ Plans with detailed package descriptions seeded");
     process.exit();
   } catch (err) {
     console.error("❌ Seeding failed:", err.message);

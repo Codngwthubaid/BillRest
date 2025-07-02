@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const supportTicketSchema = new mongoose.Schema(
   {
+    serialNumber: { type: Number, unique: true },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     subject: { type: String, required: true },
     message: { type: String, required: true },
@@ -10,9 +11,10 @@ const supportTicketSchema = new mongoose.Schema(
       enum: ["pending", "resolved", "escalated"],
       default: "pending",
     },
-    respondedBy: { type: String }, // Optional: can store support admin's name/email
+    respondedBy: { type: String },
   },
   { timestamps: true }
 );
+
 
 export const SupportTicket = mongoose.model("SupportTicket", supportTicketSchema);

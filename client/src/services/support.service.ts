@@ -13,3 +13,8 @@ export const getMyTickets = async (): Promise<SupportTicket[]> => {
   const res = await axiosInstance.get('/support');
   return res.data;
 };
+
+export const getTicketBySerialNumber = async (serialNumber: number): Promise<SupportTicket> => {
+  const res = await axiosInstance.get(`/support/ticket/${serialNumber}`);
+  return res.data;
+};

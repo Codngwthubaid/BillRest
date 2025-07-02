@@ -6,7 +6,7 @@ import {
   deleteInvoice,
 } from "@/services/invoice.service";
 import { useInvoiceStore } from "@/store/invoice.store";
-import { FileText, DollarSign, Clock, Calendar, Eye, Send, Download, PenLine, Trash, Loader2 } from "lucide-react";
+import { FileText, DollarSign, Clock, Calendar, Eye, Download, PenLine, Trash, Loader2, Printer, Share } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +18,8 @@ import { UpdateInvoiceDialog } from "@/components/invoices/UpdateInvoiceDialog";
 import ProtectedPinDialog from "@/components/invoices/ProtectedPinDialog";
 import ViewInvoiceSizeDialog from "@/components/invoices/ViewInvoiceSizeDialog";
 import DownloadInvoiceDialog from "@/components/invoices/DownloadInvoiceDialog";
+import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
+import { DialogHeader } from "@/components/ui/dialog";
 
 
 export default function InvoicesPage() {
@@ -25,6 +27,10 @@ export default function InvoicesPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [printInvoice, setPrintInvoice] = useState<Invoice | null>(null);
+  const [shareInvoice, setShareInvoice] = useState<Invoice | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -187,7 +193,7 @@ export default function InvoicesPage() {
       {/* Search & Filter */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <Input
-          placeholder="Search invoices..."
+          placeholder="Search invoices by invoice ID orr customer name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full"
@@ -223,7 +229,7 @@ export default function InvoicesPage() {
                 </td>
                 <td>{getStatusBadge(invoice.status)}</td>
                 <td>{invoice.createdAt?.slice(0, 10)}</td>
-                <td className="flex gap-2 p-2 mt-5 flex-wrap">
+                {/* <td className="flex gap-2 p-2 mt-5 flex-wrap">
                   <button onClick={() => handleViewInvoice(invoice)}>
                     <Eye className="w-4 h-4 text-primary hover:scale-110 cursor-pointer" />
                   </button>
@@ -239,6 +245,13 @@ export default function InvoicesPage() {
                     <Send className="w-4 h-4 text-purple-600 hover:scale-110" />
                   </button>
 
+                  <button onClick={() => {
+                    setPrintInvoice(invoice);
+                    setShowPrintDialog(true);
+                  }}>
+                    <Printer className="w-4 h-4 text-orange-600 hover:scale-110" />
+                  </button>
+
                   <button onClick={() =>
                     askForPin(() => handleUpdateInvoice(invoice))
                   }>
@@ -252,6 +265,41 @@ export default function InvoicesPage() {
                   </button>
 
 
+                </td> */}
+
+                <td className="flex gap-2 p-2 mt-5 flex-wrap">
+                  <button onClick={() => handleViewInvoice(invoice)}>
+                    <Eye className="w-4 h-4 text-primary hover:scale-110 cursor-pointer" />
+                  </button>
+
+                  <button onClick={() => {
+                    setSelectedInvoice(invoice);
+                    setShowDownloadDialog(true);
+                  }}>
+                    <Download className="w-4 h-4 text-green-600 hover:scale-110" />
+                  </button>
+
+                  <button onClick={() => {
+                    setPrintInvoice(invoice);
+                    setShowPrintDialog(true);
+                  }}>
+                    <Printer className="w-4 h-4 text-orange-600 hover:scale-110" />
+                  </button>
+
+                  <button onClick={() => {
+                    setShareInvoice(invoice);
+                    setShowShareDialog(true);
+                  }}>
+                    <Share className="w-4 h-4 text-teal-600 hover:scale-110" />
+                  </button>
+
+                  <button onClick={() => askForPin(() => handleUpdateInvoice(invoice))}>
+                    <PenLine className="w-4 h-4 text-emerald-600 hover:scale-110" />
+                  </button>
+
+                  <button onClick={() => askForPin(() => handleDeleteInvoice(invoice))}>
+                    <Trash className="w-4 h-4 text-red-600 hover:scale-110" />
+                  </button>
                 </td>
 
               </tr>
@@ -318,10 +366,30 @@ export default function InvoicesPage() {
       />
 
       <ViewInvoiceSizeDialog
-        open={showDialog}
-        invoice={selectedInvoice}
-        onClose={() => setShowDialog(false)}
+        open={showPrintDialog}
+        invoice={printInvoice}
+        onClose={() => setShowPrintDialog(false)}
       />
+
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Invoice</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <Button onClick={() => {
+              sendInvoiceOnWhatsApp(shareInvoice?._id ?? "");
+              setShowShareDialog(false);
+            }} className="bg-green-600 hover:bg-green-700 w-full">
+              Share on WhatsApp
+            </Button>
+            <Button onClick={() => alert("Email feature coming soon")} className="w-full">
+              Share via Email
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
