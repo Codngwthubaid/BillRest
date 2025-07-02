@@ -12,14 +12,21 @@ import { User, Mail, Phone, Building, MapPin, FileText, DollarSign, Calendar, Ed
 import type { BusinessPayload } from "@/types/business.types";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { format } from "date-fns";
+import ProtectedPinDialog from "../invoices/ProtectedPinDialog";
+import { useSubscriptionStore } from "@/store/subscription.store";
 
 export default function UserProfileDetails() {
   const { user } = useAuthStore();
   const { business, loading, error, fetchBusiness } = useBusinessStore();
+  const { currentSubscription, fetchUserSubscription } = useSubscriptionStore();
   const { data: reportData } = useReportStore();
+
   const [open, setOpen] = useState(false);
   const [localPin, setLocalPin] = useState("");
   const [showPin, setShowPin] = useState(false);
+  const [protectedPinDialogOpen, setProtectedPinDialogOpen] = useState(false);
+
+  console.log(currentSubscription)
 
   const [formData, setFormData] = useState<BusinessPayload & { protectedPin?: string }>({
     name: user?.name || "",
@@ -30,22 +37,6 @@ export default function UserProfileDetails() {
     gstSlabs: [],
     protectedPin: "",
   });
-
-
-  useEffect(() => {
-    if (business) {
-      setFormData({
-        name: user?.name || "",
-        phone: user?.phone || "",
-        businessName: business.businessName,
-        address: business.address || "",
-        defaultCurrency: business.defaultCurrency,
-        gstSlabs: business.gstSlabs,
-        protectedPin: business.protectedPin || "",
-      });
-    }
-  }, [business, user]);
-
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -67,6 +58,14 @@ export default function UserProfileDetails() {
     }));
   };
 
+  const handleEyeClick = () => {
+    if (showPin) {
+      setShowPin(false);
+    } else {
+      setProtectedPinDialogOpen(true);
+    }
+  };
+
   const handleSave = async () => {
     try {
       if (!formData.protectedPin && localPin) {
@@ -82,10 +81,27 @@ export default function UserProfileDetails() {
     }
   };
 
+  useEffect(() => {
+    if (business) {
+      setFormData({
+        name: user?.name || "",
+        phone: user?.phone || "",
+        businessName: business.businessName,
+        address: business.address || "",
+        defaultCurrency: business.defaultCurrency,
+        gstSlabs: business.gstSlabs,
+        protectedPin: business.protectedPin || "",
+      });
+    }
+  }, [business, user]);
+
+  useEffect(() => {
+    fetchUserSubscription();
+  }, [fetchUserSubscription]);
+
   // Loading or error states
   if (loading) return <div>Loading business profile...</div>;
   if (error) return <div>Error loading business: {error}</div>;
-  if (!business) return <div>No business profile found.</div>;
   return (
     <div className="lg:col-span-2 space-y-6">
       <Card className="rounded-lg shadow-sm ">
@@ -144,7 +160,7 @@ export default function UserProfileDetails() {
                 <span className="">{formData.address || "N/A"}</span>
               </div>
             </div>
-            <div>
+            {/* <div>
               <Label className="text-sm font-medium mb-2">Protected PIN</Label>
               <div className="flex items-center space-x-3">
                 <FileText className="w-4 h-4" />
@@ -160,6 +176,33 @@ export default function UserProfileDetails() {
                     type="button"
                     className="ml-2 focus:outline-none"
                     onClick={() => setShowPin((prev) => !prev)}
+                  >
+                    {showPin ? (
+                      <EyeOff className="w-4 h-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="w-4 h-4 text-muted-foreground" />
+                    )}
+                  </button>
+                )}
+              </div>
+            </div> */}
+
+            <div>
+              <Label className="text-sm font-medium mb-2">Protected PIN</Label>
+              <div className="flex items-center space-x-3">
+                <FileText className="w-4 h-4" />
+                <span>
+                  {formData.protectedPin
+                    ? showPin
+                      ? formData.protectedPin
+                      : "******"
+                    : "N/A"}
+                </span>
+                {formData.protectedPin && (
+                  <button
+                    type="button"
+                    className="ml-2 focus:outline-none"
+                    onClick={() => handleEyeClick()}
                   >
                     {showPin ? (
                       <EyeOff className="w-4 h-4 text-muted-foreground" />
@@ -354,6 +397,52 @@ export default function UserProfileDetails() {
           </div>
         </CardContent>
       </Card>
+
+      <Card className="pt-6 rounded-lg shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Subscription Details</CardTitle>
+        </CardHeader>
+        <CardContent className="pb-6 space-y-4">
+          {currentSubscription ? (
+            <>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Plan ID</span>
+                <span className="text-sm text-muted-foreground">{currentSubscription.planId}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Status</span>
+                <span
+                  className={`text-sm ${currentSubscription.status === "active" ? "text-green-600" : "text-red-600"
+                    }`}
+                >
+                  {currentSubscription.status}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Start Date</span>
+                <span className="text-sm text-muted-foreground">
+                  {format(new Date(currentSubscription.startDate), "dd MMM yyyy")}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">End Date</span>
+                <span className="text-sm text-muted-foreground">
+                  {format(new Date(currentSubscription.endDate), "dd MMM yyyy")}
+                </span>
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">No active subscription found.</p>
+          )}
+        </CardContent>
+      </Card>
+
+
+      <ProtectedPinDialog
+        open={protectedPinDialogOpen}
+        onClose={() => setProtectedPinDialogOpen(false)}
+        onVerified={() => setShowPin(true)}
+      />
     </div>
   );
 }
