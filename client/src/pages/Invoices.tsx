@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useReactToPrint } from "react-to-print";
 import {
   getInvoices,
   sendInvoiceOnWhatsApp,
@@ -20,6 +21,10 @@ import ViewInvoiceSizeDialog from "@/components/invoices/ViewInvoiceSizeDialog";
 import DownloadInvoiceDialog from "@/components/invoices/DownloadInvoiceDialog";
 import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
 import { DialogHeader } from "@/components/ui/dialog";
+import InvoiceActionsDialog from "@/components/invoices/InvoiceActionsDialog";
+import InvoicePreview from "@/components/invoices/InvoicePreview";
+import POSReceipt58mm from "@/components/invoices/POSReceipt58mm";
+import POSReceipt80mm from "@/components/invoices/POSReceipt80mm";
 
 
 export default function InvoicesPage() {
@@ -38,7 +43,13 @@ export default function InvoicesPage() {
   const [showPinDialog, setShowPinDialog] = useState(false);
   const [showDownloadDialog, setShowDownloadDialog] = useState(false);
   const [pinCallback, setPinCallback] = useState<() => void>(() => () => { });
+  const [previewType, setPreviewType] = useState<"A4" | "58mm" | "80mm">("A4");
 
+
+  const previewRef = useRef<HTMLDivElement>(null);
+  const handlePrint = useReactToPrint({
+    contentRef: previewRef,
+  });
 
   const askForPin = (callback: () => void) => {
     setPinCallback(() => callback);
@@ -60,13 +71,15 @@ export default function InvoicesPage() {
     setShowDeleteDialog(true);
   };
 
-  useEffect(() => {
-    const fetch = async () => {
-      const data = await getInvoices();
-      setInvoices(data);
-    };
-    fetch();
-  }, [setInvoices]);
+  const handlePrintRequest = (type: "A4" | "58mm" | "80mm") => {
+    setPreviewType(type);
+    setPrintInvoice(selectedInvoice);
+    setTimeout(() => {
+      handlePrint();
+    }, 50);
+    setShowPrintDialog(false);
+  };
+
 
   const filtered = invoices.filter((inv) =>
     inv.invoiceNumber.toLowerCase().includes(search.toLowerCase()) ||
@@ -96,10 +109,17 @@ export default function InvoicesPage() {
   };
 
   useEffect(() => {
+    const fetch = async () => {
+      const data = await getInvoices();
+      setInvoices(data);
+    };
+    fetch();
+  }, [setInvoices]);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
     }, 1000);
-
     return () => clearTimeout(timer);
   }, []);
 
@@ -229,44 +249,6 @@ export default function InvoicesPage() {
                 </td>
                 <td>{getStatusBadge(invoice.status)}</td>
                 <td>{invoice.createdAt?.slice(0, 10)}</td>
-                {/* <td className="flex gap-2 p-2 mt-5 flex-wrap">
-                  <button onClick={() => handleViewInvoice(invoice)}>
-                    <Eye className="w-4 h-4 text-primary hover:scale-110 cursor-pointer" />
-                  </button>
-
-                  <button onClick={() => {
-                    setSelectedInvoice(invoice);
-                    setShowDownloadDialog(true);
-                  }}>
-                    <Download className="w-4 h-4 text-green-600 hover:scale-110" />
-                  </button>
-
-                  <button onClick={() => sendInvoiceOnWhatsApp(invoice._id!)}>
-                    <Send className="w-4 h-4 text-purple-600 hover:scale-110" />
-                  </button>
-
-                  <button onClick={() => {
-                    setPrintInvoice(invoice);
-                    setShowPrintDialog(true);
-                  }}>
-                    <Printer className="w-4 h-4 text-orange-600 hover:scale-110" />
-                  </button>
-
-                  <button onClick={() =>
-                    askForPin(() => handleUpdateInvoice(invoice))
-                  }>
-                    <PenLine className="w-4 h-4 text-emerald-600 hover:scale-110" />
-                  </button>
-
-                  <button onClick={() =>
-                    askForPin(() => handleDeleteInvoice(invoice))
-                  }>
-                    <Trash className="w-4 h-4 text-red-600 hover:scale-110" />
-                  </button>
-
-
-                </td> */}
-
                 <td className="flex gap-2 p-2 mt-5 flex-wrap">
                   <button onClick={() => handleViewInvoice(invoice)}>
                     <Eye className="w-4 h-4 text-primary hover:scale-110 cursor-pointer" />
@@ -280,10 +262,10 @@ export default function InvoicesPage() {
                   </button>
 
                   <button onClick={() => {
-                    setPrintInvoice(invoice);
+                    setSelectedInvoice(invoice);
                     setShowPrintDialog(true);
                   }}>
-                    <Printer className="w-4 h-4 text-orange-600 hover:scale-110" />
+                    <Printer className="w-4 h-4 text-orange-600 hover:scale-110"  />
                   </button>
 
                   <button onClick={() => {
@@ -301,7 +283,6 @@ export default function InvoicesPage() {
                     <Trash className="w-4 h-4 text-red-600 hover:scale-110" />
                   </button>
                 </td>
-
               </tr>
             ))}
             {filtered.length === 0 && (
@@ -321,7 +302,6 @@ export default function InvoicesPage() {
         onClose={() => setShowUpdateDialog(false)}
         onUpdate={async (id, updatedFields) => {
           console.log(id, updatedFields)
-          // Map products to include 'name' if missing
           const mappedFields = {
             ...updatedFields,
             products: updatedFields.products?.map((p: any) => ({
@@ -366,9 +346,18 @@ export default function InvoicesPage() {
       />
 
       <ViewInvoiceSizeDialog
+        open={showDialog}
+        invoice={selectedInvoice}
+        previewType={previewType}
+        onClose={() => setShowDialog(false)}
+      />
+
+      <InvoiceActionsDialog
         open={showPrintDialog}
-        invoice={printInvoice}
-        onClose={() => setShowPrintDialog(false)}
+        onOpenChange={setShowPrintDialog}
+        onPrintA4={() => handlePrintRequest("A4")}
+        onPrint58mm={() => handlePrintRequest("58mm")}
+        onPrint80mm={() => handlePrintRequest("80mm")}
       />
 
       <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
@@ -383,12 +372,18 @@ export default function InvoicesPage() {
             }} className="bg-green-600 hover:bg-green-700 w-full">
               Share on WhatsApp
             </Button>
-            <Button onClick={() => alert("Email feature coming soon")} className="w-full">
-              Share via Email
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
+
+      <div style={{ display: "none" }}>
+        <div ref={previewRef} className="m-10">
+          {previewType === "A4" && <InvoicePreview invoice={printInvoice!} />}
+          {previewType === "58mm" && <POSReceipt58mm business={{ businessName: "Your Biz" }} invoice={printInvoice!} />}
+          {previewType === "80mm" && <POSReceipt80mm business={{ businessName: "Your Biz" }} invoice={printInvoice!} />}
+        </div>
+      </div>
+
 
     </div>
   );

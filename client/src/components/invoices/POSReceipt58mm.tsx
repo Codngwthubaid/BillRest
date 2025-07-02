@@ -16,7 +16,7 @@ import { ToWords } from 'to-words';
 
 export default function POSReceipt58mm({ business, invoice }: POSReceipt58mmProps) {
   const toWords = new ToWords();
-  const amountInWords = toWords.convert(invoice.totalAmount);
+  const amountInWords = invoice ? toWords.convert(invoice.totalAmount) : "";
 
   return (
     <div

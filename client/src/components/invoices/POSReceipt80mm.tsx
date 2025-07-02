@@ -15,7 +15,7 @@ type POSReceipt80mmProps = {
 
 export default function POSReceipt80mm({ business, invoice }: POSReceipt80mmProps) {
   const toWords = new ToWords();
-  const amountInWords = toWords.convert(invoice.totalAmount);
+  const amountInWords = invoice ? toWords.convert(invoice.totalAmount) : "";
 
   return (
     <div

@@ -11,7 +11,7 @@ import InvoicesPage from "./pages/Invoices";
 import ProductsPage from "./pages/Product";
 import ReportPage from "./pages/Report";
 import HelpPage from "./pages/Help";
-import ContactPage from "./pages/contact";
+import ContactPage from "./pages/Contact";
 import ProtectedPinRoute from "./routes/ProtectedPinRoute";
 import CustomerPage from "./pages/Customers";
 
@@ -29,11 +29,11 @@ function App() {
             <Route path="/plans" element={<Plans />} />
 
             <Route element={<ProtectedPinRoute />}>
-              <Route path="/profile" element={<Profile />} />
               <Route path="/reports" element={<ReportPage />} />
             </Route>
 
             <Route element={<SubscriptionRoute />}>
+              <Route path="/profile" element={<Profile />} />
               <Route path="/invoices" element={<InvoicesPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/products" element={<ProductsPage />} />

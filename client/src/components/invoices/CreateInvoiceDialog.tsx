@@ -261,7 +261,6 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
             <InvoiceActionsDialog
                 open={actionDialogOpen}
                 onOpenChange={setActionDialogOpen}
-                onSendWhatsApp={() => alert("Send to WhatsApp")}
                 onPrintA4={handlePrintA4}
                 onPrint58mm={handlePrint58mm}
                 onPrint80mm={handlePrint80mm}

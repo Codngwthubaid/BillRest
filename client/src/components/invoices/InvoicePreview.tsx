@@ -8,6 +8,7 @@ type InvoicePreviewProps = {
 };
 
 export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
+  if (!invoice) return null;
   const toWords = new ToWords();
   const amountInWords = toWords.convert(invoice.totalAmount);
   const { user } = useAuthStore();

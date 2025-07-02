@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onSendWhatsApp: () => void;
     onPrintA4: () => void;
     onPrint58mm: () => void;
     onPrint80mm: () => void;
@@ -13,7 +12,6 @@ interface Props {
 export default function InvoiceActionsDialog({
     open,
     onOpenChange,
-    onSendWhatsApp,
     onPrintA4,
     onPrint58mm,
     onPrint80mm,
@@ -26,9 +24,6 @@ export default function InvoiceActionsDialog({
                 </DialogHeader>
 
                 <div className="flex flex-col gap-4 mt-6">
-                    <Button onClick={onSendWhatsApp} className="bg-green-600 hover:bg-green-700">
-                        Send to WhatsApp
-                    </Button>
                     <Button onClick={onPrintA4} className="bg-blue-600 hover:bg-blue-700">
                         Print A4
                     </Button>
