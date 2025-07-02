@@ -13,6 +13,7 @@ import ReportPage from "./pages/Report";
 import HelpPage from "./pages/Help";
 import ContactPage from "./pages/contact";
 import ProtectedPinRoute from "./routes/ProtectedPinRoute";
+import CustomerPage from "./pages/Customers";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
               <Route path="/invoices" element={<InvoicesPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/products" element={<ProductsPage />} />
+              <Route path="/customers" element={<CustomerPage />} />
               <Route path="/reports" element={<ReportPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/help" element={<HelpPage />} />

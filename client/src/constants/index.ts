@@ -6,7 +6,8 @@ import {
     User,
     HelpCircle,
     Mail,
-    DollarSign
+    DollarSign,
+    UserRoundCheck
 } from "lucide-react";
 
 export const items = {
@@ -25,6 +26,11 @@ export const items = {
             title: "Products",
             href: "/products",
             icon: ShoppingBag,
+        },
+        {
+            title: "Customers",
+            href: "/customers",
+            icon: UserRoundCheck,
         },
         {
             title: "Reports",

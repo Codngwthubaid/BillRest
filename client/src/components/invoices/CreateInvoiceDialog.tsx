@@ -135,7 +135,7 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
                         <DialogTitle>Create Invoice</DialogTitle>
                     </DialogHeader>
 
-                    <div className="flex justify-start items-start gap-6 mt-4">
+                    <div className="flex justify-start items-start gap-6">
                         {/* Left side - Invoice Form */}
                         <form onSubmit={handleSubmit} className="col-span-2 space-y-6">
                             <div className="bg-gray-50 p-4 rounded-xl shadow space-y-4">

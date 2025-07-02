@@ -14,6 +14,7 @@ import subscriptionRoutes from "./routes/subscription.routes.js";
 import planRoutes from "./routes/plan.routes.js";
 import supportRoutes from "./routes/support.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import customerRoutes from "./routes/customer.routes.js"
 
 dotenv.config();
 const app = express();
@@ -41,6 +42,7 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/plans", planRoutes);
+app.use("/api/customers",customerRoutes)
 
 
 

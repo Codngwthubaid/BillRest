@@ -1,6 +1,7 @@
 import { Invoice } from "../models/invoice.model.js";
 import { Product } from "../models/product.model.js";
-import { Counter } from "../models/counter.js";
+import { Counter } from "../models/counter.model.js";
+import { Customer } from "../models/customer.model.js";
 
 const getNextInvoiceNumber = async () => {
   const counter = await Counter.findOneAndUpdate(
@@ -94,6 +95,27 @@ export const createInvoice = async (req, res) => {
       businessState
     });
 
+    // 🆕 Create or update Customer
+    let existingCustomer = await Customer.findOne({
+      user: userId,
+      phoneNumber
+    });
+
+    if (!existingCustomer) {
+      // If customer doesn't exist, create new
+      await Customer.create({
+        user: userId,
+        name: customerName,
+        phoneNumber,
+        state: customerState,
+        invoices: [invoice._id]
+      });
+    } else {
+      // If exists, add invoice to customer's history
+      existingCustomer.invoices.push(invoice._id);
+      await existingCustomer.save();
+    }
+
     res.status(201).json({
       message: "Invoice created successfully",
       invoice
@@ -183,6 +205,44 @@ export const updateInvoice = async (req, res) => {
       updateData,
       { new: true }
     );
+
+    // 🔥 Now update the customer side
+    const oldPhoneNumber = existingInvoice.phoneNumber;
+    const newPhoneNumber = updatedInvoice.phoneNumber;
+    const customerName = updatedInvoice.customerName;
+    const state = updatedInvoice.customerState;
+
+    // Find old customer by old phone number
+    let customer = await Customer.findOne({ user: userId, phoneNumber: oldPhoneNumber });
+
+    if (customer) {
+      if (oldPhoneNumber !== newPhoneNumber) {
+        // Phone number changed, move invoice to new customer
+        customer.invoices.pull(updatedInvoice._id);
+        await customer.save();
+
+        let newCustomer = await Customer.findOne({ user: userId, phoneNumber: newPhoneNumber });
+        if (!newCustomer) {
+          // Create new customer if not exists
+          newCustomer = await Customer.create({
+            user: userId,
+            name: customerName,
+            phoneNumber: newPhoneNumber,
+            state,
+            invoices: [updatedInvoice._id]
+          });
+        } else {
+          // Add invoice to existing customer
+          newCustomer.invoices.push(updatedInvoice._id);
+          await newCustomer.save();
+        }
+      } else {
+        // Same phone, just update name/state if changed
+        customer.name = customerName;
+        customer.state = state;
+        await customer.save();
+      }
+    }
 
     res.status(200).json({
       message: "Invoice updated successfully",
