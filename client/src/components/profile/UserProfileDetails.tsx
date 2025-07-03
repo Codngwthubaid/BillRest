@@ -406,8 +406,8 @@ export default function UserProfileDetails() {
           {currentSubscription ? (
             <>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Plan ID</span>
-                <span className="text-sm text-muted-foreground">{currentSubscription.planId}</span>
+                <span className="text-sm font-medium">Plan</span>
+                <span className="text-sm text-muted-foreground">{currentSubscription.plan?.name}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Status</span>
