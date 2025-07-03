@@ -9,7 +9,7 @@ import {
     AreaChart,
 } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, Calendar } from 'lucide-react';
+import { TrendingUp, Calendar, IndianRupee } from 'lucide-react';
 import type { ReportFilterType } from '@/services/report.service';
 import type { Invoice } from '@/types/invoice.types';
 
@@ -47,7 +47,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({ data, filterType }) => {
                             <div>
                                 <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Total Sales</p>
                                 <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                                    ${totalSales.toLocaleString()}
+                                    <IndianRupee/>{totalSales.toLocaleString()}
                                 </p>
                             </div>
                             <TrendingUp className="h-8 w-8 text-blue-500" />
@@ -61,7 +61,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({ data, filterType }) => {
                             <div>
                                 <p className="text-sm font-medium text-green-600 dark:text-green-400">Average Sales</p>
                                 <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                                    ${avgSales.toLocaleString()}
+                                    <IndianRupee/>{avgSales.toLocaleString()}
                                 </p>
                             </div>
                             <Calendar className="h-8 w-8 text-green-500" />
@@ -101,7 +101,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({ data, filterType }) => {
                                 <YAxis
                                     className="text-xs"
                                     tick={{ fontSize: 12 }}
-                                    tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                                    tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`}
                                 />
                                 <Tooltip
                                     contentStyle={{
@@ -111,7 +111,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({ data, filterType }) => {
                                         boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                                     }}
                                     formatter={(value: any, name: string) => [
-                                        name === 'sales' ? `$${value.toLocaleString()}` : value,
+                                        name === 'sales' ? `₹${value.toLocaleString()}` : value,
                                         name === 'sales' ? 'Sales' : 'Orders'
                                     ]}
                                 />

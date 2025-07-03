@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { User, Mail, Phone, Building, MapPin, FileText, DollarSign, Calendar, Edit, Save, Eye, EyeOff } from "lucide-react";
+import { User, Mail, Phone, Building, MapPin, FileText, IndianRupee , Calendar, Edit, Save, Eye, EyeOff } from "lucide-react";
 import type { BusinessPayload } from "@/types/business.types";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { format } from "date-fns";
@@ -217,7 +217,7 @@ export default function UserProfileDetails() {
             <div>
               <Label className="text-sm font-medium  mb-2">Default Currency</Label>
               <div className="flex items-center space-x-3">
-                <DollarSign className="w-4 h-4 " />
+                <IndianRupee  className="w-4 h-4 " />
                 <span className="">{formData.defaultCurrency || "N/A"}</span>
               </div>
             </div>

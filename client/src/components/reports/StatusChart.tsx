@@ -13,7 +13,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, Clock, AlertCircle, XCircle } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle, XCircle, IndianRupee } from 'lucide-react';
 import type { ReportFilterType } from '@/services/report.service';
 
 interface StatusChartProps {
@@ -79,7 +79,7 @@ export const StatusChart: React.FC<StatusChartProps> = ({ data, filterType }) =>
             Count: {data.value} ({((data.value / totalInvoices) * 100).toFixed(1)}%)
           </p>
           <p className="text-sm text-muted-foreground">
-            Amount: ${data.amount.toLocaleString()}
+            Amount: <IndianRupee/>{data.amount.toLocaleString()}
           </p>
         </div>
       );
@@ -107,7 +107,7 @@ export const StatusChart: React.FC<StatusChartProps> = ({ data, filterType }) =>
                   <p className="text-sm font-medium text-muted-foreground">{status.name}</p>
                   <p className="text-lg font-bold">{status.value}</p>
                   <p className="text-xs text-muted-foreground">
-                    ${status.amount.toLocaleString()}
+                    <IndianRupee />{status.amount.toLocaleString()}
                   </p>
                 </div>
               </CardContent>
@@ -181,7 +181,7 @@ export const StatusChart: React.FC<StatusChartProps> = ({ data, filterType }) =>
                   <YAxis 
                     className="text-xs"
                     tick={{ fontSize: 12 }}
-                    tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                    tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`}
                   />
                   <Tooltip 
                     contentStyle={{
@@ -190,7 +190,7 @@ export const StatusChart: React.FC<StatusChartProps> = ({ data, filterType }) =>
                       borderRadius: '8px',
                       boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                     }}
-                    formatter={(value: any) => [`$${value.toLocaleString()}`, 'Amount']}
+                    formatter={(value: any) => [`₹${value.toLocaleString()}`, 'Amount']}
                   />
                   <Bar dataKey="amount" radius={[4, 4, 0, 0]}>
                     {statusData.map((entry, index) => (

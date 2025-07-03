@@ -6,7 +6,7 @@ import {
     User,
     HelpCircle,
     Mail,
-    DollarSign,
+    IndianRupee ,
     UserRoundCheck
 } from "lucide-react";
 
@@ -50,7 +50,7 @@ export const items = {
         {
             title: "Plans",
             href: "/plans",
-            icon: DollarSign,
+            icon: IndianRupee ,
         },
         {
             title: "Help",
@@ -119,7 +119,7 @@ export const items = {
         {
             title: "Plans",
             href: "/plans",
-            icon: DollarSign,
+            icon: IndianRupee ,
         },
         {
             title: "Help",

@@ -7,7 +7,7 @@ import {
   deleteInvoice,
 } from "@/services/invoice.service";
 import { useInvoiceStore } from "@/store/invoice.store";
-import { FileText, DollarSign, Clock, Calendar, Eye, Download, PenLine, Trash, Loader2, Printer, Share } from "lucide-react";
+import { FileText, IndianRupee , Clock, Calendar, Eye, Download, PenLine, Trash, Loader2, Printer, Share } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -166,7 +166,7 @@ export default function InvoicesPage() {
         <Card className="py-0">
           <CardContent className="p-4 text-sm flex flex-col items-start gap-1">
             <div className="flex items-center gap-2 text-green-600">
-              <DollarSign className="w-4 h-4" />
+              <IndianRupee  className="w-4 h-4" />
               <span>Paid</span>
             </div>
             <span className="font-bold text-lg">{summary.paid}</span>
@@ -202,7 +202,7 @@ export default function InvoicesPage() {
         <Card className="py-0">
           <CardContent className="p-4 text-sm flex flex-col items-start gap-1">
             <div className="flex items-center gap-2 text-primary">
-              <DollarSign className="w-4 h-4" />
+              <IndianRupee  className="w-4 h-4" />
               <span>Total Amount</span>
             </div>
             <span className="font-bold text-lg">₹{summary.totalAmount.toLocaleString()}</span>

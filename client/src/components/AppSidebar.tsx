@@ -43,7 +43,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="text-xl font-bold my-6 flex items-center">
-            <span className="rounded p-1 mr-2 text-3xl text-blue-500">BillRest</span>
+            <img src="/Billrest_20250626_235033_0006.png" className="bg-transparent" alt="Billrest Logo" />
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

@@ -26,7 +26,7 @@ import {
     TrendingUp,
     FileText,
     Calendar,
-    DollarSign,
+    IndianRupee,
     Filter,
     RefreshCw,
     Award,
@@ -239,7 +239,7 @@ export default function ReportPage() {
                             <StatsCard
                                 title="Total Revenue"
                                 value={`${data.totalSales.toLocaleString()} ${data.invoices[0]?.currency || 'USD'}`}
-                                icon={DollarSign}
+                                icon={IndianRupee}
                                 trend="+12.5%"
                                 trendDirection="up"
                                 className='bg-green-500 hover:bg-green-600 text-white'

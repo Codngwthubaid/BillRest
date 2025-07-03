@@ -1,4 +1,4 @@
-import { Edit3, Trash2, User, Phone, MapPin, FileText, DollarSign } from 'lucide-react';
+import { Edit3, Trash2, User, Phone, MapPin, FileText, IndianRupee  } from 'lucide-react';
 import type { Customer } from '../../types/customers.types';
 
 interface CustomerCardProps {
@@ -80,7 +80,7 @@ export default function CustomerCard({
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center space-x-1 text-green-600 mb-1">
-              <DollarSign className="w-4 h-4" />
+              <IndianRupee  className="w-4 h-4" />
               <span className="text-lg font-semibold">₹{totalSales.toLocaleString()}</span>
             </div>
             <p className="text-xs ">Total Sales</p>

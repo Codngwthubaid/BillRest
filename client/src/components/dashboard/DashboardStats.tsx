@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/store/auth.store";
 import { useReportStore } from "@/store/report.store";
-import { DollarSign, FileText, Package } from "lucide-react";
+import { IndianRupee , FileText, Package } from "lucide-react";
 import { useEffect } from "react";
 import { Card, CardContent } from "../ui/card";
 
@@ -16,7 +16,7 @@ export default function DashboardStats() {
     {
       title: "Total Sales",
       value: `₹${data?.totalSales?.toFixed(2) || "0.00"}`,
-      icon: DollarSign,
+      icon: IndianRupee ,
       color: "bg-green-500",
       roles: ["master", "customer"],
     },

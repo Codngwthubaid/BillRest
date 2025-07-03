@@ -10,7 +10,7 @@ import {
     Cell,
 } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, Award, TrendingUp } from 'lucide-react';
+import { Package, Award, TrendingUp, IndianRupee } from 'lucide-react';
 import type { ReportFilterType } from '@/services/report.service';
 
 interface ProductsChartProps {
@@ -54,7 +54,7 @@ export const ProductsChart: React.FC<ProductsChartProps> = ({ data, filterType }
                             <div>
                                 <p className="text-sm font-medium text-green-600 dark:text-green-400">Product Revenue</p>
                                 <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                                    ${totalRevenue.toLocaleString()}
+                                    <IndianRupee />{totalRevenue.toLocaleString()}
                                 </p>
                             </div>
                             <TrendingUp className="h-8 w-8 text-green-500" />
