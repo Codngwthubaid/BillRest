@@ -182,18 +182,11 @@ export const getSalesReport = async (req, res) => {
             default:
                 return res.status(400).json({ message: "Invalid filter type" });
         }
-
-        console.log("🔍 Sales report range:");
-        console.log("Start:", start.toISOString());
-        console.log("End:", end.toISOString());
-
+        
         const invoices = await Invoice.find({
             user: userId,
             // createdAt: { $gte: start, $lte: end },
         });
-
-        console.log("Invoices found:", invoices.length);
-
         const totalSales = invoices.reduce((sum, inv) => sum + (inv.totalAmount || 0), 0);
 
         // 🔍 Compute Top 5 Products

@@ -14,8 +14,15 @@ import HelpPage from "./pages/Help";
 import ContactPage from "./pages/Contact";
 import ProtectedPinRoute from "./routes/ProtectedPinRoute";
 import CustomerPage from "./pages/Customers";
+import BusinessPage from "./pages/Businesses";
+import NotFoundPage from "./pages/NotFound404";
 
-function App() {
+import { useAuthStore } from "./store/auth.store";
+
+export default function App() {
+  const { user } = useAuthStore();
+  console.log(user);
+
   return (
     <Router>
       <Routes>
@@ -23,33 +30,61 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
 
-        {/* Protected Layout + Pages */}
+        {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route path="/plans" element={<Plans />} />
-
             <Route element={<ProtectedPinRoute />}>
               <Route path="/reports" element={<ReportPage />} />
             </Route>
 
-            <Route element={<SubscriptionRoute />}>
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/invoices" element={<InvoicesPage />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/products" element={<ProductsPage />} />
-              <Route path="/customers" element={<CustomerPage />} />
-              <Route path="/reports" element={<ReportPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/help" element={<HelpPage />} />
-            </Route>
+            {/* Role-based routing */}
+            {user?.role === "customer" && (
+              <Route element={<SubscriptionRoute />}>
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/invoices" element={<InvoicesPage />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/products" element={<ProductsPage />} />
+                <Route path="/customers" element={<CustomerPage />} />
+                <Route path="/reports" element={<ReportPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/help" element={<HelpPage />} />
+              </Route>
+            )}
+
+            {user?.role === "support" && (
+              <>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/invoices" element={<InvoicesPage />} />
+                <Route path="/products" element={<ProductsPage />} />
+                <Route path="/customers" element={<CustomerPage />} />
+                <Route path="/businesses" element={<BusinessPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/help" element={<HelpPage />} />
+              </>
+            )}
+
+            {user?.role === "master" && (
+              <>
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/invoices" element={<InvoicesPage />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/products" element={<ProductsPage />} />
+                <Route path="/customers" element={<CustomerPage />} />
+                <Route path="/reports" element={<ReportPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/help" element={<HelpPage />} />
+                <Route path="/businesses" element={<BusinessPage />} />
+                {/* add more admin-specific routes here */}
+              </>
+            )}
           </Route>
         </Route>
 
         {/* Fallback */}
-        <Route path="*" element={<div>404 Not Found</div>} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
   );
 }
-
-export default App;

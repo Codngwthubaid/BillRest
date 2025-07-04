@@ -6,8 +6,9 @@ import {
     User,
     HelpCircle,
     Mail,
-    IndianRupee ,
-    UserRoundCheck
+    IndianRupee,
+    UserRoundCheck,
+    StoreIcon
 } from "lucide-react";
 
 export const items = {
@@ -50,7 +51,7 @@ export const items = {
         {
             title: "Plans",
             href: "/plans",
-            icon: IndianRupee ,
+            icon: IndianRupee,
         },
         {
             title: "Help",
@@ -60,6 +61,11 @@ export const items = {
     ],
     sidebarOfSupport: [
         {
+            title: "Dashboard",
+            href: "/dashboard",
+            icon: Home,
+        },
+        {
             title: "Invoices",
             href: "/invoices",
             icon: FileText,
@@ -68,6 +74,16 @@ export const items = {
             title: "Products",
             href: "/products",
             icon: ShoppingBag,
+        },
+        {
+            title: "Customers",
+            href: "/customers",
+            icon: UserRoundCheck,
+        },
+        {
+            title: "Businesses",
+            href: "/businesses",
+            icon: StoreIcon,
         },
         {
             title: "Contact",
@@ -119,7 +135,7 @@ export const items = {
         {
             title: "Plans",
             href: "/plans",
-            icon: IndianRupee ,
+            icon: IndianRupee,
         },
         {
             title: "Help",
