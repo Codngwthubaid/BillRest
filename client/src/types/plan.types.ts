@@ -4,8 +4,8 @@ export interface Plan {
   durationInDays: number;
   pricePerMonth: number;
   totalPrice: number;
-  type: "package" | "individual"; // e.g., package vs add-on
-  description?: string;           // optional if you want to show e.g., "(300 WhatsApp Invoices)"
+  type: "package" | "individual";
+  description?: string;
   createdAt?: string;
   updatedAt?: string;
 }

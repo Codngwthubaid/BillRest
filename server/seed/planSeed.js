@@ -8,14 +8,14 @@ const seedPlans = async () => {
   try {
     await connectDB();
     await Plan.deleteMany();
-
+    
     await Plan.insertMany([
       {
-        name: "3 Months",
+        name: "12 Months",
         type: "package",
-        durationInDays: 90,
-        pricePerMonth: 1199,
-        totalPrice: 3597,
+        durationInDays: 365,
+        pricePerMonth: 799,
+        totalPrice: 9588,
         includedInvoices: 300,
         description: [
           "Business Management",
@@ -43,11 +43,11 @@ const seedPlans = async () => {
         ]
       },
       {
-        name: "12 Months",
+        name: "3 Months",
         type: "package",
-        durationInDays: 365,
-        pricePerMonth: 799,
-        totalPrice: 9588,
+        durationInDays: 90,
+        pricePerMonth: 1199,
+        totalPrice: 3597,
         includedInvoices: 300,
         description: [
           "Business Management",

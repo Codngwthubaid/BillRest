@@ -29,6 +29,8 @@ router.get("/:id", getInvoiceById);
 router.get("/:id/download", downloadInvoicePDF);
 router.get("/:id/pos-pdf", downloadPOSReceiptPDF);
 router.get("/:id/print", verifyToken, printInvoicePDF);
+
+// not usen
 router.get("/:id/print-page", verifyToken, printInvoicePage);
 
 

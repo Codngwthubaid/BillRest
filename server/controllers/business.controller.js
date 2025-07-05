@@ -8,6 +8,7 @@ export const createOrUpdateBusiness = async (req, res) => {
       phone,
       businessName,
       address,
+      gstNumber,
       defaultCurrency,
       gstSlabs,
       protectedPin
@@ -32,6 +33,7 @@ export const createOrUpdateBusiness = async (req, res) => {
 
       business.businessName = businessName;
       business.address = address;
+      business.gstNumber = gstNumber;
       business.defaultCurrency = defaultCurrency;
       business.gstSlabs = gstSlabs;
       business.isOnboarded = true;
@@ -46,6 +48,7 @@ export const createOrUpdateBusiness = async (req, res) => {
         user: userId,
         businessName,
         address,
+        gstNumber,
         defaultCurrency,
         gstSlabs,
         isOnboarded: true,
@@ -63,6 +66,7 @@ export const createOrUpdateBusiness = async (req, res) => {
     res.status(500).json({ message: "Failed to update profile/business" });
   }
 };
+
 
 export const getBusinessByUser = async (req, res) => {
   try {

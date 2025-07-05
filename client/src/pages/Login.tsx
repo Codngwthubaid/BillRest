@@ -49,7 +49,7 @@ export default function Login() {
       toast.success("Logged in successfully");
 
       if (res.user.role === "customer") {
-        if (subscription && subscription?.planId) {
+        if (subscription && subscription?.plan) {
           navigate("/dashboard");
         } else {
           navigate("/plans");
@@ -66,7 +66,9 @@ export default function Login() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-background px-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Login - BillRest</CardTitle>
+          <CardTitle className="flex items-center justify-center">
+            <img src="/Billrest_20250626_235033_0006.png" className="bg-transparent w-60" alt="Billrest Logo" />
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

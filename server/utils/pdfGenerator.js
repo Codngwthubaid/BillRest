@@ -57,6 +57,7 @@ export const generateInvoicePDF = async (invoice, business, user) => {
           [
             { text: business?.businessName || "YOUR BUSINESS NAME", style: "header" },
             { text: `Address: ${business?.address || "Your Business Address"}`, style: "subheader" },
+            { text: `GSTIN: ${business?.gstNumber || "N/A"}`, style: "subheader" },
             { text: `Phone: ${user?.phone || "+91 9876543210"}`, style: "subheader" },
             { text: `Email: ${user?.email || "business@example.com"}`, style: "subheader" }
           ],
@@ -73,10 +74,12 @@ export const generateInvoicePDF = async (invoice, business, user) => {
       },
       "\n",
 
-      // Customer info
       {
-        text: `${invoice.customerName}\n${invoice.phoneNumber}`,
-        style: "customerInfo"
+        stack: [
+          { text: `${invoice.customerName}`, style: "customerInfo" },
+          { text: `Phone: ${invoice.phoneNumber}` },
+          { text: `GSTIN: ${invoice.gstNumber || "N/A"}` }
+        ]
       },
       "\n",
 
@@ -128,7 +131,7 @@ export const generateInvoicePDF = async (invoice, business, user) => {
             margin: [0, 5, 0, 0]
           },
           {
-            alignment: "right",
+            alignment: "left",
             table: {
               widths: ["auto", "auto"],
               body: [
@@ -140,14 +143,52 @@ export const generateInvoicePDF = async (invoice, business, user) => {
             layout: "noBorders"
           }
         ]
+      },
+
+      "\n",
+
+      // Custom Note Section
+      {
+        text: "Custom Note:",
+        style: "noteTitle",
+        margin: [0, 20, 0, 5]
+      },
+
+      // Box for writing notes
+      {
+        table: {
+          widths: ['*'],
+          body: [
+            [
+              {
+                text: "\n\n\n\n\n\n\n\n\n\n", // ~10 blank lines for manual input
+                style: 'noteBox'
+              }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 0.5,
+          vLineWidth: () => 0.5,
+          hLineColor: () => '#999999',
+          vLineColor: () => '#999999',
+          paddingTop: () => 5,
+          paddingBottom: () => 5,
+          paddingLeft: () => 5,
+          paddingRight: () => 5
+        }
       }
+
+
     ],
     styles: {
       header: { fontSize: 14, bold: true },
       subheader: { fontSize: 9 },
       invoiceTitle: { fontSize: 13, bold: true, color: '#089981', margin: [0, 0, 0, 5] },
       customerInfo: { margin: [0, 0, 0, 10] },
-      tableHeader: { fillColor: '#d3f6ec', bold: true, fontSize: 10 }
+      tableHeader: { fillColor: '#d3f6ec', bold: true, fontSize: 10 },
+      noteTitle: { fontSize: 12, bold: true },
+      noteBox: { fontSize: 10 }
     },
     defaultStyle: {
       font: "Roboto",

@@ -15,6 +15,12 @@ const businessSchema = new mongoose.Schema(
     },
     businessName: { type: String, required: true },
     address: { type: String },
+    gstNumber: {
+      type: String,
+      minlength: 15,
+      maxlength: 15,
+      trim: true,
+    },
     defaultCurrency: {
       type: String,
       enum: ["INR", "USD", "AED"],

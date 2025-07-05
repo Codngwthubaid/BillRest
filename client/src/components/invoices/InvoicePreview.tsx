@@ -23,6 +23,7 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
           <p className="text-xs">Address: {business?.address}</p>
           <p className="text-xs">Phone: {user?.phone}</p>
           <p className="text-xs">Email: {user?.email}</p>
+          <p className="text-xs">GSTIN: {business?.gstNumber || "N/A"}</p>
         </div>
         <div className="text-right">
           <h3 className="text-lg font-bold text-emerald-600 mb-1">BillRest Invoice</h3>
@@ -38,6 +39,8 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
           {invoice.customerName}
           {"\n"}
           {invoice.phoneNumber}
+          {"\n"}
+          GSTIN: {invoice.gstNumber || "N/A"}
         </p>
       </div>
 
@@ -111,6 +114,11 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
             </tbody>
           </table>
         </div>
+      </div>
+      {/* Custom Note */}
+      <div className="mt-6">
+        <p className="text-sm font-semibold mb-2">Custom Note:</p>
+        <div className="border border-dashed border-gray-400 h-20 p-2"></div>
       </div>
     </div>
   );

@@ -32,9 +32,11 @@ export const downloadPOSReceiptPDF = async (req, res) => {
           <div class="center">
             <h3>${business.businessName}</h3>
             <p>${business.address || ""}</p>
+             <p>GSTIN: ${business.gstNumber || "N/A"}</p>
           </div>
           <div>Invoice #: ${invoice.invoiceNumber}<br>Date: ${new Date(invoice.createdAt).toLocaleDateString()}</div>
           <div>Customer: ${invoice.customerName || "N/A"}</div>
+          <div>Customer GSTIN: ${invoice.gstNumber || "N/A"}</div>
           <div class="receipt">
             ${invoice.products.map(item => `
               <div>${item.product} x${item.quantity} @ ₹${item.price} = ₹${(item.price * item.quantity).toFixed(2)}</div>

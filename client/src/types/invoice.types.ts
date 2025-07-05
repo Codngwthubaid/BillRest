@@ -27,6 +27,7 @@ export interface Invoice {
   phoneNumber: string;
   customerState?: string;
   businessState?: string;
+  gstNumber?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -40,6 +41,7 @@ export interface CreateInvoicePayload {
   status: "paid" | "pending" | "overdue" | "draft";
   customerState: string;
   businessState: string;
+  gstNumber?: string;
 }
 
 export interface UpdateInvoicePayload {
@@ -50,6 +52,7 @@ export interface UpdateInvoicePayload {
   currency: "INR" | "USD" | "AED" | string;
   customerState?: string;
   businessState?: string;
+  gstNumber?: string;
   products: InvoiceProductPayload[];
 }
 

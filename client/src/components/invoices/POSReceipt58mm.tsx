@@ -5,6 +5,7 @@ type Business = {
   address?: string;
   phone?: string;
   email?: string;
+  gstNumber?: string;
 };
 
 type POSReceipt58mmProps = {
@@ -29,6 +30,7 @@ export default function POSReceipt58mm({ business, invoice }: POSReceipt58mmProp
         {business.address && <p>{business.address}</p>}
         {business.phone && <p>Ph: {business.phone}</p>}
         {business.email && <p>{business.email}</p>}
+        <p>GSTIN: {business.gstNumber || "N/A"}</p>
       </div>
 
       {/* Invoice Meta */}
@@ -41,6 +43,7 @@ export default function POSReceipt58mm({ business, invoice }: POSReceipt58mmProp
       <div className="mb-1">
         Customer: {invoice.customerName || "N/A"}
         {invoice.phoneNumber && <div>Ph: {invoice.phoneNumber}</div>}
+        <div>GSTIN: {invoice.gstNumber || "N/A"}</div>
       </div>
 
       {/* Items */}

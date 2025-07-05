@@ -27,6 +27,7 @@ const defaultForm: CreateInvoicePayload = {
     products: [],
     customerState: "",
     businessState: "",
+    gstNumber: "",
 };
 
 export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
@@ -173,6 +174,7 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
                                 <Input placeholder="Phone Number" value={form.phoneNumber} onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })} required />
                                 <Input placeholder="Customer State" value={form.customerState} onChange={(e) => setForm({ ...form, customerState: e.target.value })} required />
                                 <Input placeholder="Business State" value={form.businessState} onChange={(e) => setForm({ ...form, businessState: e.target.value })} required />
+                                <Input placeholder="GST Number" value={form.gstNumber} onChange={(e) => setForm({ ...form, gstNumber: e.target.value })} />
                             </div>
 
                             <div className="grid grid-cols-3 gap-4">
@@ -197,47 +199,6 @@ export default function CreateInvoiceDialog({ open, onOpenChange }: Props) {
                         </div>
 
                         {/* Products */}
-                        {/* <div className="bg-gray-50 p-4 rounded-xl shadow space-y-4">
-                            <h3 className="text-lg font-medium mb-2">Products</h3>
-                            <div className="grid grid-cols-8 gap-3 text-sm font-semibold text-gray-600 mb-2">
-                                <div>Product</div><div>Stock</div><div>Category</div><div>Qty</div><div>Price</div><div>GST %</div><div>Discount %</div>
-                            </div>
-
-                            <div className="space-y-2">
-                                {form.products.map((p, idx) => (
-                                    <div key={idx} className="grid grid-cols-8 gap-3 items-center">
-                                        <Select onValueChange={(value) => handleProductSelect(idx, value)}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select or type..." />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {products.map((prod) => (
-                                                    <SelectItem key={prod._id} value={prod._id}>{prod.name} / {prod.barcode}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-
-                                        <div>{p.stock ?? "N/A"}</div>
-                                        <div>{p.category ?? "N/A"}</div>
-                                        <Input type="number" value={p.quantity} onChange={(e) => handleChangeProductField(idx, "quantity", e.target.value)} placeholder="Qty" />
-                                        <Input type="number" value={p.price} onChange={(e) => handleChangeProductField(idx, "price", e.target.value)} placeholder="Price" />
-                                        <Input type="number" value={p.gstRate} onChange={(e) => handleChangeProductField(idx, "gstRate", e.target.value)} placeholder="GST %" />
-                                        <Input type="number" value={p.discount} onChange={(e) => handleChangeProductField(idx, "discount", e.target.value)} placeholder="Discount" />
-                                        <Button type="button" variant="destructive" onClick={() => {
-                                            const updated = [...form.products];
-                                            updated.splice(idx, 1);
-                                            setForm({ ...form, products: updated });
-                                        }}>X</Button>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <Button type="button" variant="outline" onClick={handleAddProduct}>
-                                + Add Product
-                            </Button>
-                        </div> */}
-
-
                         <div className="bg-gray-50 p-4 rounded-xl shadow space-y-4">
                             <h3 className="text-lg font-medium mb-2">Products</h3>
 

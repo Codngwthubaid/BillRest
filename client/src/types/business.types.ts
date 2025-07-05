@@ -8,6 +8,7 @@ export interface Business {
   user: string;
   businessName: string;
   address?: string;
+  gstNumber?: string;
   defaultCurrency: "INR" | "USD" | "AED";
   gstSlabs: GstSlab[];
   isOnboarded: boolean;
@@ -24,6 +25,7 @@ export interface BusinessPayload {
   phone: string;
   businessName: string;
   address?: string;
+  gstNumber?: string;
   defaultCurrency: "INR" | "USD" | "AED";
   gstSlabs: GstSlab[];
   protectedPin?: string;

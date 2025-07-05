@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { User, Mail, Phone, Building, MapPin, FileText, IndianRupee , Calendar, Edit, Save, Eye, EyeOff } from "lucide-react";
+import { User, Mail, Phone, Building, MapPin, FileText, IndianRupee, Calendar, Edit, Save, Eye, EyeOff } from "lucide-react";
 import type { BusinessPayload } from "@/types/business.types";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { format } from "date-fns";
@@ -33,6 +33,7 @@ export default function UserProfileDetails() {
     phone: user?.phone || "",
     businessName: "",
     address: "",
+    gstNumber: "",
     defaultCurrency: "INR",
     gstSlabs: [],
     protectedPin: "",
@@ -88,6 +89,7 @@ export default function UserProfileDetails() {
         phone: user?.phone || "",
         businessName: business.businessName,
         address: business.address || "",
+        gstNumber: business.gstNumber || "",
         defaultCurrency: business.defaultCurrency,
         gstSlabs: business.gstSlabs,
         protectedPin: business.protectedPin || "",
@@ -160,33 +162,13 @@ export default function UserProfileDetails() {
                 <span className="">{formData.address || "N/A"}</span>
               </div>
             </div>
-            {/* <div>
-              <Label className="text-sm font-medium mb-2">Protected PIN</Label>
+            <div>
+              <Label className="text-sm font-medium mb-2">GST Number</Label>
               <div className="flex items-center space-x-3">
-                <FileText className="w-4 h-4" />
-                <span>
-                  {formData.protectedPin
-                    ? showPin
-                      ? formData.protectedPin
-                      : "******"
-                    : "N/A"}
-                </span>
-                {formData.protectedPin && (
-                  <button
-                    type="button"
-                    className="ml-2 focus:outline-none"
-                    onClick={() => setShowPin((prev) => !prev)}
-                  >
-                    {showPin ? (
-                      <EyeOff className="w-4 h-4 text-muted-foreground" />
-                    ) : (
-                      <Eye className="w-4 h-4 text-muted-foreground" />
-                    )}
-                  </button>
-                )}
+                <FileText className="w-4 h-4 " />
+                <span className="">{formData.gstNumber || "N/A"}</span>
               </div>
-            </div> */}
-
+            </div>
             <div>
               <Label className="text-sm font-medium mb-2">Protected PIN</Label>
               <div className="flex items-center space-x-3">
@@ -217,7 +199,7 @@ export default function UserProfileDetails() {
             <div>
               <Label className="text-sm font-medium  mb-2">Default Currency</Label>
               <div className="flex items-center space-x-3">
-                <IndianRupee  className="w-4 h-4 " />
+                <IndianRupee className="w-4 h-4 " />
                 <span className="">{formData.defaultCurrency || "N/A"}</span>
               </div>
             </div>
@@ -280,6 +262,16 @@ export default function UserProfileDetails() {
                       placeholder="Address"
                       name="address"
                       value={formData.address || ""}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium  mb-2">GST Number</Label>
+                    <Input
+                      placeholder="GST Number"
+                      name="gstNumber"
+                      value={formData.gstNumber}
                       onChange={handleChange}
                       className="w-full px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:-blue-500"
                     />

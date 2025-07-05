@@ -31,10 +31,10 @@ const invoiceSchema = new mongoose.Schema({
   },
   customerName: String,
   phoneNumber: String,
+  gstNumber: String,     
   customerState: String,
   businessState: String,
   createdAt: { type: Date, default: Date.now },
 }, { timestamps: true });
-
 
 export const Invoice = mongoose.model("Invoice", invoiceSchema);
