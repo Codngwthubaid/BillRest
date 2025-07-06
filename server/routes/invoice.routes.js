@@ -19,7 +19,7 @@ import { checkSubscription } from "../middlewares/subscription.middleware.js";
 const router = express.Router();
 
 // Only for customers
-router.use(verifyToken, checkRole(["customer"]), checkSubscription);
+router.use(verifyToken, checkRole(["customer", "support" , "master"]), checkSubscription);
 
 router.post("/", createInvoice);
 router.get("/", getInvoices);

@@ -6,7 +6,7 @@ import { checkSubscription } from "../middlewares/subscription.middleware.js";
 
 const router = express.Router();
 
-router.use(verifyToken, checkRole(["customer"]), checkSubscription);
+router.use(verifyToken, checkRole(["customer", "support" , "master"]), checkSubscription);
 
 router.post("/", createTicket);
 router.get("/", getMyTickets);

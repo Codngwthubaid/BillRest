@@ -4,7 +4,7 @@ import { IndianRupee , FileText, Package } from "lucide-react";
 import { useEffect } from "react";
 import { Card, CardContent } from "../ui/card";
 
-export default function DashboardStats() {
+export default function DashboardStatsForCustomerPanel() {
   const { data, fetchReport } = useReportStore();
   const { user } = useAuthStore();
 
