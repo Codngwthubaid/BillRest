@@ -6,7 +6,7 @@ import { checkSubscription } from "../middlewares/subscription.middleware.js";
 const router = express.Router();
 
 // Only accessible by customer role
-router.use(verifyToken, checkRole(["customer", "support" , "master"]), checkSubscription);
+router.use(verifyToken, checkRole(["customer"]), checkSubscription);
 
 router.post("/", createOrUpdateBusiness);
 router.get("/", getBusinessByUser);

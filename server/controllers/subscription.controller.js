@@ -3,7 +3,7 @@ import { Subscription } from "../models/subscription.model.js";
 import crypto from "crypto";
 import mongoose from "mongoose";
 
-// 📌 1. Get Current User's Subscription
+// Get Current User's Subscription
 export const getUserSubscription = async (req, res) => {
   try {
     const subscription = await Subscription.findOne({ user: req.user.id })
@@ -22,7 +22,7 @@ export const getUserSubscription = async (req, res) => {
   }
 };
 
-// 📌 2. Verify Payment and Activate Subscription
+// Verify Payment and Activate Subscription
 export const verifyPaymentAndActivate = async (req, res) => {
   try {
     const {

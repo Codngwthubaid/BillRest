@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/store/auth.store";
 import { Calendar } from "lucide-react";
 
-export default function DashboardHeaderForCustomerPanel() {
+export default function DashboardHeader() {
 
   const { user } = useAuthStore();
 
@@ -14,16 +14,6 @@ export default function DashboardHeaderForCustomerPanel() {
         <p>
           Here's what's happening with your business today.
         </p>
-        {/* {
-          user?.role === "support" && <p>
-            Check the detailings for the listed businesses. 
-          </p>
-        }
-        {
-          user?.role === "master" && <p>
-            Check the detailings for the listed businesses and customers.
-          </p>
-        } */}
       </div>
       <div className="flex items-center space-x-2 text-sm">
         <Calendar className="w-4 h-4" />

@@ -1,17 +1,43 @@
-import { useAuthStore } from "@/store/auth.store";
-import ProfilePageForAdminPanel from "@/components/profile/ProfilePageForAdminPanel";
-import ProfilePageForCustomerPanel from "@/components/profile/ProfilePageForCustomerPanel";
-import ProfilePageForSupportPanel from "@/components/profile/ProfilePageForSupportPanel";
+import ProfileStats from "@/components/profile/ProfileStats";
+import UserProfileDetails from "@/components/profile/UserProfileDetails";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function ProfilePage() {
 
-  const { user } = useAuthStore()
+    const [isLoading, setIsLoading] = useState(true)
 
-  return (
-    <>
-      {user?.role === "customer" && <ProfilePageForCustomerPanel />}
-      {user?.role === "support" && <ProfilePageForSupportPanel />}
-      {user?.role === "master" && <ProfilePageForAdminPanel />}
-    </>
-  )
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, []);
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="text-xl font-semibold animate-pulse text-blue-600">
+                    <Loader2 className="animate-spin size-12" />
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6 px-4 py-10 mx-auto max-w-7xl">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold">Profile</h1>
+                    <p>Manage your personal information and view your activity</p>
+                </div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <UserProfileDetails />
+                <ProfileStats />
+            </div>
+        </div>
+    );
 }
+
