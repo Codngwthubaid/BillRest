@@ -104,7 +104,7 @@ export default function Plans() {
           </p>
         </div>
 
-        {packagePlans?.length > 0 && (
+        {/* {packagePlans?.length > 0 && (
           <div className="mb-20">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {packagePlans.map((plan) => {
@@ -129,6 +129,14 @@ export default function Plans() {
                         <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
                       </div>
 
+                      <div className="text-center mb-6">
+                        <span className="text-4xl font-bold">₹{plan.pricePerMonth}</span>
+                        <div className="text-gray-600">/month</div>
+                        <div className="text-sm mt-1">
+                          {plan.durationInDays} days • ₹{plan.totalPrice} total
+                        </div>
+                      </div>
+
                       <ul className="list-disc list-inside space-y-2 mb-6">
                         {Array.isArray(plan.description) ? (
                           plan.description.map((point, idx) => (
@@ -139,20 +147,68 @@ export default function Plans() {
                         )}
                       </ul>
 
-                      <div className="text-center mb-6">
-                        <span className="text-4xl font-bold">₹{plan.pricePerMonth}</span>
-                        <div className="text-gray-600">/month</div>
-                        <div className="text-sm mt-1">
-                          {plan.durationInDays} days • ₹{plan.totalPrice} total
-                        </div>
-                      </div>
-
                       <button
                         onClick={() => handleBuyPlan(plan._id)}
                         className="w-full py-4 px-6 rounded-xl border-2 font-semibold text-lg transition-all duration-300 hover:text-blue-500 hover:bg-blue-50"
                       >
                         Get Started
                       </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )} */}
+
+        {packagePlans?.length > 0 && (
+          <div className="mb-20">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {packagePlans.map((plan) => {
+                const isRecommended =
+                  plan.name.toLowerCase() === "12 months" && plan.durationInDays === 365;
+
+                return (
+                  <div
+                    key={plan._id}
+                    className={`relative rounded-2xl border p-8 flex flex-col items-center text-center
+              transition-all duration-300 hover:shadow-xl hover:-translate-y-1
+              ${isRecommended ? "border-blue-500" : "border-gray-200"}
+              dark:bg-[#171717] dark:border-gray-700`}
+                  >
+                    {isRecommended && (
+                      <div className="absolute top-0 left-0 w-full bg-blue-600 text-white text-xs font-semibold py-2 rounded-t-2xl">
+                        RECOMMENDED
+                      </div>
+                    )}
+
+                    <div className="mt-6">
+                      <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
+                      <div className="text-4xl font-bold mb-1">
+                        ₹{plan.pricePerMonth}.00
+                        <span className="text-base font-medium text-gray-600">/mo</span>
+                      </div>
+
+                      <div className="text-sm text-gray-500 mb-6">
+                        {plan.durationInDays} days • ₹{plan.totalPrice} total
+                      </div>
+
+                      <button
+                        onClick={() => handleBuyPlan(plan._id)}
+                        className="w-full py-3 px-6 rounded-md bg-blue-500 hover:bg-blue-600 text-white font-semibold text-lg transition-all duration-300"
+                      >
+                        Choose plan
+                      </button>
+
+                      <ul className="list-disc list-inside space-y-2 mb-6 text-left mt-10">
+                        {Array.isArray(plan.description) ? (
+                          plan.description.map((point, idx) => (
+                            <li key={idx}>{point}</li>
+                          ))
+                        ) : (
+                          <li>{plan.description}</li>
+                        )}
+                      </ul>
                     </div>
                   </div>
                 );
