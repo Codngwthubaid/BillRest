@@ -3,7 +3,7 @@ import { usePlanStore } from "@/store/plan.store";
 import { useAuthStore } from "@/store/auth.store";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Loader2, Zap } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { createOrder, verifyAndActivate } from "@/services/subscription.service";
 
 export default function Plans() {
@@ -17,6 +17,8 @@ export default function Plans() {
   const [isLoading, setIsLoading] = useState(true);
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
+
+  console.log(packagePlans)
 
   useEffect(() => {
     fetchPackagePlans();
@@ -105,46 +107,61 @@ export default function Plans() {
         {packagePlans?.length > 0 && (
           <div className="mb-20">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {packagePlans.map((plan) => (
-                <div
-                  key={plan._id}
-                  className={`relative rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 dark:bg-[#171717]`}
-                >
-                  <div className="p-8">
-                    <div className="text-center mb-6">
-                      <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                    </div>
+              {packagePlans.map((plan) => {
+                const isRecommended =
+                  plan.name.toLowerCase() === "12 months" && plan.durationInDays === 365;
 
-                    <ul className="list-disc list-inside space-y-2 mb-6">
-                      {Array.isArray(plan.description) ? (
-                        plan.description.map((point, idx) => (
-                          <li key={idx}>{point}</li>
-                        ))
-                      ) : (
-                        <li>{plan.description}</li>
-                      )}
-                    </ul>
-
-                    <div className="text-center mb-6">
-                      <span className="text-4xl font-bold">₹{plan.pricePerMonth}</span>
-                      <div className="text-gray-600">/month</div>
-                      <div className="text-sm mt-1">
-                        {plan.durationInDays} days • ₹{plan.totalPrice} total
+                return (
+                  <div
+                    key={plan._id}
+                    className={`relative rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 dark:bg-[#171717] 
+              ${isRecommended ? "border-2 border-blue-500" : ""}
+            `}
+                  >
+                    {isRecommended && (
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-sm font-semibold px-3 py-1 rounded-full shadow">
+                        Recommended
                       </div>
-                    </div>
+                    )}
 
-                    <button
-                      onClick={() => handleBuyPlan(plan._id)}
-                      className={`w-full py-4 px-6 rounded-xl border-2 font-semibold text-lg transition-all duration-300 hover:text-blue-500 hover:bg-blue-50`}
-                    >
-                      Get Started
-                    </button>
+                    <div className="p-8">
+                      <div className="text-center mb-6">
+                        <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                      </div>
+
+                      <ul className="list-disc list-inside space-y-2 mb-6">
+                        {Array.isArray(plan.description) ? (
+                          plan.description.map((point, idx) => (
+                            <li key={idx}>{point}</li>
+                          ))
+                        ) : (
+                          <li>{plan.description}</li>
+                        )}
+                      </ul>
+
+                      <div className="text-center mb-6">
+                        <span className="text-4xl font-bold">₹{plan.pricePerMonth}</span>
+                        <div className="text-gray-600">/month</div>
+                        <div className="text-sm mt-1">
+                          {plan.durationInDays} days • ₹{plan.totalPrice} total
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleBuyPlan(plan._id)}
+                        className="w-full py-4 px-6 rounded-xl border-2 font-semibold text-lg transition-all duration-300 hover:text-blue-500 hover:bg-blue-50"
+                      >
+                        Get Started
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
+
+
 
         {individualPlans?.length > 0 && (
           <div>
@@ -161,9 +178,7 @@ export default function Plans() {
                 >
                   <div className="p-8">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center">
-                        <Zap className="w-6 h-6 text-white" />
-                      </div>
+                      <img src="/Billrest_20250626_234724_0006.png" alt={plan.name} className="w-24 h-24 object-fill border rounded-full" />
                       <div>
                         <h3 className="text-xl font-bold">{plan.name}</h3>
                         <p className="text-sm">{plan.description}</p>

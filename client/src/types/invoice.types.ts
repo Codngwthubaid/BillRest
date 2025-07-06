@@ -53,7 +53,9 @@ export interface UpdateInvoicePayload {
   customerState?: string;
   businessState?: string;
   gstNumber?: string;
+  invoiceNumber: string;
   products: InvoiceProductPayload[];
+  createdAt?: string;
 }
 
 export interface InvoiceProductPayload {

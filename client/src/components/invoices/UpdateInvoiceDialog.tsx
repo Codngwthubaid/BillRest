@@ -29,6 +29,8 @@ export function UpdateInvoiceDialog({
     customerState: "",
     businessState: "",
     products: [],
+    invoiceNumber: "",
+    createdAt: "",
   });
 
   useEffect(() => {
@@ -47,6 +49,8 @@ export function UpdateInvoiceDialog({
         currency: invoice.currency || "INR",
         customerState: invoice.customerState || "",
         businessState: invoice.businessState || "",
+        invoiceNumber: invoice.invoiceNumber,
+        createdAt: invoice.createdAt ? new Date(invoice.createdAt).toISOString().slice(0, 16) : "",
         products: invoice.products.map((p) => ({
           product: products.find((prod) => prod.name === p.name)?._id ?? "",
           quantity: Number(p.quantity),
@@ -55,7 +59,7 @@ export function UpdateInvoiceDialog({
         })),
       });
     }
-  }, [invoice, products]); 
+  }, [invoice, products]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -85,10 +89,18 @@ export function UpdateInvoiceDialog({
         </DialogHeader>
 
         <div className="space-y-4">
+          <Input name="invoiceNumber" value={form.invoiceNumber} onChange={handleChange} placeholder="Invoice Number" />
           <Input name="customerName" value={form.customerName} onChange={handleChange} placeholder="Customer Name" />
           <Input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} placeholder="Phone Number" />
           <Input name="customerState" value={form.customerState} onChange={handleChange} placeholder="Customer State" />
           <Input name="businessState" value={form.businessState} onChange={handleChange} placeholder="Business State" />
+          <Input
+            type="datetime-local"
+            name="createdAt"
+            value={form.createdAt}
+            onChange={handleChange}
+            placeholder="Created At"
+          />
 
           <div className="grid sm:grid-cols-2 gap-4">
             <select name="currency" className="w-full border rounded p-2 text-sm" value={form.currency} onChange={handleChange}>
