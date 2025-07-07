@@ -10,7 +10,8 @@ import {
   getAllInvoices,
   getAllProducts,
   getGlobalSalesReport,
-  getBusinessOverview
+  getBusinessOverview,
+  getAllCutomers
 } from "../controllers/admin.controller.js";
 
 import { verifyToken, checkRole } from "../middlewares/auth.middleware.js";
@@ -31,5 +32,6 @@ router.get("/invoices", getAllInvoices);
 router.get("/products", getAllProducts);
 router.get("/reports/sales", getGlobalSalesReport);
 router.get("/businesses/:id/overview", getBusinessOverview);
+router.get("/customers", getAllCutomers)
 
 export default router;

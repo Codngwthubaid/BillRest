@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Invoice, CreateInvoicePayload } from "@/types/invoice.types";
+import type { Invoice, CreateInvoicePayload, AllInvoicesResponse } from "@/types/invoice.types";
 import {
   createInvoice as apiCreateInvoice,
   getInvoices as apiGetInvoices,
@@ -9,17 +9,20 @@ import {
   updateInvoice,
   deleteInvoice,
   downloadPOSReceiptPDF as apiPrintPOSReceipt,
-  printInvoicePDF
+  printInvoicePDF,
+  getAllInvoices as apiGetAllInvoices // ✅ NEW
 } from "@/services/invoice.service";
 
 interface InvoiceState {
   invoices: Invoice[];
+  allInvoices: AllInvoicesResponse; // ✅ NEW
   selectedInvoice: Invoice | null;
   loading: boolean;
   error: string | null;
 
   // Actions
   fetchInvoices: () => Promise<void>;
+  fetchAllInvoices: () => Promise<void>; // ✅ NEW
   fetchInvoiceById: (id: string) => Promise<void>;
   createInvoice: (payload: CreateInvoicePayload) => Promise<Invoice | null>;
   updateInvoice: (id: string, payload: Partial<Invoice>) => Promise<Invoice | null>;
@@ -35,6 +38,7 @@ interface InvoiceState {
 
 export const useInvoiceStore = create<InvoiceState>((set) => ({
   invoices: [],
+  allInvoices: { count: 0, invoices: [] }, // ✅ NEW
   selectedInvoice: null,
   loading: false,
   error: null,
@@ -50,6 +54,18 @@ export const useInvoiceStore = create<InvoiceState>((set) => ({
     } catch (err: any) {
       console.error("Fetch invoices error:", err);
       set({ error: err.message || "Failed to fetch invoices", loading: false });
+    }
+  },
+
+  fetchAllInvoices: async () => {
+    set({ loading: true, error: null });
+    try {
+      const data = await apiGetAllInvoices();
+      console.log("Loaded all invoices:", data);
+      set({ allInvoices: data, loading: false });
+    } catch (err: any) {
+      console.error("Fetch all invoices error:", err);
+      set({ error: err.message || "Failed to fetch all invoices", loading: false });
     }
   },
 
@@ -86,6 +102,10 @@ export const useInvoiceStore = create<InvoiceState>((set) => ({
       const { invoice } = await updateInvoice(id, payload);
       set((state) => ({
         invoices: state.invoices.map((inv) => (inv._id === id ? invoice : inv)),
+        allInvoices: {
+          ...state.allInvoices,
+          invoices: state.allInvoices.invoices.map((inv: Invoice) => (inv._id === id ? invoice : inv))
+        }, // ✅ keep admin data updated too
         selectedInvoice: state.selectedInvoice?._id === id ? invoice : state.selectedInvoice,
         loading: false,
       }));
@@ -102,7 +122,11 @@ export const useInvoiceStore = create<InvoiceState>((set) => ({
     try {
       await deleteInvoice(id);
       set((state) => ({
-        invoices: state.invoices.filter((inv) => inv._id !== id),
+        invoices: state.invoices.filter((inv: Invoice) => inv._id !== id),
+        allInvoices: {
+          ...state.allInvoices,
+          invoices: state.allInvoices.invoices.filter((inv: Invoice) => inv._id !== id)
+        }, // ✅ remove from all invoices too
         selectedInvoice: state.selectedInvoice?._id === id ? null : state.selectedInvoice,
         loading: false,
       }));

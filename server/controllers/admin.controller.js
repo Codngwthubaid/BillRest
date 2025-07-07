@@ -1,7 +1,8 @@
 import { User } from "../models/user.model.js";
-import { Invoice } from "../models/invoice.model.js";
 import { Product } from "../models/product.model.js";
+import { Invoice } from "../models/invoice.model.js";
 import { Business } from "../models/business.model.js";
+import { Customer } from "../models/customer.model.js";
 import { SupportTicket } from "../models/supportTicket.model.js";
 
 export const getDashboardStats = async (req, res) => {
@@ -163,9 +164,9 @@ export const updateCustomerFeatures = async (req, res) => {
 export const getAllSupportTickets = async (req, res) => {
   try {
     const tickets = await SupportTicket.find()
-      .populate("user", "name email phone") // Get limited user info
+      .populate("user") // Get limited user info
       .sort({ createdAt: -1 }); // Show newest tickets first
-
+    console.log(tickets)
     res.json({ tickets });
   } catch (err) {
     console.error("Error fetching tickets:", err);
@@ -204,9 +205,8 @@ export const updateTicketStatus = async (req, res) => {
 export const getAllInvoices = async (req, res) => {
   try {
     const invoices = await Invoice.find()
-      .populate("user", "name email phone")
+      .populate("user")
       .sort({ createdAt: -1 });
-
     res.json({ count: invoices.length, invoices });
   } catch (err) {
     console.error("Error fetching all invoices:", err);
@@ -352,5 +352,15 @@ export const getBusinessOverview = async (req, res) => {
   } catch (err) {
     console.error("Error in business overview:", err);
     res.status(500).json({ message: "Failed to fetch business overview" });
+  }
+};
+
+export const getAllCutomers = async (req, res) => {
+  try {
+    const customers = await Customer.find().lean();
+    res.json(customers);
+  } catch (err) {
+    console.error("Get all customers error:", err);
+    res.status(500).json({ message: err.message });
   }
 };

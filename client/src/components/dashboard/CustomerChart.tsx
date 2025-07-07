@@ -1,5 +1,7 @@
 import { useEffect } from "react";
+import { useAuthStore } from "@/store/auth.store";
 import { useReportStore } from "@/store/report.store";
+import { useCustomerStore } from "@/store/customers.store";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -15,15 +17,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend);
 
 export default function CustomerChart() {
+  const { user } = useAuthStore();
+  const role = user?.role;
+
   const { data, fetchReport } = useReportStore();
+  const { allCustomers, fetchAllCustomers } = useCustomerStore();
 
   useEffect(() => {
-    fetchReport("weekly", new Date().toISOString().split("T")[0]);
-  }, [fetchReport]);
+    if (role === "support" || role === "master") {
+      fetchAllCustomers();
+    } else {
+      fetchReport("weekly", new Date().toISOString().split("T")[0]);
+    }
+  }, [role, fetchAllCustomers, fetchReport]);
 
-  // ✅ Group invoices by day to count customers (one invoice = one customer visit)
-  const customersByDay = (data?.invoices || []).reduce((acc, invoice) => {
-    const day = new Date(invoice.createdAt).toLocaleDateString("en-IN", {
+  // ✅ Determine source
+  const invoices = role === "customer" ? (data?.invoices || []) : [];
+  const customers = role === "support" || role === "master" ? (allCustomers || []) : [];
+
+  // ✅ Prepare data for chart
+  const dataByDay = (role === "customer" ? invoices : customers).reduce((acc, item) => {
+    const day = new Date(item.createdAt).toLocaleDateString("en-IN", {
       day: "2-digit",
       month: "short",
     });
@@ -32,21 +46,23 @@ export default function CustomerChart() {
     return acc;
   }, {} as Record<string, number>);
 
-  // ✅ Get last 7 days sorted in date order
-  const sortedDays = Object.keys(customersByDay).sort((a, b) => {
-    const dateA = new Date(a);
-    const dateB = new Date(b);
+  // ✅ Sort days
+  const sortedDays = Object.keys(dataByDay).sort((a, b) => {
+    const [dayA, monthA] = a.split(" ");
+    const [dayB, monthB] = b.split(" ");
+    const dateA = new Date(`${dayA} ${monthA} 2025`);
+    const dateB = new Date(`${dayB} ${monthB} 2025`);
     return dateA.getTime() - dateB.getTime();
   });
 
   const chartLabels = sortedDays;
-  const chartValues = sortedDays.map(day => customersByDay[day]);
+  const chartValues = sortedDays.map(day => dataByDay[day]);
 
   const chartData = {
     labels: chartLabels,
     datasets: [
       {
-        label: "Customers",
+        label: role === "customer" ? "Customers" : "New Customers",
         data: chartValues,
         borderColor: "#10b981",
         backgroundColor: "rgba(16, 185, 129, 0.1)",
@@ -66,9 +82,7 @@ export default function CustomerChart() {
     scales: {
       y: {
         beginAtZero: true,
-        ticks: {
-          color: "#6b7280",
-        },
+        ticks: { color: "#6b7280" },
         grid: { color: "#e5e7eb" },
       },
       x: {
@@ -81,8 +95,8 @@ export default function CustomerChart() {
   return (
     <Card className="rounded-2xl shadow-sm border">
       <CardHeader className="border-b pt-6 pb-3">
-        <CardTitle className="text-lg font-semibold text-gray-800">
-          Customers Over Time (Weekly)
+        <CardTitle className="text-lg font-semibold ">
+          {role === "customer" ? "Customers Over Time (Weekly)" : "New Customers Over Time"}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">

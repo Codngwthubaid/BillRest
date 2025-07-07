@@ -123,6 +123,11 @@ export const items = {
             icon: ChartColumn,
         },
         {
+            title: "Business",
+            href: "/business",
+            icon: StoreIcon,
+        },
+        {
             title: "Profile",
             href: "/profile",
             icon: User,
@@ -131,11 +136,6 @@ export const items = {
             title: "Contact",
             href: "/contact",
             icon: Mail,
-        },
-        {
-            title: "Plans",
-            href: "/plans",
-            icon: IndianRupee,
         },
         {
             title: "Help",

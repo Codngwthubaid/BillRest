@@ -75,8 +75,7 @@ export default function App() {
                 <Route path="/reports" element={<ReportPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/help" element={<HelpPage />} />
-                <Route path="/businesses" element={<BusinessPage />} />
-                {/* add more admin-specific routes here */}
+                <Route path="/business" element={<BusinessPage />} />
               </>
             )}
           </Route>

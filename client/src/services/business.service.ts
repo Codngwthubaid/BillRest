@@ -24,3 +24,8 @@ export const getBusiness = async (): Promise<Business> => {
   const res = await axiosInstance.get("/business");
   return res.data;
 };
+
+export const getAllBusinesses = async () => {
+  const res = await axiosInstance.get("/business/allBusinesses");
+  return res.data;
+};

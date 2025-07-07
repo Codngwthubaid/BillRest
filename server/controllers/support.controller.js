@@ -35,7 +35,6 @@ export const createTicket = async (req, res) => {
   }
 };
 
-
 export const getMyTickets = async (req, res) => {
   try {
     const tickets = await SupportTicket.find({ user: req.user.id })
@@ -43,28 +42,6 @@ export const getMyTickets = async (req, res) => {
     res.json(tickets);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch tickets" });
-  }
-};
-
-export const getAllProducts = async (req, res) => {
-  try {
-    const products = await Product.find()
-      .populate("user", "name email")
-      .sort({ createdAt: -1 })
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ message: "Failed to fetch products" });
-  }
-};
-
-export const getAllInvoices = async (req, res) => {
-  try {
-    const invoices = await Invoice.find()
-      .populate("user", "name email")
-      .sort({ createdAt: -1 })
-    res.json(invoices);
-  } catch (err) {
-    res.status(500).json({ message: "Failed to fetch invoices" });
   }
 };
 

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist,type PersistOptions } from "zustand/middleware";
+import { persist } from "zustand/middleware";
 import type { User } from "@/types/user.types";
 import type { Subscription } from "@/types/subscription.types";
 
@@ -12,10 +12,8 @@ interface AuthState {
   setSubscription: (sub: Subscription | null) => void;
 }
 
-type AuthPersist = PersistOptions<AuthState>;
-
 export const useAuthStore = create<AuthState>()(
-  persist<AuthState, [], AuthPersist>(
+  persist(
     (set) => ({
       user: null,
       token: null,
@@ -25,7 +23,7 @@ export const useAuthStore = create<AuthState>()(
       setSubscription: (sub) => set({ subscription: sub }),
     }),
     {
-      name: "auth-storage", // 🗂 localStorage key
+      name: "auth-storage",
       partialize: (state) => ({
         user: state.user,
         token: state.token,

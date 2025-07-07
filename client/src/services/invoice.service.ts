@@ -1,5 +1,5 @@
 import { axiosInstance } from "@/lib/axiosInstance";
-import type { CreateInvoicePayload, Invoice } from "@/types/invoice.types";
+import type { AllInvoicesResponse, CreateInvoicePayload, Invoice } from "@/types/invoice.types";
 
 // ✅ Create new invoice
 export const createInvoice = async (payload: CreateInvoicePayload): Promise<{ message: string; invoice: Invoice }> => {
@@ -57,9 +57,16 @@ export const downloadPOSReceiptPDF = async (invoiceId: string, size: "58mm" | "8
   return res.data;
 };
 
-// Print invoice as PDF
+// ✅ Print invoice as PDF
 export const printInvoicePDF = async (id: string): Promise<void> => {
   const printUrl = await axiosInstance.get(`/invoices/${id}/print`);
   console.log("Opening print invoice at:", printUrl.data);
   window.open(printUrl.data);
+};
+
+// ✅ Get all invoices
+export const getAllInvoices = async (): Promise<AllInvoicesResponse> => {
+  const res = await axiosInstance.get("/invoices/allInvoices");
+  console.log(res.data)
+  return res.data;
 };

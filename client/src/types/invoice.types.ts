@@ -73,3 +73,9 @@ export interface InvoiceProductPayload {
 export interface POSPrintResponse {
   html: string;
 }
+
+
+export interface AllInvoicesResponse {
+  count: number;
+  invoices: Invoice[];
+}

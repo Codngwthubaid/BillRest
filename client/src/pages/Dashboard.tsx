@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import DashboardHeaderForCustomerPanel from "@/components/dashboard/DashboardHeader";
-import DashboardStatsForCustomerPanel from "@/components/dashboard/DashboardStats";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import DashboardStats from "@/components/dashboard/DashboardStats";
 import RecentInvoices from "@/components/dashboard/RecentInvoices";
 import CustomerChart from "@/components/dashboard/CustomerChart";
 import TopProducts from "@/components/dashboard/TopProducts";
 import TopProductsChart from "@/components/dashboard/TopProductsChart";
 import QuickActions from "@/components/dashboard/QuickActions";
+import { useAuthStore } from "@/store/auth.store";
 
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
+  const { user } = useAuthStore();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -32,14 +34,14 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 px-4 py-10 mx-auto max-w-7xl">
-      <DashboardHeaderForCustomerPanel />
-      <DashboardStatsForCustomerPanel />
-      <QuickActions />
+      <DashboardHeader />
+      <DashboardStats />
+      {user?.role === "support" || user?.role === "master" ? null : <QuickActions />}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <RecentInvoices />
-        <TopProducts />
+        {user?.role === "support" || user?.role === "master" ? null : <TopProducts />}
         <CustomerChart />
-        <TopProductsChart />
+        {user?.role === "support" || user?.role === "master" ? null : <TopProductsChart />}
       </div>
     </div>
   );

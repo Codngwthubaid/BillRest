@@ -8,7 +8,7 @@ export const createProduct = async (data: Omit<Product, "_id">) => {
 };
 
 // ✅ Get all products
-export const getAllProducts = async (): Promise<Product[]> => {
+export const getProducts = async (): Promise<Product[]> => {
   const res = await axiosInstance.get("/products");
   return res.data;
 };
@@ -31,4 +31,10 @@ export const updateProduct = async (
 // ✅ Delete product
 export const deleteProduct = async (id: string): Promise<void> => {
   await axiosInstance.delete(`/products/${id}`);
+};
+
+
+export const getAllProducts = async (): Promise<Product[]> => {
+  const res = await axiosInstance.get("/products/allProducts");
+  return res.data;
 };
