@@ -36,5 +36,5 @@ export const deleteProduct = async (id: string): Promise<void> => {
 
 export const getAllProducts = async (): Promise<Product[]> => {
   const res = await axiosInstance.get("/products/allProducts");
-  return res.data;
+  return res.data.products;
 };

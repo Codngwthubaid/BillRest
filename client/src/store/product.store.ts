@@ -6,16 +6,16 @@ import {
   updateProduct,
   deleteProduct,
   searchProducts,
-  getAllProducts, // ✅ NEW
+  getAllProducts,
 } from "@/services/product.service";
 
 interface ProductState {
   products: Product[];
-  allProducts: Product[]; // ✅ NEW
+  allProducts: Product[];
   loading: boolean;
 
   fetchProducts: () => Promise<void>;
-  fetchAllProducts: () => Promise<void>; // ✅ NEW
+  fetchAllProducts: () => Promise<void>;
   addProduct: (product: Omit<Product, "_id">) => Promise<void>;
   editProduct: (id: string, updated: Partial<Product>) => Promise<void>;
   removeProduct: (id: string) => Promise<void>;
@@ -24,13 +24,13 @@ interface ProductState {
 
 export const useProductStore = create<ProductState>((set, get) => ({
   products: [],
-  allProducts: [], // ✅ NEW
+  allProducts: [],
   loading: false,
 
   fetchProducts: async () => {
     set({ loading: true });
     try {
-      const data = await getProducts();
+      const data = await getProducts(); // expects Product[]
       set({ products: data });
     } catch (err) {
       console.error("Fetch products failed:", err);
@@ -42,9 +42,9 @@ export const useProductStore = create<ProductState>((set, get) => ({
   fetchAllProducts: async () => {
     set({ loading: true });
     try {
-      const data = await getAllProducts();
+      const data = await getAllProducts(); // returns { count, products }
       console.log("Loaded all products:", data);
-      set({ allProducts: data });
+      set({ allProducts: data }); // ✅ fix: only store array of products
     } catch (err) {
       console.error("Fetch all products failed:", err);
     } finally {
@@ -55,7 +55,10 @@ export const useProductStore = create<ProductState>((set, get) => ({
   addProduct: async (product) => {
     try {
       const newProduct = await createProduct(product);
-      set({ products: [...get().products, newProduct], allProducts: [...get().allProducts, newProduct] }); // ✅ also update allProducts
+      set({
+        products: [...get().products, newProduct],
+        allProducts: [...get().allProducts, newProduct],
+      });
     } catch (err) {
       console.error("Add product failed:", err);
     }
@@ -66,7 +69,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
       const updatedProduct = await updateProduct(id, updated);
       set({
         products: get().products.map((p) => p._id === id ? updatedProduct : p),
-        allProducts: get().allProducts.map((p) => p._id === id ? updatedProduct : p), // ✅ keep admin data updated
+        allProducts: get().allProducts.map((p) => p._id === id ? updatedProduct : p),
       });
     } catch (err) {
       console.error("Update product failed:", err);
@@ -78,7 +81,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
       await deleteProduct(id);
       set({
         products: get().products.filter((p) => p._id !== id),
-        allProducts: get().allProducts.filter((p) => p._id !== id), // ✅ remove from allProducts
+        allProducts: get().allProducts.filter((p) => p._id !== id),
       });
     } catch (err) {
       console.error("Delete product failed:", err);

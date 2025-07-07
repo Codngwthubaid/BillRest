@@ -10,12 +10,13 @@ import InvoiceDetailDialog from "@/components/customer/InvoiceDetailDialog";
 import ProtectedPinDialog from "@/components/invoices/ProtectedPinDialog";
 import ConfirmDeleteDialog from "@/components/customer/DeleteCustomerDialog";
 import { parseISO, isSameMonth } from "date-fns";
+import { useAuthStore } from "@/store/auth.store";
 
 
 
 export default function CustomerPage() {
     const { customers, loading, fetchCustomers, deleteCustomer } = useCustomerStore();
-
+    const { user } = useAuthStore();
     const [search, setSearch] = useState("");
     const [showPinDialog, setShowPinDialog] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -67,21 +68,22 @@ export default function CustomerPage() {
             <h1 className="text-3xl font-bold mb-2">Customers</h1>
             <p className="mb-6">Manage your customer database</p>
 
-            {/* Stats */}
-            <div className="flex justify-between items-center flex-col sm:flex-row gap-4 mb-6">
-                <div className="rounded-xl p-4 border-2 w-full">
-                    <p className="text-sm">Total Customers</p>
-                    <p className="text-2xl font-semibold">{customers.length}</p>
+            {user?.role === "customer" && (
+                <div className="flex justify-between items-center flex-col sm:flex-row gap-4 mb-6">
+                    <div className="rounded-xl p-4 border-2 w-full">
+                        <p className="text-sm">Total Customers</p>
+                        <p className="text-2xl font-semibold">{customers.length}</p>
+                    </div>
+                    <div className="rounded-xl p-4 border-2 w-full">
+                        <p className="text-sm">Active This Month</p>
+                        <p className="text-2xl font-semibold text-green-600">{activeThisMonth}</p>
+                    </div>
+                    <div className="rounded-xl p-4 border-2 w-full">
+                        <p className="text-sm">New This Month</p>
+                        <p className="text-2xl font-semibold text-purple-600">{newThisMonth}</p>
+                    </div>
                 </div>
-                <div className="rounded-xl p-4 border-2 w-full">
-                    <p className="text-sm">Active This Month</p>
-                    <p className="text-2xl font-semibold text-green-600">{activeThisMonth}</p>
-                </div>
-                <div className="rounded-xl p-4 border-2 w-full">
-                    <p className="text-sm">New This Month</p>
-                    <p className="text-2xl font-semibold text-purple-600">{newThisMonth}</p>
-                </div>
-            </div>
+            )}
 
             {/* Search & Export */}
             <div className="flex items-center gap-4 mb-6">
@@ -91,12 +93,14 @@ export default function CustomerPage() {
                     onChange={(e) => setSearch(e.target.value)}
                     className="flex-1"
                 />
-                <Button
-                    onClick={() => exportToCSV(customers, "customers.csv")}
-                    className="bg-green-600 text-white"
-                >
-                    Export CSV
-                </Button>
+                {user?.role === "customer" && (
+                    <Button
+                        onClick={() => exportToCSV(customers, "customers.csv")}
+                        className="bg-green-600 text-white"
+                    >
+                        Export CSV
+                    </Button>
+                )}
             </div>
 
             {/* Customer cards */}

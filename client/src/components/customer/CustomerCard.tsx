@@ -1,5 +1,6 @@
-import { Edit3, Trash2, User, Phone, MapPin, FileText, IndianRupee  } from 'lucide-react';
+import { Edit3, Trash2, User, Phone, MapPin, FileText, IndianRupee } from 'lucide-react';
 import type { Customer } from '../../types/customers.types';
+import { useAuthStore } from '@/store/auth.store';
 
 interface CustomerCardProps {
   customer: Customer;
@@ -16,6 +17,7 @@ export default function CustomerCard({
   onEdit
 }: CustomerCardProps) {
 
+  const {user} = useAuthStore();
   const totalSales = customer.invoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
   const invoiceCount = customer.invoices.length;
 
@@ -43,13 +45,15 @@ export default function CustomerCard({
                 <Edit3 className="w-4 h-4" />
               </button>
             )}
-            <button
-              onClick={onDelete}
-              className="p-2  hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-              title="Delete customer"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            {user?.role === "customer" && (
+              <button
+                onClick={onDelete}
+                className="p-2  hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                title="Delete customer"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -80,7 +84,7 @@ export default function CustomerCard({
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center space-x-1 text-green-600 mb-1">
-              <IndianRupee  className="w-4 h-4" />
+              <IndianRupee className="w-4 h-4" />
               <span className="text-lg font-semibold">₹{totalSales.toLocaleString()}</span>
             </div>
             <p className="text-xs ">Total Sales</p>

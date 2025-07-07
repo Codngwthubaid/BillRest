@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-    Plus,
-    Search,
-    Edit,
-    Trash2,
-    Package,
-    Barcode,
-    Loader2,
+    Plus, Search, Edit, Trash2, Package, Barcode, Loader2
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,12 +10,15 @@ import CreateProductDialog from "@/components/product/CreateProductDialog";
 import UpdateProductDialog from "@/components/product/UpdateProductDialog";
 import DeleteProductDialog from "@/components/product/DeleteProductDialog";
 import type { Product } from "@/types/product.types"
-
-
-
+import { useAuthStore } from "@/store/auth.store";
 
 export default function ProductsPage() {
- const { products, fetchProducts, editProduct, removeProduct } = useProductStore();
+    const { user } = useAuthStore();
+    const {
+        products, fetchProducts, editProduct, removeProduct,
+        allProducts, fetchAllProducts
+    } = useProductStore();
+
     const [search, setSearch] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
     const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -30,14 +27,22 @@ export default function ProductsPage() {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
 
+    const isCustomer = user?.role === "customer";
+    const isSupportOrMaster = user?.role === "support" || user?.role === "master";
+    const data = isCustomer ? products : allProducts ?? [];
+
     useEffect(() => {
-        fetchProducts();
-    }, [fetchProducts]);
+        if (isCustomer) {
+            fetchProducts();
+        } else if (isSupportOrMaster) {
+            fetchAllProducts();
+        }
+    }, [user?.role, fetchProducts, fetchAllProducts, isCustomer, isSupportOrMaster]);
 
-    const categories = [...new Set(products.map(p => p.category))];
+    const categories = [...new Set((Array.isArray(data) ? data : []).map(p => p.category))];
 
-    const filtered = products.filter((product) => {
-        const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase())
+    const filtered = (Array.isArray(data) ? data : []).filter((product) => {
+        const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
         const matchesCategory = !selectedCategory || product.category === selectedCategory;
         return matchesSearch && matchesCategory;
     });
@@ -48,25 +53,18 @@ export default function ProductsPage() {
         return 'text-green-600 bg-green-100';
     };
 
-
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setLoading(false);
-        }, 1000);
-
+        const timer = setTimeout(() => setLoading(false), 1000);
         return () => clearTimeout(timer);
     }, []);
 
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">
-                <div className="text-xl font-semibold animate-pulse text-blue-600">
-                    <Loader2 className="animate-spin size-12" />
-                </div>
+                <Loader2 className="animate-spin size-12 text-blue-600" />
             </div>
         );
     }
-
 
     return (
         <div className="space-y-6 p-6">
@@ -74,31 +72,30 @@ export default function ProductsPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold">Products</h1>
-                    <p className="">Manage your product inventory</p>
+                    <p>Manage your product inventory</p>
                 </div>
-                <Button
-                    onClick={() => setShowCreateDialog(true)}
-                    className="flex items-center space-x-2 dark:text-white bg-blue-600 hover:bg-blue-700"
-                >
-                    <Plus className="w-4 h-4" />
-                    <span>Add Product</span>
-                </Button>
-                <CreateProductDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />
+                {isCustomer && (
+                    <>
+                        <Button onClick={() => setShowCreateDialog(true)}
+                            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700">
+                            <Plus className="w-4 h-4" />
+                            <span>Add Product</span>
+                        </Button>
+                        <CreateProductDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />
+                    </>
+                )}
             </div>
 
-            {/* Search and Filters */}
-
+            {/* Search & Filters */}
             <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-                <div className="flex-1">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" />
-                        <Input
-                            placeholder="Search products..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
+                <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
+                    <Input
+                        placeholder="Search products..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
                 </div>
                 <div>
                     <select
@@ -125,48 +122,44 @@ export default function ProductsPage() {
                                         <Package className="w-6 h-6 text-blue-600" />
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold ">{product.name}</h3>
+                                        <h3 className="font-semibold">{product.name}</h3>
                                     </div>
                                 </div>
-                                <div className="flex space-x-1">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => { setSelectedProduct(product); setShowUpdateDialog(true); }}
-                                        className=" hover:text-blue-600"
-                                    >
-                                        <Edit className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => { setSelectedProduct(product); setShowDeleteDialog(true); }}
-                                        className=" hover:text-red-600"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                </div>
+                                {isCustomer && (
+                                    <div className="flex space-x-1">
+                                        <Button variant="ghost" size="sm"
+                                            onClick={() => { setSelectedProduct(product); setShowUpdateDialog(true); }}
+                                            className="hover:text-blue-600">
+                                            <Edit className="w-4 h-4" />
+                                        </Button>
+                                        <Button variant="ghost" size="sm"
+                                            onClick={() => { setSelectedProduct(product); setShowDeleteDialog(true); }}
+                                            className="hover:text-red-600">
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
 
-                            <p className="text-sm  mb-4">{product.description}</p>
+                            <p className="text-sm mb-4">{product.description}</p>
 
                             <div className="space-y-3">
                                 <div className="flex justify-between">
-                                    <span className="text-sm ">Price:</span>
+                                    <span className="text-sm">Price:</span>
                                     <span className="font-semibold">₹{product.price.toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-sm ">Category:</span>
+                                    <span className="text-sm">Category:</span>
                                     <span className="text-sm font-medium">{product.category}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-sm ">Stock:</span>
+                                    <span className="text-sm">Stock:</span>
                                     <span className={`text-sm font-medium px-2 py-1 rounded-full ${getStockStatus(product.stock)}`}>
                                         {product.stock} units
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-sm ">Tax Rate:</span>
+                                    <span className="text-sm">Tax Rate:</span>
                                     <span className="text-sm font-medium">{product.gstRate}%</span>
                                 </div>
                             </div>
@@ -184,9 +177,9 @@ export default function ProductsPage() {
 
             {filtered.length === 0 && (
                 <div className="text-center py-12">
-                    <Package className="w-12 h-12  mx-auto mb-4" />
-                    <h3 className="text-lg font-medium  mb-2">No products found</h3>
-                    <p className="">Try adjusting your search or filter criteria</p>
+                    <Package className="w-12 h-12 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No products found</h3>
+                    <p>Try adjusting your search or filter criteria</p>
                 </div>
             )}
 
@@ -205,7 +198,7 @@ export default function ProductsPage() {
                 productName={selectedProduct?.name || ""}
                 onClose={() => setShowDeleteDialog(false)}
                 onConfirmDelete={async () => {
-                    if (!selectedProduct || !selectedProduct._id) return;
+                    if (!selectedProduct?._id) return;
                     await removeProduct(selectedProduct._id);
                     setShowDeleteDialog(false);
                 }}
