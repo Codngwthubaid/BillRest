@@ -37,8 +37,12 @@ export default function ProfilePage() {
                     <p>Manage your personal information and view your activity</p>
                 </div>
             </div>
-                <SupportAndAdminProfileLayout />
-                <DashboardStats />
+            {(user?.role === "support" || user?.role === "master") && (
+                <>
+                    <SupportAndAdminProfileLayout />
+                    <DashboardStats />
+                </>
+            )}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {user?.role === "customer" && (
                     <>

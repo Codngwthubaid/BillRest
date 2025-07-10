@@ -1,6 +1,4 @@
 import { SupportTicket } from "../models/supportTicket.model.js";
-import { Product } from "../models/product.model.js";
-import { Invoice } from "../models/invoice.model.js";
 import { Counter } from "../models/counter.model.js";
 
 export const createTicket = async (req, res) => {
@@ -59,3 +57,23 @@ export const getTicketBySeriaNumber = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch ticket" });
   }
 }
+
+export const updateTicketStatus = async (req, res) => {
+  try {
+    const { status, respondedBy } = req.body;
+    const ticket = await SupportTicket.findOneAndUpdate(
+      { serialNumber: parseInt(req.params.serialNumber) },
+      { status, respondedBy },
+      { new: true }
+    );
+
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found" });
+    }
+
+    res.json({ message: "Ticket status updated", ticket });
+  } catch (err) {
+    console.error("Failed to update ticket:", err.message);
+    res.status(500).json({ message: "Failed to update ticket" });
+  }
+};

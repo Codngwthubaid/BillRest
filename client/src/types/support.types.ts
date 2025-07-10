@@ -7,4 +7,9 @@ export interface SupportTicket {
   respondedBy?: string;
   createdAt: string;
   updatedAt: string;
+  user: {
+    name: string;
+    email: string;
+    phone: string;
+  };
 }

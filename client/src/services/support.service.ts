@@ -23,3 +23,8 @@ export const getAllSupportTickets = async () => {
   const res = await axiosInstance.get("/support/allTickets");
   return res.data;
 }
+
+export const updateTicketStatus = async (id: string, status: string) => {
+  const res = await axiosInstance.put(`/support/tickets/${id}`, { status });
+  return res.data;
+};
