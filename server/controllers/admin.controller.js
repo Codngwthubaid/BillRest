@@ -357,7 +357,9 @@ export const getBusinessOverview = async (req, res) => {
 
 export const getAllCutomers = async (req, res) => {
   try {
-    const customers = await Customer.find().lean();
+    const customers = await Customer.find()
+      .populate("invoices")
+      .lean();
     res.json(customers);
   } catch (err) {
     console.error("Get all customers error:", err);

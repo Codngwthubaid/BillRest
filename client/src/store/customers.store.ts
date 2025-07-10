@@ -8,7 +8,7 @@ import {
 
 interface CustomerState {
   customers: Customer[];
-  allCustomers: Customer[]; // ✅ NEW for admin
+  allCustomers: Customer[]; // ✅ NEW for master and support 
   loading: boolean;
   error: string | null;
 
