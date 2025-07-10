@@ -71,8 +71,8 @@ export const getDashboardStats = async (req, res) => {
 
 export const getAllBusinesses = async (req, res) => {
   try {
-    const businesses = await User.find({ role: "customer" })
-      .select("name email phone createdAt isActive features")
+    const businesses = await Business.find()
+      .populate("user", "name email phone isActive features") // populate from User
       .sort({ createdAt: -1 });
 
     res.json({ businesses });
@@ -81,6 +81,7 @@ export const getAllBusinesses = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch businesses" });
   }
 };
+
 
 export const toggleBusinessActive = async (req, res) => {
   try {
