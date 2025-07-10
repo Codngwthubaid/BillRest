@@ -118,14 +118,14 @@ export const items = {
             icon: ShoppingBag,
         },
         {
-            title: "Reports",
-            href: "/reports",
-            icon: ChartColumn,
-        },
-        {
             title: "Business",
             href: "/business",
             icon: StoreIcon,
+        },
+        {
+            title: "Customers",
+            href: "/customers",
+            icon: UserRoundCheck,
         },
         {
             title: "Profile",

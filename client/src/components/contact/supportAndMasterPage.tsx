@@ -23,10 +23,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuthStore } from "@/store/auth.store";
 
 export default function SupportAndMasterContactPage() {
-    const { allTickets, fetchAllTickets, updateTicketStatus, loading } = useSupportStore();
 
+    const { user } = useAuthStore()
+    const { allTickets, fetchAllTickets, updateTicketStatus, loading } = useSupportStore();
     useEffect(() => {
         fetchAllTickets();
     }, [fetchAllTickets]);
@@ -76,7 +78,10 @@ export default function SupportAndMasterContactPage() {
                                 <TableHead>Phone</TableHead>
                                 <TableHead>Message</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead>Change Status</TableHead>
+                                {
+                                    user?.role === "support" &&
+                                    <TableHead>Change Status</TableHead>
+                                }
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -92,21 +97,24 @@ export default function SupportAndMasterContactPage() {
                                             {ticket?.status ?? "-"}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell>
-                                        <Select
-                                            value={ticket?.status}
-                                            onValueChange={(status) => handleStatusChange(ticket?._id, status)}
-                                        >
-                                            <SelectTrigger className="w-36">
-                                                <SelectValue placeholder="Select status" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="pending">Pending</SelectItem>
-                                                <SelectItem value="resolved">Resolved</SelectItem>
-                                                <SelectItem value="escalated">Escalated</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </TableCell>
+                                    {
+                                        user?.role === "support" &&
+                                        <TableCell>
+                                            <Select
+                                                value={ticket?.status}
+                                                onValueChange={(status) => handleStatusChange(ticket?._id, status)}
+                                            >
+                                                <SelectTrigger className="w-36">
+                                                    <SelectValue placeholder="Select status" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="pending">Pending</SelectItem>
+                                                    <SelectItem value="resolved">Resolved</SelectItem>
+                                                    <SelectItem value="escalated">Escalated</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </TableCell>
+                                    }
                                 </TableRow>
                             ))}
                         </TableBody>

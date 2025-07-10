@@ -14,7 +14,7 @@ export default function DashboardStats() {
   const { allCustomers, fetchAllCustomers } = useCustomerStore();
   const { businesses, fetchAllBusinesses } = useBusinessStore();
   const { allInvoices, fetchAllInvoices } = useInvoiceStore();
-  const { tickets, fetchTickets } = useSupportStore();
+  const { allTickets, fetchAllTickets } = useSupportStore();
 
   console.log("All Invoices :", allInvoices);
 
@@ -23,8 +23,8 @@ export default function DashboardStats() {
     fetchAllCustomers();
     fetchAllBusinesses();
     fetchAllInvoices();
-    fetchTickets();
-  }, [fetchReport, fetchAllCustomers, fetchAllBusinesses, fetchAllInvoices, fetchTickets]);
+    fetchAllTickets();
+  }, [fetchReport, fetchAllCustomers, fetchAllBusinesses, fetchAllInvoices, fetchAllTickets]);
 
   let dashboardStats = [];
 
@@ -59,9 +59,15 @@ export default function DashboardStats() {
       },
       {
         title: "Total Queries",
-        value: tickets?.length || 0,
+        value: allTickets?.length || 0,
         icon: HelpCircle,
         color: "bg-red-500",
+      },
+      {
+        title: "Total Businesses",
+        value: businesses.length || 0,
+        icon: StoreIcon,
+        color: "bg-green-500",
       },
       {
         title: "Total Customers",

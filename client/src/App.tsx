@@ -72,7 +72,6 @@ export default function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/customers" element={<CustomerPage />} />
-                <Route path="/reports" element={<ReportPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/help" element={<HelpPage />} />
                 <Route path="/business" element={<BusinessPage />} />

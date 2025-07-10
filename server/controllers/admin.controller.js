@@ -134,6 +134,7 @@ export const updateBusinessFeatures = async (req, res) => {
   }
 };
 
+// not used
 export const updateCustomerFeatures = async (req, res) => {
   try {
     const { customerId } = req.params;

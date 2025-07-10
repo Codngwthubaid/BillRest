@@ -25,7 +25,6 @@ router.get("/dashboard", getDashboardStats);
 router.get("/businesses", getAllBusinesses);
 router.patch("/businesses/:id/toggle", toggleBusinessActive);
 router.patch("/businesses/:id/features", updateBusinessFeatures);
-router.put("/customers/:customerId/features", updateCustomerFeatures);
 router.get("/tickets", getAllSupportTickets);
 router.patch("/tickets/:id", updateTicketStatus);
 router.get("/invoices", getAllInvoices);
@@ -33,5 +32,9 @@ router.get("/products", getAllProducts);
 router.get("/reports/sales", getGlobalSalesReport);
 router.get("/businesses/:id/overview", getBusinessOverview);
 router.get("/customers", getAllCutomers)
+
+
+// not used
+router.put("/customers/:customerId/features", updateCustomerFeatures);
 
 export default router;

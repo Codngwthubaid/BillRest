@@ -1,10 +1,14 @@
 import { create } from "zustand";
-import { getBusiness, getAllBusinesses } from "@/services/business.service";
+import {
+  getBusiness,
+  getAllBusinesses,
+  updateBusinessFeatures
+} from "@/services/business.service";
 import type { Business } from "@/types/business.types";
 
 interface BusinessState {
   business: Business | null;
-  businesses: Business[]; // ✅ NEW
+  businesses: Business[];
   loading: boolean;
   error: string | null;
   isPinVerified: boolean;
@@ -12,12 +16,12 @@ interface BusinessState {
   verifyPin: () => void;
   resetPinVerification: () => void;
   fetchBusiness: () => Promise<void>;
-  fetchAllBusinesses: () => Promise<void>; // ✅ NEW
+  fetchAllBusinesses: () => Promise<void>;
   clearBusiness: () => void;
+  updateBusinessFeaturesInStore: (id: string, features: any) => Promise<void>;
 }
 
-export const useBusinessStore = create<BusinessState>((set) => {
-  // Load business for current user immediately
+export const useBusinessStore = create<BusinessState>((set, get) => {
   const loadBusiness = async () => {
     set({ loading: true, error: null });
     try {
@@ -34,12 +38,12 @@ export const useBusinessStore = create<BusinessState>((set) => {
     }
   };
 
-  // Load on store initialization
+  // Load on store init
   loadBusiness();
 
   return {
     business: null,
-    businesses: [], // ✅ NEW
+    businesses: [],
     loading: true,
     error: null,
     isPinVerified: false,
@@ -49,7 +53,6 @@ export const useBusinessStore = create<BusinessState>((set) => {
     fetchBusiness: loadBusiness,
     clearBusiness: () => set({ business: null }),
 
-    // ✅ Fetch all businesses for admin
     fetchAllBusinesses: async () => {
       set({ loading: true, error: null });
       try {
@@ -61,5 +64,24 @@ export const useBusinessStore = create<BusinessState>((set) => {
         set({ error: err?.message || "Failed to load all businesses", loading: false });
       }
     },
+
+    updateBusinessFeaturesInStore: async (id, features) => {
+      set({ loading: true, error: null });
+      try {
+        const data = await updateBusinessFeatures(id, features);
+        console.log("Updated business features:", data);
+
+        const updatedBusinesses = get().businesses.map((b) =>
+          b.user._id === id
+            ? { ...b, user: { ...b.user, features: data.features } }
+            : b
+        );
+
+        set({ businesses: updatedBusinesses, loading: false });
+      } catch (err: any) {
+        console.error("Failed to update business features:", err);
+        set({ error: err?.message || "Failed to update business features", loading: false });
+      }
+    }
   };
 });

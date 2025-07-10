@@ -3,9 +3,39 @@ export interface GstSlab {
   value: number;
 }
 
+export interface BusinessFeatures {
+  whatsappInvoice?: boolean;
+  barcode?: boolean;
+  pwa?: boolean;
+  backup?: boolean;
+}
+
+// export interface Business {
+//   _id?: string;
+//   user: string;
+//   businessName: string;
+//   address?: string;
+//   gstNumber?: string;
+//   defaultCurrency: "INR" | "USD" | "AED";
+//   gstSlabs: GstSlab[];
+//   isOnboarded: boolean;
+//   protectedPin?: string;
+//   features?: BusinessFeatures;
+//   createdAt?: string;
+//   updatedAt?: string;
+// }
+
+
 export interface Business {
   _id?: string;
-  user: string;
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+    phone: string;
+    isActive: boolean;
+    features: BusinessFeatures;
+  };
   businessName: string;
   address?: string;
   gstNumber?: string;
@@ -13,12 +43,11 @@ export interface Business {
   gstSlabs: GstSlab[];
   isOnboarded: boolean;
   protectedPin?: string;
-  features: {
-    posPrint: "58mm" | "80mm" | "disabled";
-  };
+  features?: BusinessFeatures;  
   createdAt?: string;
   updatedAt?: string;
 }
+
 
 export interface BusinessPayload {
   name: string;
@@ -29,7 +58,5 @@ export interface BusinessPayload {
   defaultCurrency: "INR" | "USD" | "AED";
   gstSlabs: GstSlab[];
   protectedPin?: string;
-  features?: {
-    posPrint?: "58mm" | "80mm" | "disabled";
-  };
+  features?: BusinessFeatures;
 }

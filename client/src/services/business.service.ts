@@ -1,5 +1,5 @@
 import { axiosInstance } from "@/lib/axiosInstance";
-import type { Business, BusinessPayload } from "@/types/business.types";
+import type { Business, BusinessFeatures, BusinessPayload } from "@/types/business.types";
 
 interface BusinessResponse {
   message: string;
@@ -27,5 +27,12 @@ export const getBusiness = async (): Promise<Business> => {
 
 export const getAllBusinesses = async () => {
   const res = await axiosInstance.get("/business/allBusinesses");
+  return res.data;
+};
+
+export const updateBusinessFeatures = async (id: string, features: BusinessFeatures) => {
+  const res = await axiosInstance.patch(`/admin/businesses/${id}/features`, {
+    features
+  });
   return res.data;
 };

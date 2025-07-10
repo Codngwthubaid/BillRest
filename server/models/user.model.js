@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
         features: {
             whatsappInvoice: { type: Boolean, default: false },
             barcode: { type: Boolean, default: false },
-            pwa: { type: Boolean, default: true },
+            pwa: { type: Boolean, default: false },
             backup: { type: Boolean, default: false }
         }
     },

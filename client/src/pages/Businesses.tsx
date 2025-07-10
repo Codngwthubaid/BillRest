@@ -2,10 +2,10 @@ import { useBusinessStore } from "@/store/business.store";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { format } from "date-fns";
 import type { Business } from "@/types/business.types";
+import { useAuthStore } from "@/store/auth.store";
+import { Switch } from "@/components/ui/switch"
 
-// TEMPORARY: Extend to include populated `user`
 type BusinessWithUser = Business & {
   user: {
     _id: string;
@@ -23,7 +23,8 @@ type BusinessWithUser = Business & {
 };
 
 export default function Businesses() {
-  const { businesses, fetchAllBusinesses } = useBusinessStore();
+  const { user } = useAuthStore()
+  const { businesses, fetchAllBusinesses , updateBusinessFeaturesInStore} = useBusinessStore();
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -57,9 +58,9 @@ export default function Businesses() {
               <TableHead>Business Name</TableHead>
               <TableHead>User Name</TableHead>
               <TableHead>Address</TableHead>
-              <TableHead>Created At</TableHead>
               <TableHead>Protected PIN</TableHead>
-              <TableHead>PWA Enabled</TableHead>
+              <TableHead>PWA Status</TableHead>
+              {user?.role === "master" && <TableHead>PWA Enabled</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -69,7 +70,6 @@ export default function Businesses() {
                 <TableCell>{b.businessName}</TableCell>
                 <TableCell>{b.user?.name || "N/A"}</TableCell>
                 <TableCell>{b.address || "N/A"}</TableCell>
-                <TableCell>{b.createdAt ? format(new Date(b.createdAt), "dd MMM yyyy") : "N/A"}</TableCell>
                 <TableCell>{b.protectedPin || "N/A"}</TableCell>
                 <TableCell>
                   {b.user?.features?.pwa ? (
@@ -78,6 +78,18 @@ export default function Businesses() {
                     <span className="text-red-600 font-semibold">No</span>
                   )}
                 </TableCell>
+                {
+                  user?.role === "master" && (
+                    <TableCell>
+                      <Switch
+                        checked={b.user?.features?.pwa}
+                        onCheckedChange={(checked) => {
+                          updateBusinessFeaturesInStore(b.user._id, { pwa: checked });
+                        }}
+                      />
+                    </TableCell>
+                  )
+                }
               </TableRow>
             ))}
           </TableBody>
