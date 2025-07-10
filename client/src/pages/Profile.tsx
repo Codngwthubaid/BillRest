@@ -1,12 +1,16 @@
 import ProfileStats from "@/components/profile/ProfileStats";
 import UserProfileDetails from "@/components/profile/UserProfileDetails";
+import SupportAndAdminProfileLayout from "@/components/profile/SupportAndAdminProfileLayout";
+import { useAuthStore } from "@/store/auth.store";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import DashboardStats from "@/components/dashboard/DashboardStats";
+
 
 export default function ProfilePage() {
-
     const [isLoading, setIsLoading] = useState(true)
-
+    const { user } = useAuthStore()
+    console.log(user)
     useEffect(() => {
         const timer = setTimeout(() => {
             setIsLoading(false);
@@ -33,9 +37,15 @@ export default function ProfilePage() {
                     <p>Manage your personal information and view your activity</p>
                 </div>
             </div>
+                <SupportAndAdminProfileLayout />
+                <DashboardStats />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <UserProfileDetails />
-                <ProfileStats />
+                {user?.role === "customer" && (
+                    <>
+                        <UserProfileDetails />
+                        <ProfileStats />
+                    </>
+                )}
             </div>
         </div>
     );
