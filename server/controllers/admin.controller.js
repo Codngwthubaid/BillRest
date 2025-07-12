@@ -82,7 +82,6 @@ export const getAllBusinesses = async (req, res) => {
   }
 };
 
-
 export const toggleBusinessActive = async (req, res) => {
   try {
     const { id } = req.params;

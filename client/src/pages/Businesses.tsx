@@ -27,6 +27,8 @@ export default function Businesses() {
   const { businesses, fetchAllBusinesses , updateBusinessFeaturesInStore} = useBusinessStore();
   const [search, setSearch] = useState("");
 
+  console.log(businesses)
+
   useEffect(() => {
     fetchAllBusinesses();
   }, [fetchAllBusinesses]);
