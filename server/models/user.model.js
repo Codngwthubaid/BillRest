@@ -1,5 +1,54 @@
+// import mongoose from "mongoose";
+// import bcrypt from "bcryptjs"
+
+// const userSchema = new mongoose.Schema(
+//     {
+//         name: { type: String, required: true },
+//         email: { type: String, required: true, unique: true },
+//         phone: { type: String, required: true, unique: true },
+//         password: { type: String, required: true },
+//         isActive: { type: Boolean, default: true },
+//         role: {
+//             type: String,
+//             enum: ["master", "customer", "support"],
+//             default: "customer",
+//         },
+//         subscription: {
+//             plan: { type: mongoose.Schema.Types.ObjectId, ref: "Plan" },
+//             startDate: Date,
+//             endDate: Date,
+//         },
+//         features: {
+//             whatsappInvoice: { type: Boolean, default: false },
+//             barcode: { type: Boolean, default: false },
+//             pwa: { type: Boolean, default: false },
+//             backup: { type: Boolean, default: false }
+//         }
+//     },
+//     { timestamps: true }
+// );
+
+// // Hash password before saving
+// userSchema.pre("save", async function (next) {
+//     if (!this.isModified("password")) return next();
+//     const salt = await bcrypt.genSalt(10);
+//     this.password = await bcrypt.hash(this.password, salt);
+//     next();
+// });
+
+// // Compare plain text with hash
+// userSchema.methods.comparePassword = function (inputPassword) {
+//     return bcrypt.compare(inputPassword, this.password);
+// };
+
+// export const User = mongoose.model("User", userSchema);
+
+
+
+
+
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs"
+import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
     {
@@ -8,11 +57,21 @@ const userSchema = new mongoose.Schema(
         phone: { type: String, required: true, unique: true },
         password: { type: String, required: true },
         isActive: { type: Boolean, default: true },
+        
+        // Update role enum
         role: {
             type: String,
-            enum: ["master", "customer", "support"],
+            enum: ["master", "customer", "clinic", "support"],
             default: "customer",
         },
+
+        // New field for software type selection
+        type: {
+            type: String,
+            enum: ["billrest_general", "billrest_health"],
+            required: true
+        },
+
         subscription: {
             plan: { type: mongoose.Schema.Types.ObjectId, ref: "Plan" },
             startDate: Date,
@@ -28,7 +87,6 @@ const userSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// Hash password before saving
 userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) return next();
     const salt = await bcrypt.genSalt(10);
@@ -36,7 +94,6 @@ userSchema.pre("save", async function (next) {
     next();
 });
 
-// Compare plain text with hash
 userSchema.methods.comparePassword = function (inputPassword) {
     return bcrypt.compare(inputPassword, this.password);
 };
