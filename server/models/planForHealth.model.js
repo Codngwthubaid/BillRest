@@ -10,4 +10,4 @@ const planSchema = new mongoose.Schema({
   description: { type: [String], required: true },
 });
 
-export const Plan = mongoose.model("Plan", planSchema);
+export const PlanForHealth = mongoose.model("PlanForHealth", planSchema);

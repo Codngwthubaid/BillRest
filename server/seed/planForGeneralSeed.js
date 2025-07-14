@@ -1,15 +1,15 @@
 import dotenv from "dotenv";
 import { connectDB } from "../config/db.js";
-import { Plan } from "../models/plan.model.js";
+import { PlanForGeneral } from "../models/planForGeneral.model.js";
 
 dotenv.config();
 
 const seedPlans = async () => {
   try {
     await connectDB();
-    await Plan.deleteMany();
-    
-    await Plan.insertMany([
+    await PlanForGeneral.deleteMany();
+
+    await PlanForGeneral.insertMany([
       {
         name: "12 Months",
         type: "package",

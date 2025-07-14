@@ -1,11 +1,19 @@
 import { razorpay } from "../config/razorpay.js";
-import { Plan } from "../models/plan.model.js";
+import { PlanForGeneral } from "../models/planForGeneral.model.js";
+import { PlanForHealth } from "../models/planForHealth.model.js";
 
 export const createRazorpayOrder = async (req, res) => {
   try {
     const { planId } = req.body;
-    const plan = await Plan.findById(planId);
-    if (!plan) return res.status(404).json({ message: "Plan not found" });
+
+    let plan = await PlanForGeneral.findById(planId);
+    if (!plan) {
+      plan = await PlanForHealth.findById(planId);
+    }
+
+    if (!plan) {
+      return res.status(404).json({ message: "Plan not found" });
+    }
 
     const options = {
       amount: Math.round(Number(plan.totalPrice) * 100),

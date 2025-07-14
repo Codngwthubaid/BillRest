@@ -1,10 +1,23 @@
 import express from "express";
-import { getAllPlans, getPackagePlans, getIndividualPlans } from "../controllers/plan.controller.js";
+import {
+  getAllGeneralPlans,
+  getAllHealthPlans,
+  getGeneralPackagePlans,
+  getHealthPackagePlans,
+  getGeneralIndividualPlans,
+  getHealthIndividualPlans
+} from "../controllers/plan.controller.js";
 
 const router = express.Router();
 
-router.get("/", getAllPlans);           // /api/plans
-router.get("/packages", getPackagePlans); // /api/plans/packages
-router.get("/individuals", getIndividualPlans); // /api/plans/individuals
+// General Plans
+router.get("/general", getAllGeneralPlans);                     // /api/plans/general
+router.get("/general/packages", getGeneralPackagePlans);        // /api/plans/general/packages
+router.get("/general/individuals", getGeneralIndividualPlans);  // /api/plans/general/individuals
+
+// Health Plans
+router.get("/health", getAllHealthPlans);                       // /api/plans/health
+router.get("/health/packages", getHealthPackagePlans);          // /api/plans/health/packages
+router.get("/health/individuals", getHealthIndividualPlans);    // /api/plans/health/individuals
 
 export default router;

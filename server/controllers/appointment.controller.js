@@ -1,11 +1,11 @@
 import { Appointment } from "../models/appointment.model.js";
 import { Patient } from "../models/patient.model.js";
-import { Service } from "../models/service.model.js";
 import { Counter } from "../models/counter.model.js";
 import { Business } from "../models/business.model.js";
-import { generateInvoicePDF } from "../utils/pdfGenerator.js"; // reuse
-import { sendInvoiceViaWhatsApp, uploadPDFAndGetLink } from "../utils/whatsappSender.js"; // reuse
+import { generateInvoicePDF } from "../utils/pdfGenerator.js"; // reuse for appointment slip
+import { sendInvoiceViaWhatsApp } from "../utils/sendWhatsApp.js"; // reuse
 
+// UTILITY: Get next appointment number
 const getNextAppointmentNumber = async () => {
   const latest = await Appointment.findOne({}).sort({ createdAt: -1 }).lean();
   let lastNumber = 0;
@@ -27,42 +27,23 @@ const getNextAppointmentNumber = async () => {
   return `APT${String(nextNumber).padStart(4, "0")}`;
 };
 
-// CREATE
+// CREATE appointment
 export const createAppointment = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { patientId, services, date, time, paymentMethod, status, notes } = req.body;
-
-    let totalAmount = 0;
-    const appointmentServices = [];
-
-    for (const item of services) {
-      const service = await Service.findById(item.service);
-      if (!service) return res.status(404).json({ message: "Service not found" });
-
-      const price = service.price;
-      totalAmount += price;
-
-      appointmentServices.push({
-        name: service.name,
-        price
-      });
-    }
+    const { patientId, description, status, admitted, date } = req.body;
 
     const appointment = await Appointment.create({
-      user: userId,
+      clinic: userId,
       appointmentNumber: await getNextAppointmentNumber(),
       patient: patientId,
-      services: appointmentServices,
-      totalAmount,
-      date,
-      time,
-      paymentMethod,
+      description,
       status,
-      notes
+      admitted,
+      date
     });
 
-    // update patient visit history
+    // update patient's visit history
     const patient = await Patient.findById(patientId);
     if (patient) {
       patient.visits.push(appointment._id);
@@ -76,16 +57,15 @@ export const createAppointment = async (req, res) => {
   }
 };
 
-// UPDATE
+// UPDATE appointment
 export const updateAppointment = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
-    const updateData = req.body;
 
     const appointment = await Appointment.findOneAndUpdate(
-      { _id: id, user: userId },
-      updateData,
+      { _id: id, clinic: userId },
+      req.body,
       { new: true }
     );
 
@@ -98,13 +78,13 @@ export const updateAppointment = async (req, res) => {
   }
 };
 
-// DELETE
+// DELETE appointment
 export const deleteAppointment = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
 
-    const appointment = await Appointment.findOneAndDelete({ _id: id, user: userId });
+    const appointment = await Appointment.findOneAndDelete({ _id: id, clinic: userId });
     if (!appointment) return res.status(404).json({ message: "Appointment not found" });
 
     res.json({ message: "Appointment deleted" });
@@ -114,11 +94,11 @@ export const deleteAppointment = async (req, res) => {
   }
 };
 
-// LIST ALL
+// GET all appointments
 export const getAppointments = async (req, res) => {
   try {
     const { date, patient } = req.query;
-    const query = { user: req.user.id };
+    const query = { clinic: req.user.id };
 
     if (date) query.date = date;
     if (patient) query.patient = patient;
@@ -134,30 +114,31 @@ export const getAppointments = async (req, res) => {
   }
 };
 
-// GET SINGLE
+// GET appointment by ID
 export const getAppointmentById = async (req, res) => {
   try {
     const { id } = req.params;
-    const appointment = await Appointment.findOne({ _id: id, user: req.user.id })
+    const appointment = await Appointment.findOne({ _id: id, clinic: req.user.id })
       .populate("patient", "name phoneNumber");
 
     if (!appointment) return res.status(404).json({ message: "Appointment not found" });
+
     res.json(appointment);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-// DOWNLOAD PDF
+// DOWNLOAD appointment slip PDF
 export const downloadAppointmentPDF = async (req, res) => {
   try {
-    const appointment = await Appointment.findOne({ _id: req.params.id, user: req.user.id })
+    const appointment = await Appointment.findOne({ _id: req.params.id, clinic: req.user.id })
       .populate("patient", "name phoneNumber");
 
     if (!appointment) return res.status(404).json({ message: "Appointment not found" });
 
     const business = await Business.findOne({ user: req.user.id });
-    const pdfBuffer = await generateInvoicePDF(appointment, business); // reuse with appointment data
+    const pdfBuffer = await generateInvoicePDF(appointment, business);
 
     res.set({
       "Content-Type": "application/pdf",
@@ -172,10 +153,10 @@ export const downloadAppointmentPDF = async (req, res) => {
   }
 };
 
-// PRINT PDF
+// PRINT appointment slip PDF
 export const printAppointmentPDF = async (req, res) => {
   try {
-    const appointment = await Appointment.findOne({ _id: req.params.id, user: req.user.id })
+    const appointment = await Appointment.findOne({ _id: req.params.id, clinic: req.user.id })
       .populate("patient", "name phoneNumber");
 
     if (!appointment) return res.status(404).json({ message: "Appointment not found" });
@@ -196,15 +177,15 @@ export const printAppointmentPDF = async (req, res) => {
   }
 };
 
-// SEND WHATSAPP
+// SEND appointment slip on WhatsApp
 export const sendAppointmentWhatsApp = async (req, res) => {
   try {
-    const appointment = await Appointment.findOne({ _id: req.params.id, user: req.user.id })
+    const appointment = await Appointment.findOne({ _id: req.params.id, clinic: req.user.id })
       .populate("patient", "name phoneNumber");
 
     if (!appointment) return res.status(404).json({ message: "Appointment not found" });
 
-    const pdfBuffer = await generateInvoicePDF(appointment); // reuse
+    const pdfBuffer = await generateInvoicePDF(appointment);
     const pdfUrl = await uploadPDFAndGetLink(pdfBuffer, `appointment-${appointment._id}.pdf`);
 
     await sendInvoiceViaWhatsApp(appointment.patient.phoneNumber, pdfUrl);

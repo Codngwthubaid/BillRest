@@ -15,6 +15,9 @@ import planRoutes from "./routes/plan.routes.js";
 import supportRoutes from "./routes/support.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import customerRoutes from "./routes/customer.routes.js"
+import appointmentRoutes from "./routes/appointment.routes.js"
+import serviceRoutes from "./routes/service.routes.js"
+import patientRoutes from "./routes/patient.routes.js"
 
 dotenv.config();
 const app = express();
@@ -43,7 +46,9 @@ app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/plans", planRoutes);
 app.use("/api/customers",customerRoutes)
-
+app.use("/api/appointments", appointmentRoutes)
+app.use("/api/patients", patientRoutes)
+app.use("/api/services", serviceRoutes)
 
 
 app.get("/", (req, res) => res.send("🚀 Billing Software Backend Running"));

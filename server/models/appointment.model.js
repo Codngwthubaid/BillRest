@@ -1,21 +1,12 @@
 import mongoose from "mongoose";
 
 const appointmentSchema = new mongoose.Schema({
-  clinic: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // the clinic owner
+  clinic: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   patient: { type: mongoose.Schema.Types.ObjectId, ref: "Patient", required: true },
 
   appointmentNumber: { type: String, required: true, unique: true },
 
-  services: [
-    {
-      name: { type: String, required: true },
-      price: { type: Number, required: true },
-      discount: { type: Number, default: 0 }
-    }
-  ],
-
-  totalAmount: { type: Number, required: true },
-  discount: { type: Number, default: 0 },
+  description: { type: String }, // patient problem / reason
 
   status: {
     type: String,
@@ -23,18 +14,7 @@ const appointmentSchema = new mongoose.Schema({
     default: 'Pending',
   },
 
-  paymentStatus: {
-    type: String,
-    enum: ["Paid", "Pending"],
-    default: "Pending",
-  },
-  paymentMethod: {
-    type: String,
-    enum: ["Cash", "UPI", "Card", "Other"],
-    default: "Cash",
-  },
-
-  admitted: { type: Boolean, default: false }, // for IPD quick checks
+  admitted: { type: Boolean, default: false },
   date: { type: Date, default: Date.now },
 }, { timestamps: true });
 
