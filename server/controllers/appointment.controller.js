@@ -5,25 +5,36 @@ import { Business } from "../models/business.model.js";
 import { generateInvoicePDF } from "../utils/pdfGenerator.js"; // reuse for appointment slip
 import { sendInvoiceViaWhatsApp } from "../utils/sendWhatsApp.js"; // reuse
 
-// UTILITY: Get next appointment number
+// Get next appointment number
 const getNextAppointmentNumber = async () => {
-  const latest = await Appointment.findOne({}).sort({ createdAt: -1 }).lean();
+  // 1️⃣ Find latest appointment from DB (based on createdAt or _id)
+  const latestAppointment = await Appointment.findOne({})
+    .sort({ createdAt: -1 })
+    .lean();
+
   let lastNumber = 0;
-  if (latest?.appointmentNumber) {
-    const match = latest.appointmentNumber.match(/APT(\d+)/);
-    if (match) lastNumber = parseInt(match[1], 10);
+  if (latestAppointment?.appointmentNumber) {
+    const match = latestAppointment.appointmentNumber.match(/APT(\d+)/);
+    if (match) {
+      lastNumber = parseInt(match[1], 10);
+    }
   }
 
+  // 2️⃣ Check existing counter
   const counterDoc = await Counter.findOne({ _id: "appointmentNumber" });
-  let currentCounter = counterDoc ? counterDoc.sequence_value : 0;
-  let nextNumber = Math.max(lastNumber, currentCounter) + 1;
+  const currentCounter = counterDoc ? counterDoc.sequence_value : 0;
 
+  // 3️⃣ Calculate next number
+  const nextNumber = Math.max(lastNumber, currentCounter) + 1;
+
+  // 4️⃣ Update counter to keep in sync
   await Counter.findOneAndUpdate(
     { _id: "appointmentNumber" },
     { sequence_value: nextNumber },
     { upsert: true, new: true }
   );
 
+  // 5️⃣ Return formatted
   return `APT${String(nextNumber).padStart(4, "0")}`;
 };
 
@@ -31,26 +42,66 @@ const getNextAppointmentNumber = async () => {
 export const createAppointment = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { patientId, description, status, admitted, date } = req.body;
+    const {
+      name, phoneNumber, address, age, gender,
+      description, status, admitted, appointmentNumber
+    } = req.body;
 
-    const appointment = await Appointment.create({
-      clinic: userId,
-      appointmentNumber: await getNextAppointmentNumber(),
-      patient: patientId,
-      description,
-      status,
-      admitted,
-      date
-    });
+    if (!name || !phoneNumber) {
+      return res.status(400).json({ message: "Patient name and phone number are required." });
+    }
 
-    // update patient's visit history
-    const patient = await Patient.findById(patientId);
-    if (patient) {
-      patient.visits.push(appointment._id);
+    // Check or create patient
+    let patient = await Patient.findOne({ clinic: userId, phoneNumber });
+    if (!patient) {
+      patient = await Patient.create({
+        clinic: userId,
+        name, phoneNumber, address, age, gender, visits: []
+      });
+    } else {
+      patient.name = name;
+      patient.address = address;
+      patient.age = age;
+      patient.gender = gender;
       await patient.save();
     }
 
-    res.status(201).json({ message: "Appointment created", appointment });
+    // Generate appointment number
+    let finalAppointmentNumber = appointmentNumber || await getNextAppointmentNumber();
+
+    // If manually set, sync counter
+    if (appointmentNumber) {
+      const match = appointmentNumber.match(/APT(\d+)/);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        const counterDoc = await Counter.findOne({ _id: "appointmentNumber" });
+        const currentCounter = counterDoc ? counterDoc.sequence_value : 0;
+        if (num >= currentCounter) {
+          await Counter.findOneAndUpdate(
+            { _id: "appointmentNumber" },
+            { sequence_value: num },
+            { upsert: true }
+          );
+        }
+      }
+    }
+
+    // Create appointment
+    const appointment = await Appointment.create({
+      clinic: userId,
+      appointmentNumber: finalAppointmentNumber,
+      patient: patient._id,
+      description,
+      status,
+      admitted
+    });
+
+    // Update patient visits
+    patient.visits.push(appointment._id);
+    await patient.save();
+
+    res.status(201).json({ message: "Appointment created successfully", appointment });
+
   } catch (err) {
     console.error("Create appointment error:", err);
     res.status(500).json({ message: err.message });
@@ -62,7 +113,35 @@ export const updateAppointment = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
+    const { appointmentNumber, name, phoneNumber, address, age, gender } = req.body;
 
+    // Handle manual number update
+    if (appointmentNumber) {
+      const existingNumber = await Appointment.findOne({
+        appointmentNumber,
+        _id: { $ne: id }
+      });
+
+      if (existingNumber) {
+        return res.status(400).json({ message: `Appointment number ${appointmentNumber} already exists.` });
+      }
+
+      const match = appointmentNumber.match(/APT(\d+)/);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        const counterDoc = await Counter.findOne({ _id: "appointmentNumber" });
+        const currentCounter = counterDoc ? counterDoc.sequence_value : 0;
+        if (num >= currentCounter) {
+          await Counter.findOneAndUpdate(
+            { _id: "appointmentNumber" },
+            { sequence_value: num },
+            { upsert: true }
+          );
+        }
+      }
+    }
+
+    // Update appointment
     const appointment = await Appointment.findOneAndUpdate(
       { _id: id, clinic: userId },
       req.body,
@@ -71,7 +150,21 @@ export const updateAppointment = async (req, res) => {
 
     if (!appointment) return res.status(404).json({ message: "Appointment not found" });
 
-    res.json({ message: "Appointment updated", appointment });
+    // Update patient if details provided
+    if (name || phoneNumber || address || age || gender) {
+      const patient = await Patient.findOne({ _id: appointment.patient, clinic: userId });
+      if (patient) {
+        if (name) patient.name = name;
+        if (phoneNumber) patient.phoneNumber = phoneNumber;
+        if (address) patient.address = address;
+        if (age) patient.age = age;
+        if (gender) patient.gender = gender;
+        await patient.save();
+      }
+    }
+
+    res.json({ message: "Appointment and patient updated", appointment });
+
   } catch (err) {
     console.error("Update appointment error:", err);
     res.status(500).json({ message: err.message });
@@ -84,10 +177,37 @@ export const deleteAppointment = async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
+    // Delete
     const appointment = await Appointment.findOneAndDelete({ _id: id, clinic: userId });
-    if (!appointment) return res.status(404).json({ message: "Appointment not found" });
+    if (!appointment) {
+      return res.status(404).json({ message: "Appointment not found" });
+    }
 
-    res.json({ message: "Appointment deleted" });
+    // Remove from patient visits
+    await Patient.updateMany(
+      { visits: appointment._id },
+      { $pull: { visits: appointment._id } }
+    );
+
+    // Resequence all appointments
+    const appointments = await Appointment.find({ clinic: userId }).sort({ createdAt: 1 });
+
+    let counter = 1;
+    for (const appt of appointments) {
+      appt.appointmentNumber = `APT${String(counter).padStart(4, "0")}`;
+      await appt.save();
+      counter++;
+    }
+
+    // Update counter doc
+    await Counter.findOneAndUpdate(
+      { _id: "appointmentNumber" },
+      { sequence_value: counter - 1 },
+      { upsert: true }
+    );
+
+    res.json({ message: "Appointment deleted and numbering updated" });
+
   } catch (err) {
     console.error("Delete appointment error:", err);
     res.status(500).json({ message: err.message });
@@ -129,7 +249,10 @@ export const getAppointmentById = async (req, res) => {
   }
 };
 
-// DOWNLOAD appointment slip PDF
+
+
+// NOTE - NOT USED
+// Download appointment slip PDF
 export const downloadAppointmentPDF = async (req, res) => {
   try {
     const appointment = await Appointment.findOne({ _id: req.params.id, clinic: req.user.id })
@@ -152,8 +275,7 @@ export const downloadAppointmentPDF = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-// PRINT appointment slip PDF
+// Print appointment slip PDF
 export const printAppointmentPDF = async (req, res) => {
   try {
     const appointment = await Appointment.findOne({ _id: req.params.id, clinic: req.user.id })
@@ -176,8 +298,7 @@ export const printAppointmentPDF = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-// SEND appointment slip on WhatsApp
+// Send appointment slip on WhatsApp
 export const sendAppointmentWhatsApp = async (req, res) => {
   try {
     const appointment = await Appointment.findOne({ _id: req.params.id, clinic: req.user.id })

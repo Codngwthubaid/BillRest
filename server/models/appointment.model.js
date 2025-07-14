@@ -15,7 +15,6 @@ const appointmentSchema = new mongoose.Schema({
   },
 
   admitted: { type: Boolean, default: false },
-  date: { type: Date, default: Date.now },
 }, { timestamps: true });
 
 export const Appointment = mongoose.model("Appointment", appointmentSchema);

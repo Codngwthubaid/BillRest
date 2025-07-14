@@ -11,7 +11,7 @@ const patientSchema = new mongoose.Schema({
     enum: ["Male", "Female", "Other"]
   },
 
-  appointments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Appointment" }]
+  visits: [{ type: mongoose.Schema.Types.ObjectId, ref: "Appointment" }]
 }, { timestamps: true });
 
 patientSchema.index({ phoneNumber: 1, clinic: 1 }, { unique: true });
