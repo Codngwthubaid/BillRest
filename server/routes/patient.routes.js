@@ -6,8 +6,8 @@ import { checkSubscription } from "../middlewares/subscription.middleware.js"
 
 const router = express.Router();
 
-router.get("/", verifyToken, checkRole(["customer"]), checkSubscription, getPatients);
-router.delete("/:id", verifyToken, checkRole(["customer"]), checkSubscription, deletePatient);
+router.get("/", verifyToken, checkRole(["clinic"]), checkSubscription, getPatients);
+router.delete("/:id", verifyToken, checkRole(["clinic"]), checkSubscription, deletePatient);
 
 // router.get("/allPatients", verifyToken, checkRole(["support", "master"]), getAllPatients)
 
