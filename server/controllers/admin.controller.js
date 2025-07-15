@@ -3,7 +3,8 @@ import { Product } from "../models/product.model.js";
 import { Invoice } from "../models/invoice.model.js";
 import { Business } from "../models/business.model.js";
 import { Customer } from "../models/customer.model.js";
-import { SupportTicket } from "../models/supportTicket.model.js";
+import { SupportTicketForGeneral } from "../models/supportTicketForGeneral.model.js";
+import { SupportTicketForHealth } from "../models/supportTicketForHealth.model.js"
 
 export const getDashboardStats = async (req, res) => {
   try {
@@ -162,9 +163,9 @@ export const updateCustomerFeatures = async (req, res) => {
   }
 };
 
-export const getAllSupportTickets = async (req, res) => {
+export const getAllSupportTicketsForGeneral = async (req, res) => {
   try {
-    const tickets = await SupportTicket.find()
+    const tickets = await SupportTicketForGeneral.find()
       .populate("user") // Get limited user info
       .sort({ createdAt: -1 }); // Show newest tickets first
     console.log(tickets)
@@ -175,7 +176,7 @@ export const getAllSupportTickets = async (req, res) => {
   }
 };
 
-export const updateTicketStatus = async (req, res) => {
+export const updateTicketStatusForGeneral = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
@@ -186,7 +187,47 @@ export const updateTicketStatus = async (req, res) => {
   }
 
   try {
-    const ticket = await SupportTicket.findByIdAndUpdate(
+    const ticket = await SupportTicketForGeneral.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    ).populate("user", "name email");
+
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found" });
+    }
+
+    res.json({ message: "Ticket status updated", ticket });
+  } catch (err) {
+    console.error("Failed to update ticket:", err.message);
+    res.status(500).json({ message: "Failed to update ticket" });
+  }
+};
+export const getAllSupportTicketsForHealth = async (req, res) => {
+  try {
+    const tickets = await SupportTicketForHealth.find()
+      .populate("user") // Get limited user info
+      .sort({ createdAt: -1 }); // Show newest tickets first
+    console.log(tickets)
+    res.json({ tickets });
+  } catch (err) {
+    console.error("Error fetching tickets:", err);
+    res.status(500).json({ message: "Failed to fetch support tickets" });
+  }
+};
+
+export const updateTicketStatusForHealth = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  // Validate status input
+  const validStatuses = ["pending", "resolved", "escalated"];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ message: "Invalid status value" });
+  }
+
+  try {
+    const ticket = await SupportTicketForHealth.findByIdAndUpdate(
       id,
       { status },
       { new: true }

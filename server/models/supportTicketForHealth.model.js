@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const supportTicketSchema = new mongoose.Schema(
+const supportTicketSchemaForHealth = new mongoose.Schema(
   {
     serialNumber: { type: Number, unique: true },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -17,4 +17,4 @@ const supportTicketSchema = new mongoose.Schema(
 );
 
 
-export const SupportTicket = mongoose.model("SupportTicket", supportTicketSchema);
+export const SupportTicketForHealth = mongoose.model("SupportTicketForHealth", supportTicketSchemaForHealth);

@@ -4,14 +4,16 @@ import {
   getAllBusinesses,
   toggleBusinessActive,
   updateBusinessFeatures,
-  getAllSupportTickets,
-  updateTicketStatus,
   updateCustomerFeatures,
   getAllInvoices,
   getAllProducts,
   getGlobalSalesReport,
   getBusinessOverview,
-  getAllCutomers
+  getAllCutomers,
+  getAllSupportTicketsForGeneral,
+  updateTicketStatusForGeneral,
+  getAllSupportTicketsForHealth,
+  updateTicketStatusForHealth
 } from "../controllers/admin.controller.js";
 
 import { verifyToken, checkRole } from "../middlewares/auth.middleware.js";
@@ -25,8 +27,10 @@ router.get("/dashboard", getDashboardStats);
 router.get("/businesses", getAllBusinesses);
 router.patch("/businesses/:id/toggle", toggleBusinessActive);
 router.patch("/businesses/:id/features", updateBusinessFeatures);
-router.get("/tickets", getAllSupportTickets);
-router.patch("/tickets/:id", updateTicketStatus);
+router.get("/general/tickets", getAllSupportTicketsForGeneral);
+router.patch("/general/tickets/:id", updateTicketStatusForGeneral);
+router.get("/health/tickets", getAllSupportTicketsForHealth);
+router.patch("/health/tickets/:id", updateTicketStatusForHealth);
 router.get("/invoices", getAllInvoices);
 router.get("/products", getAllProducts);
 router.get("/reports/sales", getGlobalSalesReport);
