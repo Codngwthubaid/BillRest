@@ -19,7 +19,7 @@ import appointmentRoutes from "./routes/appointment.routes.js"
 import serviceRoutes from "./routes/service.routes.js"
 import patientRoutes from "./routes/patient.routes.js"
 import clinicRoutes from "./routes/clinic.routes.js"
-
+import ipdRoutes from "./routes/ipd.routes.js"
 
 dotenv.config();
 const app = express();
@@ -52,7 +52,7 @@ app.use("/api/customers",customerRoutes)
 app.use("/api/appointments", appointmentRoutes)
 app.use("/api/patients", patientRoutes)
 app.use("/api/services", serviceRoutes)
-
+app.use("/api/ipd", ipdRoutes)
 
 app.get("/", (req, res) => res.send("🚀 Billing Software Backend Running"));
 
