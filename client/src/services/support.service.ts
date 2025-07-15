@@ -5,26 +5,26 @@ export const createSupportTicket = async (data: {
   subject: string;
   message: string;
 }): Promise<{ message: string; ticket: SupportTicket }> => {
-  const res = await axiosInstance.post('/support', data);
+  const res = await axiosInstance.post('/support/general', data);
   return res.data;
 };
 
 export const getMyTickets = async (): Promise<SupportTicket[]> => {
-  const res = await axiosInstance.get('/support');
+  const res = await axiosInstance.get('/support/general');
   return res.data;
 };
 
 export const getTicketBySerialNumber = async (serialNumber: number): Promise<SupportTicket> => {
-  const res = await axiosInstance.get(`/support/ticket/${serialNumber}`);
+  const res = await axiosInstance.get(`/support/general/ticket/${serialNumber}`);
   return res.data;
 };
 
 export const getAllSupportTickets = async () => {
-  const res = await axiosInstance.get("/support/allTickets");
+  const res = await axiosInstance.get("/support/general/allTickets");
   return res.data;
 }
 
 export const updateTicketStatus = async (id: string, status: string) => {
-  const res = await axiosInstance.put(`/support/tickets/${id}`, { status });
+  const res = await axiosInstance.put(`/support/general/tickets/${id}`, { status });
   return res.data;
 };

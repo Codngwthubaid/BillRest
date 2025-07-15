@@ -10,7 +10,7 @@ export type ReportFilterType =
   | "financial"
   | "custom";
 
-export const getSalesReport = async (
+export const getSalesReportForGeneral = async (
   filterType: ReportFilterType,
   startDate: string,
   endDate?: string
@@ -21,6 +21,21 @@ export const getSalesReport = async (
     ...(endDate ? { endDate } : {}),
   });
 
-  const res = await axiosInstance.get(`/report/sales?${queryParams}`);
+  const res = await axiosInstance.get(`/report/sales/general/?${queryParams}`);
+  return res.data;
+};
+
+export const getSalesReportForHealth = async (
+  filterType: ReportFilterType,
+  startDate: string,
+  endDate?: string
+): Promise<SalesReportResponse> => {
+  const queryParams = new URLSearchParams({
+    filterType,
+    startDate,
+    ...(endDate ? { endDate } : {}),
+  });
+
+  const res = await axiosInstance.get(`/report/sales/health/?${queryParams}`);
   return res.data;
 };

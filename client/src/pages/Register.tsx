@@ -19,6 +19,7 @@ const registerSchema = z.object({
     .min(10, "Phone must be 10 digits")
     .max(10, "Phone must be 10 digits"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  type: z.enum(["billrest_general", "billrest_health"]),
 });
 
 type RegisterValues = z.infer<typeof registerSchema>;
@@ -50,7 +51,7 @@ export default function Register() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-background px-4">
-      <Card className="w-full max-w-md shadow-lg">
+      <Card className="w-full max-w-md shadow-lg py-10">
         <CardHeader>
           <CardTitle className="flex items-center justify-center">
             <img src="/Billrest_20250626_235033_0006.png" className="bg-transparent w-60" alt="Billrest Logo" />
@@ -76,6 +77,10 @@ export default function Register() {
                 <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
               )}
             </div>
+            <select {...register("type")} className="text-gray-500 text-sm border rounded-md p-2 w-full">
+              <option value="billrest_general">Billrest General</option>
+              <option value="billrest_health">Billrest Health</option>
+            </select>
             <div className="relative">
               <Input
                 placeholder="Password"

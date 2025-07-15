@@ -39,7 +39,7 @@ export default function App() {
             </Route>
 
             {/* Role-based routing */}
-            {user?.role === "customer" && (
+            {(user?.role === "customer" || user?.role === "clinic") && (
               <Route element={<SubscriptionRoute />}>
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/invoices" element={<InvoicesPage />} />

@@ -8,7 +8,11 @@ import {
     Mail,
     IndianRupee,
     UserRoundCheck,
-    StoreIcon
+    StoreIcon,
+    FileTerminal,
+    SquareUserRound,
+    ListOrdered,
+    Receipt
 } from "lucide-react";
 
 export const items = {
@@ -32,6 +36,58 @@ export const items = {
             title: "Customers",
             href: "/customers",
             icon: UserRoundCheck,
+        },
+        {
+            title: "Reports",
+            href: "/reports",
+            icon: ChartColumn,
+        },
+        {
+            title: "Profile",
+            href: "/profile",
+            icon: User,
+        },
+        {
+            title: "Contact",
+            href: "/contact",
+            icon: Mail,
+        },
+        {
+            title: "Plans",
+            href: "/plans",
+            icon: IndianRupee,
+        },
+        {
+            title: "Help",
+            href: "/help",
+            icon: HelpCircle,
+        },
+    ],
+    sidebarOfHealth: [
+        {
+            title: "Dashboard",
+            href: "/dashboard",
+            icon: Home,
+        },
+        {
+            title: "Appointments",
+            href: "/appointments",
+            icon: FileTerminal
+        },
+        {
+            title: "Patients",
+            href: "/patients",
+            icon: SquareUserRound
+        },
+        {
+            title: "Services",
+            href: "/services",
+            icon: ListOrdered
+        },
+        {
+            title: "Billing",
+            href: "/billing",
+            icon: Receipt
         },
         {
             title: "Reports",

@@ -48,8 +48,8 @@ export default function Login() {
       setSubscription(subscription);
       toast.success("Logged in successfully");
 
-      if (res.user.role === "customer") {
-        if (subscription && subscription?.plan) {
+      if (res.user.role === "customer" || res.user.role === "clinic") {
+        if (subscription && subscription.plan) {
           navigate("/dashboard");
         } else {
           navigate("/plans");
@@ -57,6 +57,7 @@ export default function Login() {
       } else {
         navigate("/profile");
       }
+
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Login failed");
     }
@@ -64,7 +65,7 @@ export default function Login() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-background px-4">
-      <Card className="w-full max-w-md shadow-lg">
+      <Card className="py-10 w-full max-w-md shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center justify-center">
             <img src="/Billrest_20250626_235033_0006.png" className="bg-transparent w-60" alt="Billrest Logo" />

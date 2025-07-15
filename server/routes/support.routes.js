@@ -15,12 +15,12 @@ import {
 
 const router = express.Router();
 
-router.post("/general/", verifyToken, checkRole(["customer"]), checkSubscription, createTicketForGeneral);
-router.get("/general/", verifyToken, checkRole(["customer"]), checkSubscription, getMyTicketsForGeneral);
+router.post("/general", verifyToken, checkRole(["customer"]), checkSubscription, createTicketForGeneral);
+router.get("/general", verifyToken, checkRole(["customer"]), checkSubscription, getMyTicketsForGeneral);
 router.get("/general/ticket/:serialNumber", verifyToken, checkRole(["customer"]), checkSubscription, getTicketBySeriaNumberForGeneral)
-router.post("/health/", verifyToken, checkRole(["customer"]), checkSubscription, createTicketForHealth);
-router.get("/health/", verifyToken, checkRole(["customer"]), checkSubscription, getMyHealthTickets);
-router.get("/health/ticket/:serialNumber", verifyToken, checkRole(["customer"]), checkSubscription, getHealthTicketBySerialNumber)
+router.post("/health", verifyToken, checkRole(["clinic"]), checkSubscription, createTicketForHealth);
+router.get("/health", verifyToken, checkRole(["clinic"]), checkSubscription, getMyHealthTickets);
+router.get("/health/ticket/:serialNumber", verifyToken, checkRole(["clinic"]), checkSubscription, getHealthTicketBySerialNumber)
 
 
 router.put("/general/tickets/:id", verifyToken, checkRole(["support", "master"]), updateTicketStatusForGeneral);

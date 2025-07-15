@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { SalesReportResponse } from "@/types/report.types";
-import { getSalesReport, type ReportFilterType } from "@/services/report.service";
+import { getSalesReportForGeneral, getSalesReportForHealth , type ReportFilterType } from "@/services/report.service";
 
 interface ReportState {
   data: SalesReportResponse | null;
@@ -19,7 +19,7 @@ export const useReportStore = create<ReportState>((set) => ({
   fetchReport: async (filterType, startDate, endDate) => {
     set({ loading: true });
     try {
-      const response = await getSalesReport(filterType, startDate, endDate);
+      const response = await getSalesReportForGeneral(filterType, startDate, endDate);
       set({ data: response });
     } catch (err) {
       console.error("Report fetching failed:", err);
