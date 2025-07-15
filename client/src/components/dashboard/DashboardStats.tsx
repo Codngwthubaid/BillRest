@@ -5,7 +5,7 @@ import { useBusinessStore } from "@/store/business.store";
 import { useInvoiceStore } from "@/store/invoice.store";
 import { useSupportStore } from "@/store/support.store";
 import { useReportStore } from "@/store/report.store";
-import { IndianRupee, FileText, Package, StoreIcon, UserRoundCheck, HelpCircle } from "lucide-react";
+import { IndianRupee, FileText, Package, StoreIcon, UserRoundCheck, HelpCircle, FileTerminal, ListOrdered, SquareUserRound } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 
 export default function DashboardStats() {
@@ -76,8 +76,31 @@ export default function DashboardStats() {
         color: "bg-purple-500",
       },
     ];
+  } else if (user?.role === "clinic") {
+    dashboardStats = [
+      {
+        title: "Total Appointments",
+        value: `${data?.totalSales?.toFixed(2) || "0.00"}`,
+        icon: FileTerminal,
+        color: "bg-green-500",
+        roles: ["clinic"],
+      },
+      {
+        title: "Total Services",
+        value: `${data?.totalSales?.toFixed(2) || "0.00"}`,
+        icon: ListOrdered,
+        color: "bg-blue-500",
+        roles: ["clinic"],
+      },
+      {
+        title: "Total Patients",
+        value: `${data?.totalSales?.toFixed(2) || "0.00"}`,
+        icon: SquareUserRound,
+        color: "bg-purple-500",
+        roles: ["clinic"],
+      }
+    ]
   } else {
-    // customer by default
     dashboardStats = [
       {
         title: "Total Sales",

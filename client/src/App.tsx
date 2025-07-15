@@ -18,6 +18,10 @@ import BusinessPage from "./pages/Businesses";
 import NotFoundPage from "./pages/NotFound404";
 
 import { useAuthStore } from "./store/auth.store";
+import Appointments from "./pages/Appointments";
+import Billing from "./pages/Billing";
+import Services from "./pages/Services";
+import Patients from "./pages/Patients";
 
 export default function App() {
   const { user } = useAuthStore();
@@ -39,13 +43,27 @@ export default function App() {
             </Route>
 
             {/* Role-based routing */}
-            {(user?.role === "customer" || user?.role === "clinic") && (
+            {user?.role === "customer" && (
               <Route element={<SubscriptionRoute />}>
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/invoices" element={<InvoicesPage />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/customers" element={<CustomerPage />} />
+                <Route path="/reports" element={<ReportPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/help" element={<HelpPage />} />
+              </Route>
+            )}
+            
+            {user?.role === "clinic" && (
+              <Route element={<SubscriptionRoute />}>
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/appointments" element={<Appointments />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/billings" element={<Billing />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/patients" element={<Patients />} />
                 <Route path="/reports" element={<ReportPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/help" element={<HelpPage />} />

@@ -86,7 +86,7 @@ export const items = {
         },
         {
             title: "Billing",
-            href: "/billing",
+            href: "/billings",
             icon: Receipt
         },
         {

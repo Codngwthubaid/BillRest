@@ -8,6 +8,10 @@ import TopProducts from "@/components/dashboard/TopProducts";
 import TopProductsChart from "@/components/dashboard/TopProductsChart";
 import QuickActions from "@/components/dashboard/QuickActions";
 import { useAuthStore } from "@/store/auth.store";
+import TopServices from "@/components/dashboard/TopServices";
+import TopServicesChart from "@/components/dashboard/TopServicesChart";
+import RecentAppointments from "@/components/dashboard/RecentAppointments";
+import PatientChart from "@/components/dashboard/PatientChart";
 
 
 export default function Dashboard() {
@@ -38,10 +42,33 @@ export default function Dashboard() {
       <DashboardStats />
       {user?.role === "support" || user?.role === "master" ? null : <QuickActions />}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RecentInvoices />
-        {user?.role === "support" || user?.role === "master" ? null : <TopProducts />}
-        <CustomerChart />
-        {user?.role === "support" || user?.role === "master" ? null : <TopProductsChart />}
+        {(user?.role === "customer" || user?.role === "support" || user?.role === "master") && (
+          <>
+            <RecentInvoices />
+            <CustomerChart />
+          </>
+        )}
+        
+        {(user?.role === "clinic" || user?.role === "support" || user?.role === "master") && (
+          <>
+            <RecentAppointments />
+            <PatientChart />
+          </>
+        )}
+
+        {user?.role === "customer" && (
+          <>
+            <TopProducts />
+            <TopProductsChart />
+          </>
+        )}
+
+        {user?.role === "clinic" && (
+          <>
+            <TopServices />
+            <TopServicesChart />
+          </>
+        )}
       </div>
     </div>
   );
