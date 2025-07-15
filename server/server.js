@@ -18,6 +18,8 @@ import customerRoutes from "./routes/customer.routes.js"
 import appointmentRoutes from "./routes/appointment.routes.js"
 import serviceRoutes from "./routes/service.routes.js"
 import patientRoutes from "./routes/patient.routes.js"
+import clinicRoutes from "./routes/clinic.routes.js"
+
 
 dotenv.config();
 const app = express();
@@ -37,6 +39,7 @@ app.use(express.json()); // ✅ Required for parsing JSON bodies
 app.use("/api/admin" , adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/business", businessRoutes);
+app.use("/api/clinic", clinicRoutes)
 app.use("/api/products", productRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/report", reportRoutes);
