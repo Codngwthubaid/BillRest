@@ -1,7 +1,157 @@
+"use client";
+import { useEffect, useState } from "react";
+import { useAppointmentStore } from "@/store/appointment.store";
+import { useAuthStore } from "@/store/auth.store";
+import { Loader2, Calendar, Clock, FileText, IndianRupee, PenLine, Trash, Eye } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import type { Appointment } from "@/types/appointment.types";
+import { Button } from "@/components/ui/button";
+import CreateAppointmentDialog from "@/components/appointments/createAppointment";
+import UpdateAppointmentDialog from "@/components/appointments/updateAppointment";
+import { DeleteAppointmentDialog } from "@/components/appointments/deleteAppointment";
+// import your Appointment dialogs here when you build them
+// import ViewAppointmentDialog from "@/components/appointments/ViewAppointmentDialog";
+
 export default function Appointments() {
+    const { user } = useAuthStore();
+    const { appointments, fetchAppointments } = useAppointmentStore();
+
+    const [search, setSearch] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+    const [showViewDialog, setShowViewDialog] = useState(false);
+    const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showCreateDialog, setShowCreateDialog] = useState(false);
+
+    useEffect(() => {
+        const fetch = async () => {
+            await fetchAppointments();
+            setLoading(false);
+        };
+        fetch();
+    }, [fetchAppointments]);
+
+    const summary = {
+        total: appointments.length,
+        admitted: appointments.filter(a => a.admitted).length,
+        pending: appointments.filter(a => a.status === "Pending").length,
+        completed: appointments.filter(a => a.status === "Completed").length,
+        canceled: appointments.filter(a => a.status === "Canceled").length,
+    };
+
+    const filtered = appointments.filter(app =>
+        app.appointmentNumber.toLowerCase().includes(search.toLowerCase()) ||
+        app.patient?.name.toLowerCase().includes(search.toLowerCase())
+    );
+
+    const getStatusBadge = (status: string) => {
+        switch (status) {
+            case "Admitted": return <Badge className="bg-green-100 text-green-800">Admitted</Badge>;
+            case "Completed": return <Badge className="bg-yellow-100 text-yellow-800">Completed</Badge>;
+            case "Pending": return <Badge className="bg-gray-100 text-gray-800">Pending</Badge>;
+            case "Canceled": return <Badge className="bg-gray-100 text-gray-800">Canceled</Badge>;
+            default: return <Badge variant="outline">Unknown</Badge>;
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <Loader2 className="animate-spin size-12 text-blue-600" />
+            </div>
+        );
+    }
+
     return (
-        <>
-            Appointments
-        </>
-    )
+        <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+                <div>
+                    <h1 className="text-2xl font-bold">Appointments</h1>
+                    <p className="text-gray-500">Manage your appointments and admissions</p>
+                </div>
+                {user?.role === "clinic" && (
+                    <>
+                        <Button onClick={() => setShowCreateDialog(true)} className="bg-blue-600 hover:bg-blue-700">
+                            + Create Appointment
+                        </Button>
+                        <CreateAppointmentDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />
+                    </>
+                )}
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-6">
+                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-blue-600"><FileText className="w-4 h-4" />
+                    <span className="text-sm">Total</span></div><span className="font-bold text-lg">{summary.total}</span></CardContent></Card>
+                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-green-600"><IndianRupee className="w-4 h-4" />
+                    <span className="text-sm">Admitted</span></div><span className="font-bold text-lg">{summary.admitted}</span></CardContent></Card>
+                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-yellow-600"><Clock className="w-4 h-4" />
+                    <span className="text-sm">Pending</span></div><span className="font-bold text-lg">{summary.pending}</span></CardContent></Card>
+                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-orange-600"><Calendar className="w-4 h-4" />
+                    <span className="text-sm">Completed</span></div><span className="font-bold text-lg">{summary.completed}</span></CardContent></Card>
+                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-gray-600"><Calendar className="w-4 h-4" />
+                    <span className="text-sm">Canceled</span></div><span className="font-bold text-lg">{summary.canceled}</span></CardContent></Card>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <Input placeholder="Search appointments by ID or patient name..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full" />
+            </div>
+
+            <div className="rounded-lg border overflow-x-auto">
+                <table className="w-full text-sm">
+                    <thead className="bg-muted text-gray-600 text-left">
+                        <tr>
+                            <th className="p-4">Appointment</th>
+                            <th>Patient</th>
+                            <th>Status</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filtered.map((app) => (
+                            <tr key={app._id} className="border-t hover:bg-muted/30">
+                                <td className="p-4">
+                                    <div className="font-medium text-blue-600">{app.appointmentNumber}</div>
+                                    <div className="text-xs text-muted-foreground">{app.createdAt?.slice(0, 10)}</div>
+                                </td>
+                                <td>
+                                    <div>{app.patient?.name}</div>
+                                    <div className="text-xs text-muted-foreground">{app.patient?.phoneNumber}</div>
+                                </td>
+                                <td>{getStatusBadge(app.status)}</td>
+                                <td>{app.createdAt?.slice(0, 10)}</td>
+                                <td className="flex gap-2 p-2 mt-5 flex-wrap">
+                                    <button onClick={() => { setSelectedAppointment(app); setShowViewDialog(true); }}>
+                                        <Eye className="w-4 h-4 text-primary hover:scale-110 cursor-pointer" />
+                                    </button>
+                                    <button onClick={() => { setSelectedAppointment(app); setShowUpdateDialog(true); }}>
+                                        <PenLine className="w-4 h-4 text-emerald-600 hover:scale-110" />
+                                    </button>
+                                    <button onClick={() => { setSelectedAppointment(app); setShowDeleteDialog(true); }}>
+                                        <Trash className="w-4 h-4 text-red-600 hover:scale-110" />
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                        {filtered.length === 0 && (
+                            <tr>
+                                <td colSpan={5} className="text-center p-4 text-muted-foreground">
+                                    No appointments found.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Example dialogs (you'd build these) */}
+
+            <UpdateAppointmentDialog open={showUpdateDialog} appointment={selectedAppointment} onClose={() => setShowUpdateDialog(false)} />
+            {/* <DeleteAppointmentDialog open={showDeleteDialog} appointment={selectedAppointment} onClose={() => setShowDeleteDialog(false)} />  */}
+
+        </div>
+    );
 }
