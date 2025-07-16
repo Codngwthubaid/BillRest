@@ -10,6 +10,7 @@ export interface Patient {
   clinic: string;
   name: string;
   phoneNumber: string;
+  appointments?: string;
   address?: string;
   age?: number;
   gender?: "Male" | "Female" | "Other";

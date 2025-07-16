@@ -1,8 +1,7 @@
-"use client";
 import { useEffect, useState } from "react";
 import { useAppointmentStore } from "@/store/appointment.store";
 import { useAuthStore } from "@/store/auth.store";
-import { Loader2, Calendar, Clock, FileText, IndianRupee, PenLine, Trash, Eye } from "lucide-react";
+import { Loader2, Calendar, Clock, FileText, IndianRupee, PenLine, Trash } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,17 +10,15 @@ import { Button } from "@/components/ui/button";
 import CreateAppointmentDialog from "@/components/appointments/createAppointment";
 import UpdateAppointmentDialog from "@/components/appointments/updateAppointment";
 import { DeleteAppointmentDialog } from "@/components/appointments/deleteAppointment";
-// import your Appointment dialogs here when you build them
-// import ViewAppointmentDialog from "@/components/appointments/ViewAppointmentDialog";
 
 export default function Appointments() {
     const { user } = useAuthStore();
-    const { appointments, fetchAppointments } = useAppointmentStore();
+    const { appointments, fetchAppointments, deleteAppointment } = useAppointmentStore();
 
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
+
     const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
-    const [showViewDialog, setShowViewDialog] = useState(false);
     const [showUpdateDialog, setShowUpdateDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -33,6 +30,13 @@ export default function Appointments() {
         };
         fetch();
     }, [fetchAppointments]);
+
+    const handleDelete = async () => {
+        if (!selectedAppointment?._id) return;
+        await deleteAppointment(selectedAppointment._id);
+        await fetchAppointments();
+        setShowDeleteDialog(false);
+    };
 
     const summary = {
         total: appointments.length,
@@ -83,16 +87,11 @@ export default function Appointments() {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-6">
-                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-blue-600"><FileText className="w-4 h-4" />
-                    <span className="text-sm">Total</span></div><span className="font-bold text-lg">{summary.total}</span></CardContent></Card>
-                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-green-600"><IndianRupee className="w-4 h-4" />
-                    <span className="text-sm">Admitted</span></div><span className="font-bold text-lg">{summary.admitted}</span></CardContent></Card>
-                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-yellow-600"><Clock className="w-4 h-4" />
-                    <span className="text-sm">Pending</span></div><span className="font-bold text-lg">{summary.pending}</span></CardContent></Card>
-                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-orange-600"><Calendar className="w-4 h-4" />
-                    <span className="text-sm">Completed</span></div><span className="font-bold text-lg">{summary.completed}</span></CardContent></Card>
-                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-gray-600"><Calendar className="w-4 h-4" />
-                    <span className="text-sm">Canceled</span></div><span className="font-bold text-lg">{summary.canceled}</span></CardContent></Card>
+                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-blue-600"><FileText className="w-4 h-4" /><span className="text-sm">Total</span></div><span className="font-bold text-lg">{summary.total}</span></CardContent></Card>
+                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-green-600"><IndianRupee className="w-4 h-4" /><span className="text-sm">Admitted</span></div><span className="font-bold text-lg">{summary.admitted}</span></CardContent></Card>
+                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-yellow-600"><Clock className="w-4 h-4" /><span className="text-sm">Pending</span></div><span className="font-bold text-lg">{summary.pending}</span></CardContent></Card>
+                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-orange-600"><Calendar className="w-4 h-4" /><span className="text-sm">Completed</span></div><span className="font-bold text-lg">{summary.completed}</span></CardContent></Card>
+                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-gray-600"><Calendar className="w-4 h-4" /><span className="text-sm">Canceled</span></div><span className="font-bold text-lg">{summary.canceled}</span></CardContent></Card>
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
@@ -124,9 +123,6 @@ export default function Appointments() {
                                 <td>{getStatusBadge(app.status)}</td>
                                 <td>{app.createdAt?.slice(0, 10)}</td>
                                 <td className="flex gap-2 p-2 mt-5 flex-wrap">
-                                    <button onClick={() => { setSelectedAppointment(app); setShowViewDialog(true); }}>
-                                        <Eye className="w-4 h-4 text-primary hover:scale-110 cursor-pointer" />
-                                    </button>
                                     <button onClick={() => { setSelectedAppointment(app); setShowUpdateDialog(true); }}>
                                         <PenLine className="w-4 h-4 text-emerald-600 hover:scale-110" />
                                     </button>
@@ -147,11 +143,15 @@ export default function Appointments() {
                 </table>
             </div>
 
-            {/* Example dialogs (you'd build these) */}
-
             <UpdateAppointmentDialog open={showUpdateDialog} appointment={selectedAppointment} onClose={() => setShowUpdateDialog(false)} />
-            {/* <DeleteAppointmentDialog open={showDeleteDialog} appointment={selectedAppointment} onClose={() => setShowDeleteDialog(false)} />  */}
 
+            <DeleteAppointmentDialog
+                open={showDeleteDialog}
+                patientName={selectedAppointment?.patient?.name ?? ""}
+                onClose={() => setShowDeleteDialog(false)}
+                onConfirmDelete={handleDelete}
+            />
         </div>
     );
 }
+

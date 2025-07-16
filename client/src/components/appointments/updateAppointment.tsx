@@ -80,7 +80,7 @@ export default function UpdateAppointmentDialog({
                 value={form.gender ?? ""}
                 onValueChange={(value) => setForm({ ...form, gender: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Gender" />
                 </SelectTrigger>
                 <SelectContent>
@@ -100,35 +100,41 @@ export default function UpdateAppointmentDialog({
               onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
             <div className="grid grid-cols-2 gap-4">
-              <Select
-                value={form.status ?? "Pending"}
-                onValueChange={(value) =>
-                  setForm({ ...form, status: value as "Pending" | "Completed" | "Canceled" })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="Admitted">Admitted</SelectItem>
-                  <SelectItem value="Discharged">Discharged</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select
-                value={form.admitted ? "Yes" : "No"}
-                onValueChange={(value) =>
-                  setForm({ ...form, admitted: value === "Yes" })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Admitted?" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Yes">Yes</SelectItem>
-                  <SelectItem value="No">No</SelectItem>
-                </SelectContent>
-              </Select>
+              <div>
+                <label className="text-base font-medium">Status</label>
+                <Select
+                  value={form.status ?? "Pending"}
+                  onValueChange={(value) =>
+                    setForm({ ...form, status: value as "Pending" | "Completed" | "Canceled" })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="Admitted">Admitted</SelectItem>
+                    <SelectItem value="Discharged">Discharged</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-base font-medium">Admitted</label>
+                <Select
+                  value={form.admitted ? "Yes" : "No"}
+                  onValueChange={(value) =>
+                    setForm({ ...form, admitted: value === "Yes" })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Admitted?" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Yes">Yes</SelectItem>
+                    <SelectItem value="No">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 

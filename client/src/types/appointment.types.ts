@@ -11,6 +11,11 @@ export interface Patient {
 
 export interface Appointment {
   _id: string;
+  name: string;
+  phoneNumber: string;
+  address?: string;
+  age?: number;
+  gender?: string;
   clinic: string;
   patient: Patient;
   appointmentNumber: string;

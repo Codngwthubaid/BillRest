@@ -16,7 +16,7 @@ export function DeleteAppointmentDialog({
 }: DeleteAppointmentDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="max-w-fit">
         <DialogHeader>
           <DialogTitle>Delete Appointment</DialogTitle>
         </DialogHeader>
