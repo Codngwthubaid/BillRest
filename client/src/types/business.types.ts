@@ -10,22 +10,6 @@ export interface BusinessFeatures {
   backup?: boolean;
 }
 
-// export interface Business {
-//   _id?: string;
-//   user: string;
-//   businessName: string;
-//   address?: string;
-//   gstNumber?: string;
-//   defaultCurrency: "INR" | "USD" | "AED";
-//   gstSlabs: GstSlab[];
-//   isOnboarded: boolean;
-//   protectedPin?: string;
-//   features?: BusinessFeatures;
-//   createdAt?: string;
-//   updatedAt?: string;
-// }
-
-
 export interface Business {
   _id?: string;
   user: {
