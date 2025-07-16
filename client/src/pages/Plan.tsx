@@ -8,22 +8,44 @@ import { createOrder, verifyAndActivate } from "@/services/subscription.service"
 
 export default function Plans() {
   const {
-    packagePlans,
-    individualPlans,
-    fetchPackagePlans,
-    fetchIndividualPlans
+    packageGeneralPlans,
+    packageHealthPlans,
+    individualGeneralPlans,
+    individualHealthPlans,
+
+    fetchIndividualGeneralPlans,
+    fetchIndividualHealthPlans,
+    fetchPackageGeneralPlans,
+    fetchPackageHealthPlans
   } = usePlanStore();
 
   const [isLoading, setIsLoading] = useState(true);
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
 
-  console.log(packagePlans)
+  // determine plan type
+  const isCustomer = user?.role === "customer";
+  const isClinic = user?.role === "clinic";
+
+  const packagePlans = isCustomer ? packageGeneralPlans : isClinic ? packageHealthPlans : [];
+  const individualPlans = isCustomer ? individualGeneralPlans : isClinic ? individualHealthPlans : [];
 
   useEffect(() => {
-    fetchPackagePlans();
-    fetchIndividualPlans();
-  }, [fetchPackagePlans, fetchIndividualPlans]);
+    if (isCustomer) {
+      fetchPackageGeneralPlans();
+      fetchIndividualGeneralPlans();
+    } else if (isClinic) {
+      fetchPackageHealthPlans();
+      fetchIndividualHealthPlans();
+    }
+  }, [
+    isCustomer,
+    isClinic,
+    fetchPackageGeneralPlans,
+    fetchIndividualGeneralPlans,
+    fetchPackageHealthPlans,
+    fetchIndividualHealthPlans,
+  ]);
 
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
@@ -104,110 +126,43 @@ export default function Plans() {
           </p>
         </div>
 
-        {/* {packagePlans?.length > 0 && (
-          <div className="mb-20">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {packagePlans.map((plan) => {
-                const isRecommended =
-                  plan.name.toLowerCase() === "12 months" && plan.durationInDays === 365;
-
-                return (
-                  <div
-                    key={plan._id}
-                    className={`relative rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 dark:bg-[#171717] 
-              ${isRecommended ? "border-2 border-blue-500" : ""}
-            `}
-                  >
-                    {isRecommended && (
-                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-sm font-semibold px-3 py-1 rounded-full shadow">
-                        Recommended
-                      </div>
-                    )}
-
-                    <div className="p-8">
-                      <div className="text-center mb-6">
-                        <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                      </div>
-
-                      <div className="text-center mb-6">
-                        <span className="text-4xl font-bold">₹{plan.pricePerMonth}</span>
-                        <div className="text-gray-600">/month</div>
-                        <div className="text-sm mt-1">
-                          {plan.durationInDays} days • ₹{plan.totalPrice} total
-                        </div>
-                      </div>
-
-                      <ul className="list-disc list-inside space-y-2 mb-6">
-                        {Array.isArray(plan.description) ? (
-                          plan.description.map((point, idx) => (
-                            <li key={idx}>{point}</li>
-                          ))
-                        ) : (
-                          <li>{plan.description}</li>
-                        )}
-                      </ul>
-
-                      <button
-                        onClick={() => handleBuyPlan(plan._id)}
-                        className="w-full py-4 px-6 rounded-xl border-2 font-semibold text-lg transition-all duration-300 hover:text-blue-500 hover:bg-blue-50"
-                      >
-                        Get Started
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )} */}
-
         {packagePlans?.length > 0 && (
           <div className="mb-20">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {packagePlans.map((plan) => {
-                const isRecommended =
-                  plan.name.toLowerCase() === "12 months" && plan.durationInDays === 365;
-
+                const isRecommended = plan.name.toLowerCase() === "12 months" && plan.durationInDays === 365;
                 return (
                   <div
                     key={plan._id}
                     className={`relative rounded-2xl border p-8 flex flex-col items-center text-center
-              transition-all duration-300 hover:shadow-xl hover:-translate-y-1
-              ${isRecommended ? "border-blue-500" : "border-gray-200"}
-              dark:bg-[#171717] dark:border-gray-700`}
+                  transition-all duration-300 hover:shadow-xl hover:-translate-y-1
+                  ${isRecommended ? "border-blue-500" : "border-gray-200"}
+                  dark:bg-[#171717] dark:border-gray-700`}
                   >
                     {isRecommended && (
                       <div className="absolute top-0 left-0 w-full bg-blue-600 text-white text-xs font-semibold py-2 rounded-t-2xl">
                         RECOMMENDED
                       </div>
                     )}
-
                     <div className="mt-6">
                       <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
                       <div className="text-4xl font-bold mb-1">
                         ₹{plan.pricePerMonth}.00
                         <span className="text-base font-medium text-gray-600">/mo</span>
                       </div>
-
                       <div className="text-sm text-gray-500 mb-6">
                         {plan.durationInDays} days • ₹{plan.totalPrice} total
                       </div>
-
                       <button
                         onClick={() => handleBuyPlan(plan._id)}
                         className="w-full py-3 px-6 rounded-md bg-blue-500 hover:bg-blue-600 text-white font-semibold text-lg transition-all duration-300"
                       >
                         Choose plan
                       </button>
-
                       <ul className="list-disc list-inside space-y-2 mb-6 text-left mt-10">
-                        {Array.isArray(plan.description) ? (
-                          plan.description.map((point, idx) => (
-                            <li key={idx}>{point}</li>
-                          ))
-                        ) : (
-                          <li>{plan.description}</li>
-                        )}
+                        {Array.isArray(plan.description)
+                          ? plan.description.map((point, idx) => <li key={idx}>{point}</li>)
+                          : <li>{plan.description}</li>}
                       </ul>
                     </div>
                   </div>
@@ -217,15 +172,12 @@ export default function Plans() {
           </div>
         )}
 
-
-
         {individualPlans?.length > 0 && (
           <div>
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4">Add-On Services</h2>
               <p className="text-gray-600">Boost your website with powerful additional features</p>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               {individualPlans.map((plan) => (
                 <div
@@ -240,14 +192,12 @@ export default function Plans() {
                         <p className="text-sm">{plan.description}</p>
                       </div>
                     </div>
-
                     <div className="mb-6">
                       <div className="flex items-baseline gap-1">
                         <span className="text-3xl font-bold">₹{plan.pricePerMonth}</span>
                         <span className="text-gray-600">/month</span>
                       </div>
                     </div>
-
                     <button
                       onClick={() => handleBuyPlan(plan._id)}
                       className="w-full hover:text-blue-500 hover:bg-blue-50 py-3 px-6 border-2 rounded-xl font-semibold transition-all duration-300"

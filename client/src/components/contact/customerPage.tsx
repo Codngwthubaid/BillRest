@@ -71,7 +71,7 @@ export default function CustomerPage() {
 
     return (
         <div className="mx-auto px-4 py-8 space-y-12 max-w-5xl">
-            <Card>
+            <Card className='py-5'>
                 <CardHeader>
                     <CardTitle className='text-2xl font-bold'>Contact Support</CardTitle>
                     <CardDescription>Fill out the form below and we&apos;ll respond to your issue shortly.</CardDescription>

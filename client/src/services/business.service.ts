@@ -13,13 +13,11 @@ interface BusinessResponse {
   business: Business;
 }
 
-// Create or update business profile
 export const upsertBusiness = async (payload: BusinessPayload): Promise<BusinessResponse> => {
   const res = await axiosInstance.post("/business", payload);
   return res.data;
 };
 
-// Fetch business details by current user
 export const getBusiness = async (): Promise<Business> => {
   const res = await axiosInstance.get("/business");
   return res.data;

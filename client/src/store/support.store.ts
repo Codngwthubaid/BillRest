@@ -1,22 +1,30 @@
 import { create } from 'zustand';
 import type { SupportTicket } from '@/types/support.types';
+import { useAuthStore } from './auth.store';
+
 import {
-  createSupportTicket,
-  getMyTickets,
-  getTicketBySerialNumber,
-  getAllSupportTickets,
-  updateTicketStatus, // ✅ NEW
+  createSupportTicketForGeneral,
+  getMyTicketsForGeneral,
+  getTicketBySerialNumberForGeneral,
+  getAllSupportTicketsForGeneral,
+  updateTicketStatusForGeneral,
+
+  createSupportTicketForHealth,
+  getMyTicketsForHealth,
+  getTicketBySerialNumberForHealth,
+  getAllSupportTicketsForHealth,
+  updateTicketStatusForHealth,
 } from '@/services/support.service';
 
 interface SupportStore {
   tickets: SupportTicket[];
-  allTickets: SupportTicket[]; // ✅ NEW
+  allTickets: SupportTicket[];
   ticket?: SupportTicket;
   loading: boolean;
   error: string | null;
 
   fetchTickets: () => Promise<void>;
-  fetchAllTickets: () => Promise<void>; // ✅ NEW
+  fetchAllTickets: () => Promise<void>;
   fetchTicketBySerialNumber: (serialNumber: number) => Promise<void>;
   submitTicket: (subject: string, message: string) => Promise<void>;
   updateTicketStatus: (id: string, status: string) => Promise<void>;
@@ -24,7 +32,7 @@ interface SupportStore {
 
 export const useSupportStore = create<SupportStore>((set) => ({
   tickets: [],
-  allTickets: [], // ✅ NEW
+  allTickets: [],
   ticket: undefined,
   loading: false,
   error: null,
@@ -32,7 +40,10 @@ export const useSupportStore = create<SupportStore>((set) => ({
   fetchTickets: async () => {
     try {
       set({ loading: true });
-      const tickets = await getMyTickets();
+      const user = useAuthStore.getState().user;
+      const tickets = user?.role === 'clinic'
+        ? await getMyTicketsForHealth()
+        : await getMyTicketsForGeneral();
       set({ tickets, loading: false });
     } catch (err: any) {
       set({ error: err.message || 'Failed to fetch tickets', loading: false });
@@ -42,19 +53,23 @@ export const useSupportStore = create<SupportStore>((set) => ({
   fetchAllTickets: async () => {
     try {
       set({ loading: true });
-      const { tickets } = await getAllSupportTickets();
-      console.log("Loaded all support tickets:", tickets);
+      const user = useAuthStore.getState().user;
+      const tickets = user?.role === 'clinic'
+        ? await getAllSupportTicketsForHealth()
+        : await getAllSupportTicketsForGeneral();
       set({ allTickets: tickets, loading: false });
     } catch (err: any) {
       set({ error: err.message || 'Failed to fetch all tickets', loading: false });
     }
   },
 
-
   fetchTicketBySerialNumber: async (serialNumber) => {
     try {
       set({ loading: true });
-      const ticket = await getTicketBySerialNumber(serialNumber);
+      const user = useAuthStore.getState().user;
+      const ticket = user?.role === 'clinic'
+        ? await getTicketBySerialNumberForHealth(serialNumber)
+        : await getTicketBySerialNumberForGeneral(serialNumber);
       set({ ticket, loading: false });
     } catch (err: any) {
       set({ error: err.message || 'Failed to fetch ticket', loading: false });
@@ -64,10 +79,13 @@ export const useSupportStore = create<SupportStore>((set) => ({
   submitTicket: async (subject, message) => {
     try {
       set({ loading: true });
-      const { ticket } = await createSupportTicket({ subject, message });
+      const user = useAuthStore.getState().user;
+      const { ticket } = user?.role === 'clinic'
+        ? await createSupportTicketForHealth({ subject, message })
+        : await createSupportTicketForGeneral({ subject, message });
       set((state) => ({
         tickets: [ticket, ...state.tickets],
-        allTickets: [ticket, ...state.allTickets], // ✅ keep admin list updated too
+        allTickets: [ticket, ...state.allTickets],
         loading: false,
       }));
     } catch (err: any) {
@@ -75,10 +93,14 @@ export const useSupportStore = create<SupportStore>((set) => ({
     }
   },
 
-  updateTicketStatus: async (id: string, status: string) => { // ✅ new
+  updateTicketStatus: async (id, status) => {
     try {
       set({ loading: true });
-      const { ticket } = await updateTicketStatus(id, status);
+      const user = useAuthStore.getState().user;
+      const { ticket } = user?.role === 'clinic'
+        ? await updateTicketStatusForHealth(id, status)
+        : await updateTicketStatusForGeneral(id, status);
+
       set((state) => ({
         tickets: state.tickets.map(t => t._id === ticket._id ? ticket : t),
         allTickets: state.allTickets.map(t => t._id === ticket._id ? ticket : t),

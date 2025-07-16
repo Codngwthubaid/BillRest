@@ -7,7 +7,7 @@ export default function ContactPage() {
     const { user } = useAuthStore();
     return (
         <>
-            {user?.role === "customer" && <CustomerPage />}
+            {(user?.role === "customer" || user?.role === "clinic") && <CustomerPage />}
             {(user?.role === "support" || user?.role === "master") && <SupportAndMasterContactPage />}
         </>
     )

@@ -11,13 +11,13 @@ import {
 const router = express.Router();
 
 // General Plans
-router.get("/general", getAllGeneralPlans);                     // /api/plans/general
-router.get("/general/packages", getGeneralPackagePlans);        // /api/plans/general/packages
-router.get("/general/individuals", getGeneralIndividualPlans);  // /api/plans/general/individuals
+router.get("/general", getAllGeneralPlans);                     
+router.get("/general/packages", getGeneralPackagePlans);        
+router.get("/general/individuals", getGeneralIndividualPlans);  
 
 // Health Plans
-router.get("/health", getAllHealthPlans);                       // /api/plans/health
-router.get("/health/packages", getHealthPackagePlans);          // /api/plans/health/packages
-router.get("/health/individuals", getHealthIndividualPlans);    // /api/plans/health/individuals
+router.get("/health", getAllHealthPlans);                       
+router.get("/health/packages", getHealthPackagePlans);          
+router.get("/health/individuals", getHealthIndividualPlans);    
 
 export default router;

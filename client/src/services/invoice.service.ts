@@ -1,20 +1,17 @@
 import { axiosInstance } from "@/lib/axiosInstance";
 import type { AllInvoicesResponse, CreateInvoicePayload, Invoice } from "@/types/invoice.types";
 
-// ✅ Create new invoice
 export const createInvoice = async (payload: CreateInvoicePayload): Promise<{ message: string; invoice: Invoice }> => {
   const res = await axiosInstance.post("/invoices", payload);
   console.log(res.data)
   return res.data;
 };
 
-// ✅ Get all invoices
 export const getInvoices = async (): Promise<Invoice[]> => {
   const res = await axiosInstance.get("/invoices");
   return res.data;
 };
 
-// ✅ Update invoicev
 export const updateInvoice = async (
   id: string,
   payload: Partial<Invoice>
@@ -23,19 +20,16 @@ export const updateInvoice = async (
   return res.data;
 };
 
-// ✅ Delete invoice
 export const deleteInvoice = async (id: string): Promise<{ message: string }> => {
   const res = await axiosInstance.delete(`/invoices/${id}`);
   return res.data;
 };
 
-// ✅ Get invoice by ID
 export const getInvoiceById = async (id: string): Promise<Invoice> => {
   const res = await axiosInstance.get(`/invoices/${id}`);
   return res.data;
 };
 
-// ✅ Download invoice PDF
 export const downloadInvoicePDF = async (id: string): Promise<Blob> => {
   const res = await axiosInstance.get(`/invoices/${id}/download`, {
     responseType: "blob",
@@ -43,13 +37,11 @@ export const downloadInvoicePDF = async (id: string): Promise<Blob> => {
   return res.data;
 };
 
-// ✅ Send invoice via WhatsApp
 export const sendInvoiceOnWhatsApp = async (invoiceId: string): Promise<{ message: string }> => {
   const res = await axiosInstance.post(`/invoices/send-whatsapp/${invoiceId}`);
   return res.data;
 };
 
-// ✅ Trigger POS print by opening in new tab (browser handles printing)
 export const downloadPOSReceiptPDF = async (invoiceId: string, size: "58mm" | "80mm"): Promise<Blob> => {
   const res = await axiosInstance.get(`/invoices/${invoiceId}/pos-pdf?size=${size}`, {
     responseType: "blob"
@@ -57,14 +49,12 @@ export const downloadPOSReceiptPDF = async (invoiceId: string, size: "58mm" | "8
   return res.data;
 };
 
-// ✅ Print invoice as PDF
 export const printInvoicePDF = async (id: string): Promise<void> => {
   const printUrl = await axiosInstance.get(`/invoices/${id}/print`);
   console.log("Opening print invoice at:", printUrl.data);
   window.open(printUrl.data);
 };
 
-// ✅ Get all invoices
 export const getAllInvoices = async (): Promise<AllInvoicesResponse> => {
   const res = await axiosInstance.get("/invoices/allInvoices");
   console.log(res.data)
