@@ -20,7 +20,7 @@ export default function CustomerChart() {
   const { user } = useAuthStore();
   const role = user?.role;
 
-  const { data, fetchReport } = useReportStore();
+  const { generalReport: data, fetchGeneralReport: fetchReport } = useReportStore();
   const { allCustomers, fetchAllCustomers } = useCustomerStore();
 
   useEffect(() => {

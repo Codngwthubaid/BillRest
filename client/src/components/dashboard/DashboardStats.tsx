@@ -10,21 +10,24 @@ import { Card, CardContent } from "../ui/card";
 
 export default function DashboardStats() {
   const { user } = useAuthStore();
-  const { data, fetchReport } = useReportStore();
+  const { generalReport, healthReport, fetchHealthReport, fetchGeneralReport } = useReportStore();
   const { allCustomers, fetchAllCustomers } = useCustomerStore();
   const { businesses, fetchAllBusinesses } = useBusinessStore();
   const { allInvoices, fetchAllInvoices } = useInvoiceStore();
   const { allTickets, fetchAllTickets } = useSupportStore();
 
-  console.log("All Invoices :", allInvoices);
+
+  console.log("Health report:", healthReport);
+
 
   useEffect(() => {
-    fetchReport("monthly", new Date().toISOString().split("T")[0]);
+    fetchGeneralReport("monthly", new Date().toISOString().split("T")[0]);
+    fetchHealthReport("monthly", new Date().toISOString().split("T")[0]);
     fetchAllCustomers();
     fetchAllBusinesses();
     fetchAllInvoices();
     fetchAllTickets();
-  }, [fetchReport, fetchAllCustomers, fetchAllBusinesses, fetchAllInvoices, fetchAllTickets]);
+  }, [fetchGeneralReport, fetchHealthReport , fetchAllCustomers, fetchAllBusinesses, fetchAllInvoices, fetchAllTickets]);
 
   let dashboardStats = [];
 
@@ -80,21 +83,21 @@ export default function DashboardStats() {
     dashboardStats = [
       {
         title: "Total Appointments",
-        value: `${data?.totalSales?.toFixed(2) || "0.00"}`,
+        value: `${healthReport?.totalAppointments}`,
         icon: FileTerminal,
         color: "bg-green-500",
         roles: ["clinic"],
       },
       {
         title: "Total Services",
-        value: `${data?.totalSales?.toFixed(2) || "0.00"}`,
+        value: `${healthReport?.totalServices}`,
         icon: ListOrdered,
         color: "bg-blue-500",
         roles: ["clinic"],
       },
       {
         title: "Total Patients",
-        value: `${data?.totalSales?.toFixed(2) || "0.00"}`,
+        value: `${healthReport?.totalPatients}`,
         icon: SquareUserRound,
         color: "bg-purple-500",
         roles: ["clinic"],
@@ -104,21 +107,21 @@ export default function DashboardStats() {
     dashboardStats = [
       {
         title: "Total Sales",
-        value: `₹${data?.totalSales?.toFixed(2) || "0.00"}`,
+        value: `₹${generalReport?.totalSales?.toFixed(2) || "0.00"}`,
         icon: IndianRupee,
         color: "bg-green-500",
         roles: ["customer"],
       },
       {
         title: "Invoices",
-        value: data?.count || 0,
+        value: generalReport?.count || 0,
         icon: FileText,
         color: "bg-blue-500",
         roles: ["customer"],
       },
       {
         title: "Top Products",
-        value: data?.topProducts?.length || 0,
+        value: generalReport?.topProducts?.length || 0,
         icon: Package,
         color: "bg-purple-500",
         roles: ["customer"],

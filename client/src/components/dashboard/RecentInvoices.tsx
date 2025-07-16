@@ -12,7 +12,7 @@ export default function RecentInvoices() {
   const { user } = useAuthStore();
   const role = user?.role;
 
-  const { data: customerInvoices } = useReportStore();
+  const { generalReport: customerInvoices } = useReportStore();
   const { fetchAllCustomers } = useCustomerStore();
   const { allInvoices, fetchAllInvoices } = useInvoiceStore();
 

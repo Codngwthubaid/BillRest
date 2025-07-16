@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { Package } from "lucide-react";
 
 export default function TopProducts() {
-  const { data } = useReportStore();
+  const { generalReport: data } = useReportStore();
 
   return (
     <Card className="rounded-lg shadow-sm border">

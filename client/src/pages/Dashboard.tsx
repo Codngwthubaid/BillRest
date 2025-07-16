@@ -48,13 +48,6 @@ export default function Dashboard() {
             <CustomerChart />
           </>
         )}
-        
-        {(user?.role === "clinic" || user?.role === "support" || user?.role === "master") && (
-          <>
-            <RecentAppointments />
-            <PatientChart />
-          </>
-        )}
 
         {user?.role === "customer" && (
           <>
@@ -63,9 +56,16 @@ export default function Dashboard() {
           </>
         )}
 
+        {(user?.role === "clinic" || user?.role === "support" || user?.role === "master") && (
+          <>
+            <RecentAppointments />
+            <TopServices />
+          </>
+        )}
+
         {user?.role === "clinic" && (
           <>
-            <TopServices />
+            <PatientChart />
             <TopServicesChart />
           </>
         )}

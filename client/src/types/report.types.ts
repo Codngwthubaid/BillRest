@@ -34,3 +34,96 @@ export interface SalesReportResponse {
   topProducts: ReportProduct[];
   invoices: ReportInvoice[];
 }
+
+// -------- NEW: for health report --------
+export interface ReportTreatment {
+  service: string;
+  quantity: number;
+  totalSales: number;
+}
+
+export interface IPDBilling {
+  roomCharges: number;
+  serviceCharges: number;
+  medicineCharges: number;
+  otherCharges: { itemName: string; amount: number }[];
+  total: number;
+}
+
+export interface ReportIPD {
+  _id: string;
+  ipdNumber: string;
+  admissionDate: string;
+  dischargeDate?: string;
+  billing: IPDBilling;
+  status: "Admitted" | "Discharged";
+  patient: string;
+  createdAt: string;
+}
+
+// New type for top patients
+export interface TopPatient {
+  _id: string;
+  name: string;
+  phoneNumber: string;
+  visits: number;
+}
+
+// New type for top appointments
+export interface TopAppointment {
+  description: string;
+  count: number;
+}
+
+export interface Patient {
+  _id: string;
+  name: string;
+  phoneNumber: string;
+  age: number;
+  gender: string;
+  address: string;
+  clinic: string;
+  visits: string[];
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface Appointment {
+  _id: string;
+  appointmentNumber: string;
+  clinic: string;
+  createdAt: string;
+  description: string;
+  admitted: boolean;
+  patient: Patient;
+}
+
+export interface Service {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  gstRate: number;
+  unit: string;
+  category: string;
+  clinic: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface HealthSalesReport {
+  totalRevenue: number;
+  count: number;
+  topServices: ReportTreatment[];
+  ipds: ReportIPD[];
+  totalAppointments: number;
+  totalPatients: number;
+  totalServices: number;
+  topPatients: TopPatient[];
+  topAppointments: TopAppointment[];
+  appointments: Appointment[]
+  services: Service[]
+  patients: Patient[]
+}

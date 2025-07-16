@@ -1,5 +1,5 @@
 import { axiosInstance } from "@/lib/axiosInstance";
-import type { SalesReportResponse } from "@/types/report.types";
+import type { HealthSalesReport, SalesReportResponse } from "@/types/report.types";
 
 export type ReportFilterType =
   | "daily"
@@ -29,7 +29,7 @@ export const getSalesReportForHealth = async (
   filterType: ReportFilterType,
   startDate: string,
   endDate?: string
-): Promise<SalesReportResponse> => {
+): Promise<HealthSalesReport> => {
   const queryParams = new URLSearchParams({
     filterType,
     startDate,
@@ -37,5 +37,6 @@ export const getSalesReportForHealth = async (
   });
 
   const res = await axiosInstance.get(`/report/sales/health/?${queryParams}`);
+  console.log(res);
   return res.data;
 };

@@ -33,7 +33,6 @@ const billingSchema = new mongoose.Schema({
   total: { type: Number, default: 0 }
 });
 
-
 const ipdSchema = new mongoose.Schema(
   {
     clinic: {
@@ -45,6 +44,10 @@ const ipdSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Patient",
       required: true,
+    },
+    appointment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Appointment"
     },
     ipdNumber: {
       type: String,
