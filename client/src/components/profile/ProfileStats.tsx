@@ -5,11 +5,11 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "../ui/skeleton";
 import { format } from "date-fns";
-import { IndianRupee , FileText, Package } from "lucide-react";
+import { IndianRupee, FileText, Package } from "lucide-react";
 
 export default function ProfileStats() {
     const { products, fetchProducts } = useProductStore();
-    const { data: reportData, fetchReport, loading } = useReportStore();
+    const { generalReport: reportData, fetchGeneralReport: fetchReport, loading } = useReportStore();
     const [currency, setCurrency] = useState("INR");
 
     useEffect(() => {
@@ -69,7 +69,7 @@ export default function ProfileStats() {
         {
             label: "Total Sales",
             value: `${symbol} ${reportData?.totalSales?.toFixed(2) || "0.00"}`,
-            icon: IndianRupee ,
+            icon: IndianRupee,
             color: "bg-purple-100 text-purple-600",
         },
     ];

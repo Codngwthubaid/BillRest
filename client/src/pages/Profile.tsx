@@ -44,7 +44,7 @@ export default function ProfilePage() {
                 </>
             )}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {user?.role === "customer" && (
+                {(user?.role === "customer" || user?.role === "clinic") && (
                     <>
                         <UserProfileDetails />
                         <ProfileStats />
