@@ -1,10 +1,12 @@
-import ProfileStats from "@/components/profile/ProfileStats";
-import UserProfileDetails from "@/components/profile/UserProfileDetails";
 import SupportAndAdminProfileLayout from "@/components/profile/SupportAndAdminProfileLayout";
 import { useAuthStore } from "@/store/auth.store";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import DashboardStats from "@/components/dashboard/DashboardStats";
+import ProfileStatsForHealth from "@/components/profile/ProfileStatsForHealth";
+import ProfileStatsForGeneral from "@/components/profile/ProfileStatsForGeneral";
+import UserProfileDetailsForGeneral from "@/components/profile/UserProfileDetailsForGeneral";
+import UserProfileDetailsForHealth from "@/components/profile/UserProfileDetailsForHealth";
 
 
 export default function ProfilePage() {
@@ -44,10 +46,18 @@ export default function ProfilePage() {
                 </>
             )}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {(user?.role === "customer" || user?.role === "clinic") && (
+                {user?.role === "customer" && (
                     <>
-                        <UserProfileDetails />
-                        <ProfileStats />
+                        <UserProfileDetailsForGeneral />
+                        <ProfileStatsForGeneral />
+                    </>
+                )}
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {user?.role === "clinic" && (
+                    <>
+                        <UserProfileDetailsForHealth />
+                        <ProfileStatsForHealth />
                     </>
                 )}
             </div>

@@ -15,11 +15,11 @@ import { format } from "date-fns";
 import ProtectedPinDialog from "../invoices/ProtectedPinDialog";
 import { useSubscriptionStore } from "@/store/subscription.store";
 
-export default function UserProfileDetails() {
+export default function UserProfileDetailsForGeneral() {
   const { user } = useAuthStore();
   const { business, loading, error, fetchBusiness } = useBusinessStore();
   const { currentSubscription, fetchUserSubscription } = useSubscriptionStore();
-  const { data: reportData } = useReportStore();
+  const { generalReport: reportData } = useReportStore();
 
   const [open, setOpen] = useState(false);
   const [localPin, setLocalPin] = useState("");

@@ -1,7 +1,6 @@
 import { Clinic } from "../models/clinic.model.js";
 import { User } from "../models/user.model.js";
 
-// 🔥 Create or Update Clinic Profile
 export const createOrUpdateClinic = async (req, res) => {
   try {
     const {
@@ -14,7 +13,6 @@ export const createOrUpdateClinic = async (req, res) => {
 
     const userId = req.user.id;
 
-    // Update User basic profile
     const user = await User.findByIdAndUpdate(
       userId,
       { name, phone },
@@ -23,16 +21,13 @@ export const createOrUpdateClinic = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Check if clinic exists
     let clinic = await Clinic.findOne({ user: userId });
 
     if (clinic) {
-      // Handle protectedPin lock
       if (clinic.protectedPin && protectedPin && clinic.protectedPin !== protectedPin) {
         return res.status(400).json({ message: "Protected PIN is already set and cannot be changed." });
       }
 
-      // Update details
       clinic.businessName = businessName;
       clinic.address = address;
       clinic.isOnboarded = true;
@@ -43,7 +38,6 @@ export const createOrUpdateClinic = async (req, res) => {
 
       await clinic.save();
     } else {
-      // Create new clinic
       clinic = await Clinic.create({
         user: userId,
         businessName,
@@ -65,7 +59,6 @@ export const createOrUpdateClinic = async (req, res) => {
   }
 };
 
-// 🔥 Get Clinic by User
 export const getClinicByUser = async (req, res) => {
   try {
     const userId = req.user.id;

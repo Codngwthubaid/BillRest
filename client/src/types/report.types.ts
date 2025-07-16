@@ -93,6 +93,7 @@ export interface Appointment {
   _id: string;
   appointmentNumber: string;
   clinic: string;
+  status: "Pending" | "Completed" | "Canceled";
   createdAt: string;
   description: string;
   admitted: boolean;
