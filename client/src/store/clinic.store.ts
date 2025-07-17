@@ -1,77 +1,28 @@
-// import { create } from "zustand";
-// import type { Clinic } from "@/types/clinic.types";
-// import { createOrUpdateClinic, getClinicProfile } from "@/services/clinic.service";
-
-// interface ClinicStore {
-//   clinic?: Clinic;
-//   loading: boolean;
-//   error: string | null;
-
-//   fetchClinic: () => Promise<void>;
-//   saveClinicProfile: (data: {
-//     name: string;
-//     phone: string;
-//     businessName: string;
-//     address?: string;
-//     protectedPin?: string;
-//   }) => Promise<void>;
-// }
-
-// export const useClinicStore = create<ClinicStore>((set) => ({
-//   clinic: undefined,
-//   loading: false,
-//   error: null,
-
-//   fetchClinic: async () => {
-//     set({ loading: true, error: null });
-//     try {
-//       const clinic = await getClinicProfile();
-//       set({ clinic, loading: false });
-//     } catch (err: any) {
-//       set({ error: err.message || "Failed to fetch clinic profile", loading: false });
-//     }
-//   },
-
-//   saveClinicProfile: async (data) => {
-//     set({ loading: true, error: null });
-//     try {
-//       const { clinic } = await createOrUpdateClinic(data);
-//       set({ clinic, loading: false });
-//     } catch (err: any) {
-//       set({ error: err.message || "Failed to save clinic profile", loading: false });
-//     }
-//   },
-// }));
-
-
-
-
-
 import { create } from "zustand";
-import type { Clinic } from "@/types/clinic.types";
-import { createOrUpdateClinic, getClinicProfile } from "@/services/clinic.service";
+import type { Clinic, ClinicPayload } from "@/types/clinic.types";
+import { upsertClinic, getClinic } from "@/services/clinic.service";
+import { useAuthStore } from "./auth.store";
 
 interface ClinicStore {
   clinic: Clinic | null;
   loading: boolean;
   error: string | null;
+  isPinVerified: boolean;
 
+  verifyPin: () => void;
+  resetPinVerification: () => void;
   fetchClinic: () => Promise<void>;
-  saveClinicProfile: (data: {
-    name: string;
-    phone: string;
-    businessName: string;
-    address?: string;
-    protectedPin?: string;
-  }) => Promise<void>;
   clearClinic: () => void;
+  saveClinicProfile: (data: ClinicPayload) => Promise<void>;
 }
 
 export const useClinicStore = create<ClinicStore>((set) => {
+  const user = useAuthStore.getState().user;
+
   const loadClinic = async () => {
     set({ loading: true, error: null });
     try {
-      const clinic = await getClinicProfile();
+      const clinic = await getClinic();
       console.log("Loaded clinic:", clinic);
       set({ clinic, loading: false });
     } catch (err: any) {
@@ -84,27 +35,34 @@ export const useClinicStore = create<ClinicStore>((set) => {
     }
   };
 
-  // Note: commented so it doesn't auto-load; you will call fetchClinic() explicitly
-  loadClinic();
+  // Auto-load clinic if user is a clinic
+  if (user?.role === "clinic") {
+    loadClinic();
+  }
 
   return {
     clinic: null,
-    loading: false,
+    loading: true,
     error: null,
+    isPinVerified: false,
+
+    verifyPin: () => set({ isPinVerified: true }),
+    resetPinVerification: () => set({ isPinVerified: false }),
 
     fetchClinic: loadClinic,
+
     clearClinic: () => set({ clinic: null }),
 
     saveClinicProfile: async (data) => {
       set({ loading: true, error: null });
       try {
-        const { clinic } = await createOrUpdateClinic(data);
+        const { clinic } = await upsertClinic(data);
         console.log("Saved clinic profile:", clinic);
         set({ clinic, loading: false });
       } catch (err: any) {
-        console.error("Failed to save clinic:", err);
+        console.error("Failed to save clinic profile:", err);
         set({ error: err.message || "Failed to save clinic profile", loading: false });
       }
-    }
+    },
   };
 });

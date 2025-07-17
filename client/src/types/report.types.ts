@@ -57,7 +57,7 @@ export interface ReportIPD {
   dischargeDate?: string;
   billing: IPDBilling;
   status: "Admitted" | "Discharged";
-  patient: string;
+  patient: Patient;
   createdAt: string;
 }
 
@@ -91,6 +91,8 @@ export interface Patient {
 
 export interface Appointment {
   _id: string;
+  time: string;
+  date: string;
   appointmentNumber: string;
   clinic: string;
   status: "Pending" | "Completed" | "Canceled";

@@ -8,3 +8,19 @@ export interface Clinic {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ClinicPayload {
+  name: string;
+  phone: string;
+  businessName: string;
+  address?: string;
+  protectedPin?: string;
+}
+
+export interface ClinicFeatures {
+  // Example features
+  healthReportAccess?: boolean;
+  appointmentScheduling?: boolean;
+  customNotes?: boolean;
+  // Add more as needed
+}

@@ -227,11 +227,10 @@ export default function ReportsForHealth() {
                             )}
                         </CardContent>
 
-                        {/* Recent IPDs Table */}
                         <CardHeader className="px-0">
                             <CardTitle className="flex items-center gap-2 text-xl">
-                                <FileText className="h-6 w-6 text-blue-500" /> Recent IPDs
-                                <Badge variant="secondary" className="ml-2">{data.ipds.length}</Badge>
+                                <FileText className="h-6 w-6 text-blue-500" /> Recent Appointments
+                                <Badge variant="secondary" className="ml-2">{data.appointments.length}</Badge>
                             </CardTitle>
                         </CardHeader>
                         <CardContent className='px-0'>
@@ -239,29 +238,32 @@ export default function ReportsForHealth() {
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead>IPD #</TableHead>
+                                            <TableHead>#</TableHead>
+                                            <TableHead>AppointmentID</TableHead>
                                             <TableHead>Patient</TableHead>
-                                            <TableHead>Admission</TableHead>
-                                            <TableHead>Discharge</TableHead>
-                                            <TableHead>Total</TableHead>
+                                            <TableHead>Gender</TableHead>
+                                            <TableHead>Phone Number</TableHead>
+                                            <TableHead>Address</TableHead>
                                             <TableHead>Status</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {data.ipds.map((ipd, index) => (
-                                            <TableRow key={ipd._id} style={{ animationDelay: `${index * 50}ms` }}>
-                                                <TableCell className="font-mono text-sm font-medium text-blue-600">#{ipd.ipdNumber}</TableCell>
-                                                <TableCell>{ipd.patient}</TableCell>
-                                                <TableCell>{new Date(ipd.admissionDate).toLocaleDateString()}</TableCell>
-                                                <TableCell>{ipd.dischargeDate ? new Date(ipd.dischargeDate).toLocaleDateString() : '-'}</TableCell>
-                                                <TableCell>{ipd.billing.total.toLocaleString()}</TableCell>
-                                                <TableCell><Badge variant="outline">{ipd.status}</Badge></TableCell>
+                                        {data.appointments.map((appointment, index) => (
+                                            <TableRow key={appointment._id} style={{ animationDelay: `${index * 50}ms` }}>
+                                                <TableCell className="font-mono text-sm font-medium text-blue-600">{index + 1}</TableCell>
+                                                <TableCell>{appointment.appointmentNumber}</TableCell>
+                                                <TableCell>{appointment.patient?.name}</TableCell>
+                                                <TableCell>{appointment.patient?.gender}</TableCell>
+                                                <TableCell>{appointment.patient?.phoneNumber}</TableCell>
+                                                <TableCell>{appointment.patient?.address}</TableCell>
+                                                <TableCell><Badge variant="outline">{appointment.status}</Badge></TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
                                 </Table>
                             </div>
                         </CardContent>
+
                     </div>
                 )}
             </div>

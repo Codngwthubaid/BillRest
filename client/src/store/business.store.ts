@@ -5,6 +5,7 @@ import {
   updateBusinessFeatures
 } from "@/services/business.service";
 import type { Business } from "@/types/business.types";
+import { useAuthStore } from "./auth.store";
 
 interface BusinessState {
   business: Business | null;
@@ -22,6 +23,8 @@ interface BusinessState {
 }
 
 export const useBusinessStore = create<BusinessState>((set, get) => {
+  const user = useAuthStore.getState().user;
+
   const loadBusiness = async () => {
     set({ loading: true, error: null });
     try {
@@ -38,8 +41,10 @@ export const useBusinessStore = create<BusinessState>((set, get) => {
     }
   };
 
-  // Load on store init
-  loadBusiness();
+  if (user?.role === "customer") {
+    loadBusiness(); // only load for customer
+  }
+
 
   return {
     business: null,
