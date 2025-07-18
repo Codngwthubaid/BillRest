@@ -31,12 +31,21 @@ import {
     RefreshCw,
     Award,
     Package,
-    Loader2
+    Loader2,
+    Activity,
+    LineChart,
+    PieChart
 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatsCard } from '@/components/reports/StatsCard';
 import { TopProductCard } from '@/components/reports/TopProductCard';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
+
+import { AppointmentChart } from './AppointmentChart';
+import { AppointmentStatsChart } from './AppointmentStatsChart';
+import { ServicesChart } from './ServicesChart';
+import { AppointmentStatusChart } from './AppointmentStatusChart';
 
 export default function ReportsForHealth() {
     const [isLoading, setIsLoading] = useState(true);
@@ -189,11 +198,74 @@ export default function ReportsForHealth() {
                 {!loading && data && data.ipds.length > 0 && (
                     <div className="space-y-8 animate-in fade-in-50 duration-500">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <StatsCard title="Total Revenue" value={data.totalRevenue.toLocaleString()} icon={IndianRupee} className="bg-green-500 hover:bg-green-600 text-white" />
-                            <StatsCard title="Total Appointments" value={data.totalAppointments.toString()} icon={FileText} className="bg-blue-500 hover:bg-blue-600 text-white" />
-                            <StatsCard title="Total Patients" value={data.totalPatients.toString()} icon={Package} className="bg-blue-500 hover:bg-blue-600 text-white" />
-                            <StatsCard title="Total Services" value={data.totalServices.toString()} icon={TrendingUp} className="bg-green-500 hover:bg-green-600 text-white" />
+                            <StatsCard
+                                title="Total Revenue"
+                                value={data.totalRevenue.toLocaleString()}
+                                icon={IndianRupee}
+                                className="bg-green-500 hover:bg-green-600 text-white" />
+                            <StatsCard
+                                title="Total Appointments" value={data.totalAppointments.toString()}
+                                icon={FileText}
+                                className="bg-blue-500 hover:bg-blue-600 text-white" />
+                            <StatsCard
+                                title="Total Patients"
+                                value={data.totalPatients.toString()}
+                                icon={Package}
+                                className="bg-blue-500 hover:bg-blue-600 text-white" />
+                            <StatsCard
+                                title="Total Services"
+                                value={data.totalServices.toString()}
+                                icon={TrendingUp}
+                                className="bg-green-500 hover:bg-green-600 text-white" />
                         </div>
+
+
+
+                        <CardHeader className="px-0">
+                            <CardTitle className="flex items-center gap-2 text-xl">
+                                <Activity className="h-6 w-6 text-indigo-500" />
+                                Analytics Dashboard
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className='px-0'>
+                            <Tabs defaultValue="sales" className="w-full">
+                                <TabsList className="grid w-full grid-cols-4 mb-6">
+                                    <TabsTrigger value="sales" className="flex items-center gap-2">
+                                        <LineChart className="h-4 w-4" />
+                                        Appointment Trend
+                                    </TabsTrigger>
+                                    <TabsTrigger value="revenue" className="flex items-center gap-2">
+                                        <BarChart3 className="h-4 w-4" />
+                                        Appointment Distribution
+                                    </TabsTrigger>
+                                    <TabsTrigger value="products" className="flex items-center gap-2">
+                                        <Package className="h-4 w-4" />
+                                        Services
+                                    </TabsTrigger>
+                                    <TabsTrigger value="status" className="flex items-center gap-2">
+                                        <PieChart className="h-4 w-4" />
+                                        Appointment Status
+                                    </TabsTrigger>
+                                </TabsList>
+
+                                <TabsContent value="sales" className="space-y-4">
+                                    <AppointmentChart data={data} filterType={filterType} />
+                                </TabsContent>
+
+                                <TabsContent value="revenue" className="space-y-4">
+                                    <AppointmentStatsChart data={data} filterType={filterType} />
+                                </TabsContent>
+
+                                <TabsContent value="products" className="space-y-4">
+                                    <ServicesChart data={data} filterType={filterType} />
+                                </TabsContent>
+
+                                <TabsContent value="status" className="space-y-4">
+                                    <AppointmentStatusChart data={data} filterType={filterType} />
+                                </TabsContent>
+                            </Tabs>
+                        </CardContent>
+
 
                         {/* Top Services */}
                         <CardHeader className="pt-5 px-0">

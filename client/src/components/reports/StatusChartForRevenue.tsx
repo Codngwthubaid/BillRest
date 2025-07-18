@@ -21,7 +21,7 @@ interface StatusChartProps {
   filterType: ReportFilterType;
 }
 
-export const StatusChart: React.FC<StatusChartProps> = ({ data, filterType }) => {
+export const StatusChartForRevenue: React.FC<StatusChartProps> = ({ data, filterType }) => {
   // Calculate status distribution from actual data
   const statusCounts = data.invoices.reduce((acc: any, invoice: any) => {
     acc[invoice.status] = (acc[invoice.status] || 0) + 1;

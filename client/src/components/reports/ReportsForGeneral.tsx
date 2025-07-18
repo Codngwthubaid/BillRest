@@ -43,7 +43,7 @@ import { TopProductCard } from '@/components/reports/TopProductCard';
 import { InvoiceStatusBadge } from '@/components/reports/InvoiceStatusBadge';
 import { SalesChart } from '@/components/reports/SalesChart';
 import { ProductsChart } from '@/components/reports/ProductsChart';
-import { StatusChart } from '@/components/reports/StatusChart';
+import { StatusChartForRevenue } from '@/components/reports/StatusChartForRevenue';
 import { RevenueChart } from '@/components/reports/RevenueChart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
 
@@ -297,7 +297,7 @@ export default function ReportsForGeneral() {
                                 </TabsContent>
 
                                 <TabsContent value="status" className="space-y-4">
-                                    <StatusChart data={data} filterType={filterType} />
+                                    <StatusChartForRevenue data={data} filterType={filterType} />
                                 </TabsContent>
                             </Tabs>
                         </CardContent>
