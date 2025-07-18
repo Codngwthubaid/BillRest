@@ -1,8 +1,9 @@
-// types/ipd.types.ts
-
 export interface TreatmentInput {
   service: string; // service ID
-  quantity: number;
+  quantity: number; 
+  price: number;
+  gstRate: number;
+  category : string
 }
 
 export interface OtherCharge {
