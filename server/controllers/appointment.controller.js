@@ -103,6 +103,10 @@ export const updateAppointment = async (req, res) => {
     const userId = req.user.id;
     const { appointmentNumber, name, phoneNumber, address, age, gender } = req.body;
 
+    if (!id) {
+      return res.status(400).json({ message: "Invalid appointment ID" });
+    }
+
     if (appointmentNumber) {
       const existingNumber = await Appointment.findOne({
         appointmentNumber,
@@ -217,7 +221,7 @@ export const getAppointmentById = async (req, res) => {
   try {
     const { id } = req.params;
     const appointment = await Appointment.findOne({ _id: id, clinic: req.user.id })
-      .populate("patient", "name phoneNumber");
+      .populate("patient");
 
     if (!appointment) return res.status(404).json({ message: "Appointment not found" });
 

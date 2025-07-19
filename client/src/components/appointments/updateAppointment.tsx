@@ -22,19 +22,22 @@ export default function UpdateAppointmentDialog({
 
   useEffect(() => {
     if (appointment) {
+      const patient = appointment.patient ?? {};
+
       setForm({
         appointmentNumber: appointment.appointmentNumber,
-        name: appointment.name,
-        phoneNumber: appointment.phoneNumber,
-        address: appointment.address,
-        age: appointment.age,
-        gender: appointment.gender,
-        description: appointment.description,
-        status: appointment.status,
-        admitted: appointment.admitted,
+        name: patient.name ?? "",
+        phoneNumber: patient.phoneNumber ?? "",
+        address: patient.address ?? "",
+        age: patient.age ?? "",
+        gender: patient.gender ?? "",
+        description: appointment.description ?? "",
+        status: appointment.status ?? "Pending",
+        admitted: appointment.admitted ?? false,
       });
     }
   }, [appointment]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,7 +108,7 @@ export default function UpdateAppointmentDialog({
                 <Select
                   value={form.status ?? "Pending"}
                   onValueChange={(value) =>
-                    setForm({ ...form, status: value as "Pending" | "Completed" | "Canceled" })
+                    setForm({ ...form, status: value as "Pending" | "Admitted" | "Discharged" })
                   }
                 >
                   <SelectTrigger className="w-full">
