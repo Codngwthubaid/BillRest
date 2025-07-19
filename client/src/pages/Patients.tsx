@@ -50,7 +50,7 @@ export default function Patients() {
         const appointments = patient.appointments || [];
         if (appointments.length === 0) return false;
 
-        const firstAppointmentDate = appointments
+        const firstAppointmentDate = (appointments as Appointment[])
             .map(a => parseISO(a.createdAt))
             .sort((a, b) => a.getTime() - b.getTime())[0];
 

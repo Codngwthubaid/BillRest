@@ -4,13 +4,13 @@ import type { IPDResponse } from "@/types/ipd.types";
 import { ToWords } from 'to-words';
 
 type IPDPreviewProps = {
-  invoice: IPDResponse;
+  IPD: IPDResponse;
 };
 
-export default function IPDPreview({ invoice }: IPDPreviewProps) {
-  if (!invoice) return null;
+export default function IPDPreview({ IPD }: IPDPreviewProps) {
+  if (!IPD) return null;
   const toWords = new ToWords();
-  const amountInWords = toWords.convert(invoice.billing.finalAmount);
+  const amountInWords = toWords.convert(IPD.billing.finalAmount);
   const { user } = useAuthStore();
   const { business } = useBusinessStore();
 
@@ -26,25 +26,25 @@ export default function IPDPreview({ invoice }: IPDPreviewProps) {
           <p className="text-xs">GSTIN: {business?.gstNumber || "N/A"}</p>
         </div>
         <div className="text-right">
-          <h3 className="text-lg font-bold text-emerald-600 mb-1">IPD Invoice</h3>
-          <p>IPD Number: {invoice.ipdNumber}</p>
-          <div>Admission Date: {invoice.admissionDate ? new Date(invoice.admissionDate).toLocaleDateString() : "N/A"}</div>
-          <div>Created At: {invoice.createdAt ? new Date(invoice.createdAt).toLocaleDateString() : "N/A"}</div>
+          <h3 className="text-lg font-bold text-emerald-600 mb-1">IPD IPD</h3>
+          <p>IPD Number: {IPD.ipdNumber}</p>
+          <div>Admission Date: {IPD.admissionDate ? new Date(IPD.admissionDate).toLocaleDateString() : "N/A"}</div>
+          <div>Created At: {IPD.createdAt ? new Date(IPD.createdAt).toLocaleDateString() : "N/A"}</div>
         </div>
       </div>
 
       {/* Patient Info */}
       <div className="mb-4">
         <p className="whitespace-pre-line">
-          {invoice.patient.name}
+          {IPD.patient?.name}
           {"\n"}
-          {invoice.patient.phoneNumber}
+          {IPD.patient?.phoneNumber}
           {"\n"}
-          Age: {invoice.patient.age || "N/A"}
+          Age: {IPD?.patient?.age || "N/A"}
           {"\n"}
-          Gender: {invoice.patient.gender || "N/A"}
+          Gender: {IPD.patient?.gender || "N/A"}
           {"\n"}
-          Address: {invoice.patient.address || "N/A"}
+          Address: {IPD.patient?.address || "N/A"}
         </p>
       </div>
 
@@ -57,19 +57,14 @@ export default function IPDPreview({ invoice }: IPDPreviewProps) {
               <th className="border px-2 py-1">Category</th>
               <th className="border px-2 py-1">Qty</th>
               <th className="border px-2 py-1">Price</th>
-              <th className="border px-2 py-1">SGST (%)</th>
-              <th className="border px-2 py-1">CGST (%)</th>
               <th className="border px-2 py-1">Amount</th>
             </tr>
           </thead>
           <tbody>
-            {invoice.treatments.map((item, idx) => {
-              const gstRate = Number(item.service.gstRate);
+            {IPD.treatments.map((item, idx) => {
               const quantity = Number(item.quantity);
               const price = Number(item.service.price);
               const amount = (quantity * price).toFixed(2);
-              const sgst = (gstRate / 2).toFixed(1);
-              const cgst = (gstRate / 2).toFixed(1);
 
               return (
                 <tr key={idx}>
@@ -77,8 +72,6 @@ export default function IPDPreview({ invoice }: IPDPreviewProps) {
                   <td className="border px-2 py-1">{item.service.category || "N/A"}</td>
                   <td className="border px-2 py-1 text-center">{quantity}</td>
                   <td className="border px-2 py-1 text-right">₹{price.toFixed(2)}</td>
-                  <td className="border px-2 py-1 text-right">{sgst}%</td>
-                  <td className="border px-2 py-1 text-right">{cgst}%</td>
                   <td className="border px-2 py-1 text-right">₹{amount}</td>
                 </tr>
               );
@@ -88,7 +81,7 @@ export default function IPDPreview({ invoice }: IPDPreviewProps) {
       </div>
 
       {/* Other Charges Table */}
-      {invoice.billing.otherCharges.length > 0 && (
+      {IPD.billing.otherCharges.length > 0 && (
         <div className="overflow-x-auto mt-4">
           <table className="w-full border border-gray-300 text-xs">
             <thead className="bg-emerald-100">
@@ -98,7 +91,7 @@ export default function IPDPreview({ invoice }: IPDPreviewProps) {
               </tr>
             </thead>
             <tbody>
-              {invoice.billing.otherCharges.map((charge, idx) => (
+              {IPD.billing.otherCharges.map((charge, idx) => (
                 <tr key={idx}>
                   <td className="border px-2 py-1">{charge.itemName}</td>
                   <td className="border px-2 py-1 text-right">₹{charge.amount.toFixed(2)}</td>
@@ -121,25 +114,25 @@ export default function IPDPreview({ invoice }: IPDPreviewProps) {
             <tbody>
               <tr>
                 <td className="pr-2">Bed Charges:</td>
-                <td>₹{invoice.billing.bedCharges.toFixed(2)}</td>
+                <td>₹{IPD.billing.bedCharges.toFixed(2)}</td>
               </tr>
               <tr>
                 <td className="pr-2">Service Charges:</td>
-                <td>₹{invoice.billing.serviceCharges.toFixed(2)}</td>
+                <td>₹{IPD.billing.serviceCharges.toFixed(2)}</td>
               </tr>
               <tr>
                 <td className="pr-2">Other Charges:</td>
                 <td>
-                  ₹{(invoice.billing.otherCharges.reduce((sum, oc) => sum + oc.amount, 0)).toFixed(2)}
+                  ₹{(IPD.billing.otherCharges.reduce((sum, oc) => sum + oc.amount, 0)).toFixed(2)}
                 </td>
               </tr>
               <tr>
                 <td className="pr-2">Grants/Discounts:</td>
-                <td>-₹{invoice.billing.grantsOrDiscounts.toFixed(2)}</td>
+                <td>-₹{IPD.billing.grantsOrDiscounts.toFixed(2)}</td>
               </tr>
               <tr>
                 <td className="pr-2 font-semibold">Total Amount:</td>
-                <td className="font-semibold">₹{invoice.billing.finalAmount.toFixed(2)}</td>
+                <td className="font-semibold">₹{IPD.billing.finalAmount.toFixed(2)}</td>
               </tr>
             </tbody>
           </table>

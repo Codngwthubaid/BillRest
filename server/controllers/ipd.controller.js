@@ -2,6 +2,8 @@ import { Counter } from "../models/counter.model.js"
 import { IPD } from "../models/ipd.model.js"
 import { Patient } from "../models/patient.model.js"
 import { Service } from "../models/service.model.js"
+import { User } from "../models/user.model.js"
+import { generateIPDPDF } from "../utils/generateIPDPDF.js"
 
 const getNextIPDNumber = async () => {
   // 1️⃣ Find latest IPD from DB (highest created)
@@ -187,9 +189,10 @@ export const getIPDs = async (req, res) => {
   try {
     const userId = req.user.id;
     const ipds = await IPD.find({ clinic: userId })
-      .populate("patient", "name phoneNumber age gender")
+      .populate("patient")
       .sort({ createdAt: -1 });
 
+    console.log("ipds from backend:", ipds)
     res.json(ipds);
 
   } catch (err) {
@@ -295,3 +298,109 @@ export const dischargeIPD = async (req, res) => {
   }
 };
 
+export const deleteIPD = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    const ipd = await IPD.findOneAndDelete({ _id: id, clinic: userId });
+    if (!ipd) return res.status(404).json({ message: "IPD record not found" });
+
+    res.status(200).json({ message: "IPD record deleted successfully" });
+  } catch (err) {
+    console.error("Delete IPD error:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const downloadIPDPDF = async (req, res) => {
+  try {
+    const ipd = await IPD.findOne({
+      _id: req.params.id,
+      clinic: req.user.id,
+    })
+      .populate("patient", "name phoneNumber age gender address")
+      .populate("treatments.service", "name price");
+
+    if (!ipd) return res.status(404).json({ message: "IPD record not found" });
+
+    // Enrich treatments with service names (already populated, but ensure consistency)
+    const enrichedTreatments = ipd.treatments.map((treatment) => ({
+      ...treatment.toObject(),
+      service: {
+        ...treatment.service.toObject(),
+        name: treatment.service?.name || "Unknown",
+      },
+    }));
+
+    ipd.treatments = enrichedTreatments;
+
+    // Fetch clinic details (assuming User model contains business details)
+    const clinic = await User.findById(req.user.id).select("businessName address gstNumber phone email");
+    const patient = await Patient.findById(ipd.patient).select("name phoneNumber age gender address");
+
+    // Generate the PDF
+    const pdfBuffer = await generateIPDPDF(ipd, clinic, patient);
+
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename=${ipd.ipdNumber}.pdf`,
+      "Content-Length": pdfBuffer.length,
+    });
+
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error("Download IPD PDF error:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+export const printIPDPDF = async (req, res) => {
+  try {
+    const ipd = await IPD.findOne({
+      _id: req.params.id,
+      clinic: req.user.id,
+    })
+      .populate("patient", "name phoneNumber age gender address")
+      .populate("treatments.service", "name price");
+
+    if (!ipd) return res.status(404).json({ message: "IPD record not found" });
+
+    // Enrich treatments (similar to enrichedProducts)
+    const enrichedTreatments = ipd.treatments.map((item) => {
+      let serviceName = "Unknown";
+      try {
+        if (item.service && item.service.name) {
+          serviceName = item.service.name;
+        }
+      } catch (err) {
+        console.log(`Error fetching service name:`, err.message);
+      }
+      return {
+        ...item.toObject(),
+        serviceName,
+      };
+    });
+
+    ipd.treatments = enrichedTreatments;
+
+    // Get clinic details
+    const clinic = await User.findById(req.user.id).select("businessName address gstNumber phone email");
+    const patient = await Patient.findById(ipd.patient).select("name phoneNumber age gender address");
+
+    // Generate PDF
+    const pdfBuffer = await generateIPDPDF(ipd, clinic, patient);
+
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `inline; filename=${ipd.ipdNumber}.pdf`,
+      "Content-Length": pdfBuffer.length,
+    });
+
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error("Print IPD PDF error:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};

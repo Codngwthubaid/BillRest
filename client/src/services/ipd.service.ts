@@ -8,6 +8,7 @@ export const createIPD = async (data: IPDInput): Promise<IPDResponse> => {
 
 export const getAllIPDs = async (): Promise<IPDResponse[]> => {
   const res = await axiosInstance.get("/ipd");
+  console.log("Loaded IPDs:", res.data);
   return res.data;
 };
 
@@ -24,4 +25,23 @@ export const updateIPD = async (id: string, data: Partial<IPDInput>): Promise<IP
 export const dischargeIPD = async (id: string, dischargeDate?: string): Promise<IPDResponse> => {
   const res = await axiosInstance.patch(`/ipd/${id}/discharge`, { dischargeDate });
   return res.data.ipd;
+};
+
+export const deleteIPD = async (id: string): Promise<{ message: string }> => {
+  const res = await axiosInstance.delete(`/ipd/${id}`);
+  return res.data;
+};
+
+export const downloadIPDPDF = async (id: string): Promise<Blob> => {
+  const res = await axiosInstance.get(`/ipd/${id}/download-pdf`, {
+    responseType: "blob",
+  });
+  return res.data;
+};
+
+export const printIPDPDF = async (id: string): Promise<Blob> => {
+  const res = await axiosInstance.get(`/ipd/${id}/print-pdf`, {
+    responseType: "blob",
+  });
+  return res.data;
 };

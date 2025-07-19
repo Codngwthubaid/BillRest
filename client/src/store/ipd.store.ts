@@ -5,7 +5,11 @@ import {
   getIPDById,
   updateIPD,
   dischargeIPD,
+  deleteIPD,
+  downloadIPDPDF,
+  printIPDPDF,
 } from "@/services/ipd.service";
+
 import type { IPDInput, IPDResponse } from "@/types/ipd.types";
 
 interface IPDState {
@@ -19,6 +23,10 @@ interface IPDState {
   createIPDRecord: (data: IPDInput) => Promise<void>;
   updateIPDRecord: (id: string, data: Partial<IPDInput>) => Promise<void>;
   dischargeIPDRecord: (id: string, dischargeDate?: string) => Promise<void>;
+  deleteIPDRecord: (id: string) => Promise<void>;
+
+  downloadIPDPDFById: (id: string) => Promise<void>;
+  printIPDPDF: (id: string) => void;
 }
 
 export const useIPDStore = create<IPDState>((set) => ({
@@ -63,7 +71,7 @@ export const useIPDStore = create<IPDState>((set) => ({
     }
   },
 
-  updateIPDRecord: async (id: string, data: Partial<IPDInput>) => {
+  updateIPDRecord: async (id, data) => {
     set({ loading: true, error: null });
     try {
       await updateIPD(id, data);
@@ -75,7 +83,7 @@ export const useIPDStore = create<IPDState>((set) => ({
     }
   },
 
-  dischargeIPDRecord: async (id: string, dischargeDate?: string) => {
+  dischargeIPDRecord: async (id, dischargeDate) => {
     set({ loading: true, error: null });
     try {
       await dischargeIPD(id, dischargeDate);
@@ -86,4 +94,52 @@ export const useIPDStore = create<IPDState>((set) => ({
       set({ loading: false });
     }
   },
+
+  deleteIPDRecord: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      await deleteIPD(id);
+      await useIPDStore.getState().fetchIPDs();
+    } catch (err: any) {
+      set({ error: err.message || "Failed to delete IPD" });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  downloadIPDPDFById: async (id) => {
+    try {
+      const blob = await downloadIPDPDF(id);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `IPD-${id}.pdf`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      set({ error: err.message || "Failed to download IPD PDF" });
+    }
+  },
+
+  printIPDPDF: async (id) => {
+    try {
+      const blob = await printIPDPDF(id);
+      const url = window.URL.createObjectURL(blob);
+      const newWindow = window.open(url);
+      if (newWindow) {
+        newWindow.onload = () => {
+          newWindow.print();
+          newWindow.onafterprint = () => {
+            window.URL.revokeObjectURL(url);
+            newWindow.close();
+          };
+        };
+      } else {
+        set({ error: "Failed to open print window. Please allow pop-ups." });
+      }
+    } catch (err: any) {
+      set({ error: err.message || "Failed to print IPD PDF" });
+    }
+  },
+
 }));

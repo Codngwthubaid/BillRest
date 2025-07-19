@@ -3,7 +3,7 @@ import { Product } from "../models/product.model.js";
 import { Counter } from "../models/counter.model.js";
 import { Customer } from "../models/customer.model.js";
 import { Business } from "../models/business.model.js";
-import { generateInvoicePDF } from "../utils/pdfGenerator.js";
+import { generateInvoicePDF } from "../utils/pdfGeneratorForGeneral.js";
 
 const getNextInvoiceNumber = async () => {
   // 1. Find latest invoice from DB
@@ -34,7 +34,6 @@ const getNextInvoiceNumber = async () => {
   return `INV${String(nextNumber).padStart(4, "0")}`;
 };
 
-// Create Invoice
 export const createInvoice = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -159,7 +158,6 @@ export const createInvoice = async (req, res) => {
   }
 };
 
-// Update Invoice
 export const updateInvoice = async (req, res) => {
   try {
     const invoiceId = req.params.id;
@@ -339,7 +337,6 @@ export const updateInvoice = async (req, res) => {
   }
 };
 
-// Delete Invoice
 export const deleteInvoice = async (req, res) => {
   try {
     const invoiceId = req.params.id;
@@ -370,7 +367,6 @@ export const deleteInvoice = async (req, res) => {
   }
 };
 
-// Get All Invoices for User
 export const getInvoices = async (req, res) => {
   try {
     const invoices = await Invoice.find({ user: req.user.id })
@@ -382,7 +378,6 @@ export const getInvoices = async (req, res) => {
   }
 };
 
-// Get Single Invoice by ID
 export const getInvoiceById = async (req, res) => {
   try {
     const invoice = await Invoice.findOne({ _id: req.params.id, user: req.user.id }).populate("products", "name price gstRate");
@@ -393,7 +388,6 @@ export const getInvoiceById = async (req, res) => {
   }
 };
 
-// Download Invoice as PDF
 export const downloadInvoicePDF = async (req, res) => {
   try {
     const invoice = await Invoice.findOne({
@@ -441,7 +435,6 @@ export const downloadInvoicePDF = async (req, res) => {
   }
 };
 
-// Print invoice as PDF
 export const printInvoicePDF = async (req, res) => {
   try {
     const invoice = await Invoice.findOne({
@@ -486,7 +479,6 @@ export const printInvoicePDF = async (req, res) => {
   }
 };
 
-// Send Invoice via WhatsApp
 export const sendInvoiceWhatsApp = async (req, res) => {
   try {
     const { invoiceId } = req.params;

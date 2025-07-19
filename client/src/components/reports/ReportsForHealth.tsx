@@ -26,7 +26,6 @@ import {
     TrendingUp,
     FileText,
     Calendar,
-    IndianRupee,
     Filter,
     RefreshCw,
     Award,
@@ -197,16 +196,11 @@ export default function ReportsForHealth() {
 
                 {!loading && data && data.ipds.length > 0 && (
                     <div className="space-y-8 animate-in fade-in-50 duration-500">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <StatsCard
-                                title="Total Revenue"
-                                value={data.totalRevenue.toLocaleString()}
-                                icon={IndianRupee}
-                                className="bg-green-500 hover:bg-green-600 text-white" />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             <StatsCard
                                 title="Total Appointments" value={data.totalAppointments.toString()}
                                 icon={FileText}
-                                className="bg-blue-500 hover:bg-blue-600 text-white" />
+                                className="bg-purple-500 hover:bg-purple-600 text-white" />
                             <StatsCard
                                 title="Total Patients"
                                 value={data.totalPatients.toString()}

@@ -1,4 +1,4 @@
-export type AppointmentStatus = "Pending" | "Completed" | "Canceled";
+export type AppointmentStatus = "Pending" | "Admitted" | "Discharged";
 
 export interface Patient {
   _id: string;

@@ -18,7 +18,7 @@ export default function PatientCard({
 
   const { user } = useAuthStore();
   const totalVisits = patient.visits.length;
-  const completedVisits = patient.visits.filter(v => v.status === "Completed").length;
+  const completedVisits = patient.visits.filter(v => v.status === "Admitted").length;
 
   return (
     <div className="rounded-xl p-6 border transition-all flex flex-col justify-between duration-200 dark:bg-[#171717]">
@@ -86,7 +86,7 @@ export default function PatientCard({
               <Clock className="w-4 h-4" />
               <span className="text-lg font-semibold">{completedVisits}</span>
             </div>
-            <p className="text-xs">Completed</p>
+            <p className="text-xs">Admitted</p>
           </div>
         </div>
 

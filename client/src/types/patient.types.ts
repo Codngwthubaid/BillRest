@@ -1,7 +1,7 @@
 export interface PatientVisitSummary {
   _id: string;
   appointmentNumber: string;
-  status: "Pending" | "Completed" | "Canceled";
+  status: "Pending" | "Admitted" | "Discharged";
   createdAt: string;
 }
 

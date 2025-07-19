@@ -34,17 +34,24 @@ export interface Treatment {
   totalCharges: number;
 }
 
+export interface Patient {
+  _id: string;
+  clinic: string;
+  name: string;
+  phoneNumber: string;
+  appointments?: string;
+  address?: string;
+  age?: number;
+  gender?: "Male" | "Female" | "Other";
+  createdAt: string;
+  updatedAt: string;
+}
+
+
 export interface IPDResponse {
   _id: string;
   ipdNumber: string;
-  patient: {
-    _id: string;
-    name: string;
-    phoneNumber: string;
-    age: number;
-    gender: string;
-    address?: string;
-  };
+  patient: Patient | null;
   clinic: string;
   appointment?: string;
   isNewPatient: boolean;

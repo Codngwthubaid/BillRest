@@ -2,12 +2,11 @@ import { Appointment } from "../models/appointment.model.js";
 import { Patient } from "../models/patient.model.js";
 import { Counter } from "../models/counter.model.js";
 import { Business } from "../models/business.model.js";
-import { generateInvoicePDF } from "../utils/pdfGenerator.js"; // reuse for appointment slip
-import { sendInvoiceViaWhatsApp } from "../utils/sendWhatsApp.js"; // reuse
+import { generateInvoicePDF } from "../utils/pdfGeneratorForGeneral.js";
+import { sendInvoiceViaWhatsApp } from "../utils/sendWhatsApp.js";
 
-// Get next appointment number
+
 const getNextAppointmentNumber = async () => {
-  // 1️⃣ Find latest appointment from DB (based on createdAt or _id)
   const latestAppointment = await Appointment.findOne({})
     .sort({ createdAt: -1 })
     .lean();
@@ -20,25 +19,20 @@ const getNextAppointmentNumber = async () => {
     }
   }
 
-  // 2️⃣ Check existing counter
   const counterDoc = await Counter.findOne({ _id: "appointmentNumber" });
   const currentCounter = counterDoc ? counterDoc.sequence_value : 0;
 
-  // 3️⃣ Calculate next number
   const nextNumber = Math.max(lastNumber, currentCounter) + 1;
 
-  // 4️⃣ Update counter to keep in sync
   await Counter.findOneAndUpdate(
     { _id: "appointmentNumber" },
     { sequence_value: nextNumber },
     { upsert: true, new: true }
   );
 
-  // 5️⃣ Return formatted
   return `APT${String(nextNumber).padStart(4, "0")}`;
 };
 
-// CREATE appointment
 export const createAppointment = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -51,7 +45,6 @@ export const createAppointment = async (req, res) => {
       return res.status(400).json({ message: "Patient name and phone number are required." });
     }
 
-    // Check or create patient
     let patient = await Patient.findOne({ clinic: userId, phoneNumber });
     if (!patient) {
       patient = await Patient.create({
@@ -66,10 +59,8 @@ export const createAppointment = async (req, res) => {
       await patient.save();
     }
 
-    // Generate appointment number
     let finalAppointmentNumber = appointmentNumber || await getNextAppointmentNumber();
 
-    // If manually set, sync counter
     if (appointmentNumber) {
       const match = appointmentNumber.match(/APT(\d+)/);
       if (match) {
@@ -86,7 +77,6 @@ export const createAppointment = async (req, res) => {
       }
     }
 
-    // Create appointment
     const appointment = await Appointment.create({
       clinic: userId,
       appointmentNumber: finalAppointmentNumber,
@@ -96,7 +86,6 @@ export const createAppointment = async (req, res) => {
       admitted
     });
 
-    // Update patient visits
     patient.visits.push(appointment._id);
     await patient.save();
 
@@ -108,14 +97,12 @@ export const createAppointment = async (req, res) => {
   }
 };
 
-// UPDATE appointment
 export const updateAppointment = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
     const { appointmentNumber, name, phoneNumber, address, age, gender } = req.body;
 
-    // Handle manual number update
     if (appointmentNumber) {
       const existingNumber = await Appointment.findOne({
         appointmentNumber,
@@ -141,7 +128,6 @@ export const updateAppointment = async (req, res) => {
       }
     }
 
-    // Update appointment
     const appointment = await Appointment.findOneAndUpdate(
       { _id: id, clinic: userId },
       req.body,
@@ -150,7 +136,6 @@ export const updateAppointment = async (req, res) => {
 
     if (!appointment) return res.status(404).json({ message: "Appointment not found" });
 
-    // Update patient if details provided
     if (name || phoneNumber || address || age || gender) {
       const patient = await Patient.findOne({ _id: appointment.patient, clinic: userId });
       if (patient) {
@@ -171,25 +156,21 @@ export const updateAppointment = async (req, res) => {
   }
 };
 
-// DELETE appointment
 export const deleteAppointment = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
 
-    // Delete
     const appointment = await Appointment.findOneAndDelete({ _id: id, clinic: userId });
     if (!appointment) {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
-    // Remove from patient visits
     await Patient.updateMany(
       { visits: appointment._id },
       { $pull: { visits: appointment._id } }
     );
 
-    // Resequence all appointments
     const appointments = await Appointment.find({ clinic: userId }).sort({ createdAt: 1 });
 
     let counter = 1;
@@ -199,7 +180,6 @@ export const deleteAppointment = async (req, res) => {
       counter++;
     }
 
-    // Update counter doc
     await Counter.findOneAndUpdate(
       { _id: "appointmentNumber" },
       { sequence_value: counter - 1 },
@@ -214,7 +194,6 @@ export const deleteAppointment = async (req, res) => {
   }
 };
 
-// GET all appointments
 export const getAppointments = async (req, res) => {
   try {
     const { date, patient } = req.query;
@@ -234,7 +213,6 @@ export const getAppointments = async (req, res) => {
   }
 };
 
-// GET appointment by ID
 export const getAppointmentById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -252,7 +230,6 @@ export const getAppointmentById = async (req, res) => {
 
 
 // NOTE - NOT USED
-// Download appointment slip PDF
 export const downloadAppointmentPDF = async (req, res) => {
   try {
     const appointment = await Appointment.findOne({ _id: req.params.id, clinic: req.user.id })
@@ -275,7 +252,8 @@ export const downloadAppointmentPDF = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-// Print appointment slip PDF
+
+
 export const printAppointmentPDF = async (req, res) => {
   try {
     const appointment = await Appointment.findOne({ _id: req.params.id, clinic: req.user.id })
@@ -298,7 +276,8 @@ export const printAppointmentPDF = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-// Send appointment slip on WhatsApp
+
+
 export const sendAppointmentWhatsApp = async (req, res) => {
   try {
     const appointment = await Appointment.findOne({ _id: req.params.id, clinic: req.user.id })

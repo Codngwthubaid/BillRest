@@ -42,8 +42,7 @@ export default function Appointments() {
         total: appointments.length,
         admitted: appointments.filter(a => a.admitted).length,
         pending: appointments.filter(a => a.status === "Pending").length,
-        completed: appointments.filter(a => a.status === "Completed").length,
-        canceled: appointments.filter(a => a.status === "Canceled").length,
+        discharged: appointments.filter(a => a.status === "Discharged").length,
     };
 
     const filtered = appointments.filter(app =>
@@ -86,12 +85,11 @@ export default function Appointments() {
                 )}
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
                 <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-blue-600"><FileText className="w-4 h-4" /><span className="text-sm">Total</span></div><span className="font-bold text-lg">{summary.total}</span></CardContent></Card>
                 <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-green-600"><IndianRupee className="w-4 h-4" /><span className="text-sm">Admitted</span></div><span className="font-bold text-lg">{summary.admitted}</span></CardContent></Card>
                 <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-yellow-600"><Clock className="w-4 h-4" /><span className="text-sm">Pending</span></div><span className="font-bold text-lg">{summary.pending}</span></CardContent></Card>
-                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-orange-600"><Calendar className="w-4 h-4" /><span className="text-sm">Completed</span></div><span className="font-bold text-lg">{summary.completed}</span></CardContent></Card>
-                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-gray-600"><Calendar className="w-4 h-4" /><span className="text-sm">Canceled</span></div><span className="font-bold text-lg">{summary.canceled}</span></CardContent></Card>
+                <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-orange-600"><Calendar className="w-4 h-4" /><span className="text-sm">Discharged</span></div><span className="font-bold text-lg">{summary.discharged}</span></CardContent></Card>
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">

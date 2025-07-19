@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { useBusinessStore } from "@/store/business.store";
+import { useClinicStore } from "@/store/clinic.store";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+
+import { useAuthStore } from "@/store/auth.store"; 
 
 export default function ProtectedPinDialog({
     open,
@@ -15,16 +18,22 @@ export default function ProtectedPinDialog({
     onClose: () => void;
     onVerified: () => void;
 }) {
-    const { business } = useBusinessStore();
+    const { user } = useAuthStore();
+    const role = user?.role;
+    const business = useBusinessStore((state) => state.business);
+    const clinic = useClinicStore((state) => state.clinic);
+    const protectedPin = role === "clinic" ? clinic?.protectedPin : business?.protectedPin;
+
     const [inputPin, setInputPin] = useState("");
     const [showPin, setShowPin] = useState(false);
 
     const handleVerify = () => {
-        if (!business?.protectedPin) {
-            toast.error("No PIN configured for this business.");
+        if (!protectedPin) {
+            toast.error("No PIN configured.");
             return;
         }
-        if (inputPin.trim() === business.protectedPin.trim()) {
+
+        if (inputPin.trim() === protectedPin.trim()) {
             toast.success("PIN verified successfully!");
             setInputPin("");
             onClose();
