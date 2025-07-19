@@ -190,6 +190,7 @@ export const getIPDs = async (req, res) => {
     const userId = req.user.id;
     const ipds = await IPD.find({ clinic: userId })
       .populate("patient")
+      .populate("treatments.service")
       .sort({ createdAt: -1 });
 
     console.log("ipds from backend:", ipds)

@@ -143,11 +143,11 @@ export const updateAppointment = async (req, res) => {
     if (name || phoneNumber || address || age || gender) {
       const patient = await Patient.findOne({ _id: appointment.patient, clinic: userId });
       if (patient) {
-        if (name) patient.name = name;
-        if (phoneNumber) patient.phoneNumber = phoneNumber;
-        if (address) patient.address = address;
-        if (age) patient.age = age;
-        if (gender) patient.gender = gender;
+        if (req.body.hasOwnProperty("name")) patient.name = name;
+        if (req.body.hasOwnProperty("phoneNumber")) patient.phoneNumber = phoneNumber;
+        if (req.body.hasOwnProperty("address")) patient.address = address;
+        if (req.body.hasOwnProperty("age")) patient.age = age;
+        if (req.body.hasOwnProperty("gender")) patient.gender = gender;
         await patient.save();
       }
     }
@@ -207,7 +207,7 @@ export const getAppointments = async (req, res) => {
     if (patient) query.patient = patient;
 
     const appointments = await Appointment.find(query)
-      .populate("patient", "name phoneNumber")
+      .populate("patient")
       .sort({ createdAt: -1 });
 
     res.json(appointments);

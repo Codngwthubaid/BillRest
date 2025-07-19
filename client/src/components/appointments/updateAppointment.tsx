@@ -29,7 +29,7 @@ export default function UpdateAppointmentDialog({
         name: patient.name ?? "",
         phoneNumber: patient.phoneNumber ?? "",
         address: patient.address ?? "",
-        age: patient.age ?? "",
+        age: patient.age ?? 0,
         gender: patient.gender ?? "",
         description: appointment.description ?? "",
         status: appointment.status ?? "Pending",

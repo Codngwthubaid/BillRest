@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from "react";
-import { useReactToPrint } from "react-to-print";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,11 +7,7 @@ import { useIPDStore } from "@/store/ipd.store";
 import { useAppointmentStore } from "@/store/appointment.store";
 import { useServiceStore } from "@/store/service.store";
 import type { IPDInput, IPDResponse, TreatmentInput } from "@/types/ipd.types";
-import InvoicePreview from "@/components/invoices/InvoicePreview"; // Adjust for IPD preview
-import POSReceipt58mm from "@/components/invoices/POSReceipt58mm"; // Adjust for IPD
-import POSReceipt80mm from "@/components/invoices/POSReceipt80mm"; // Adjust for IPD
-import InvoiceActionsDialog from "@/components/invoices/InvoiceActionsDialog"; // Adjust for IPD actions
-import { updateIPD, dischargeIPD } from "@/services/ipd.service";
+import { dischargeIPD } from "@/services/ipd.service";
 
 interface Props {
   open: boolean;
@@ -39,11 +34,6 @@ export default function UpdateIPD({ open, onOpenChange, ipd, onUpdate }: Props) 
     grantsOrDiscounts: 0,
     treatments: [],
   });
-  const [previewType, setPreviewType] = useState<"A4" | "58mm" | "80mm">("A4");
-  const [actionDialogOpen, setActionDialogOpen] = useState(false);
-
-  const previewRef = useRef<HTMLDivElement>(null);
-  const handlePrint = useReactToPrint({ contentRef: previewRef });
 
   const { fetchIPDs } = useIPDStore();
   const { appointments, fetchAppointments } = useAppointmentStore();
@@ -155,7 +145,6 @@ export default function UpdateIPD({ open, onOpenChange, ipd, onUpdate }: Props) 
     };
     await onUpdate(ipd._id, updatedFields);
     onOpenChange(false);
-    setActionDialogOpen(true);
   };
 
   const handleDischarge = async () => {
@@ -165,82 +154,6 @@ export default function UpdateIPD({ open, onOpenChange, ipd, onUpdate }: Props) 
     onOpenChange(false);
   };
 
-  const safePrint = () => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => handlePrint());
-    });
-  };
-
-  const handlePrintA4 = () => {
-    setPreviewType("A4");
-    safePrint();
-  };
-
-  const handlePrint58mm = () => {
-    setPreviewType("58mm");
-    safePrint();
-  };
-
-  const handlePrint80mm = () => {
-    setPreviewType("80mm");
-    safePrint();
-  };
-
-  const previewIPD: IPDResponse = {
-    _id: ipd?._id || "",
-    ipdNumber: ipd?.ipdNumber || "PREVIEW",
-    patient: {
-      _id: form.patientId,
-      name: appointments.find((appt) => appt._id === form.appointmentId)?.patient.name || ipd?.patient.name || "",
-      phoneNumber:
-        appointments.find((appt) => appt._id === form.appointmentId)?.patient.phoneNumber ||
-        ipd?.patient.phoneNumber ||
-        "",
-      age: appointments.find((appt) => appt._id === form.appointmentId)?.patient.age || ipd?.patient.age || 0,
-      gender: appointments.find((appt) => appt._id === form.appointmentId)?.patient.gender || ipd?.patient.gender || "",
-      address: appointments.find((appt) => appt._id === form.appointmentId)?.patient.address || ipd?.patient.address || "",
-    },
-    clinic: ipd?.clinic || "",
-    appointment: form.appointmentId,
-    isNewPatient: form.isNewPatient || false,
-    admissionDate: form.admissionDate || new Date().toISOString(),
-    bedNumber: form.bedNumber,
-    treatments: (form.treatments || []).map((t: FormTreatmentInput) => ({
-      service: {
-        _id: t.service,
-        name: services.find((s) => s._id === t.service)?.name || "",
-        price: t.price,
-        gstRate: t.gstRate,
-        category: t.category,
-      },
-      quantity: t.quantity,
-      totalCharges: t.price * t.quantity,
-    })),
-    billing: {
-      bedCharges: form.bedCharges || 0,
-      serviceCharges: (form.treatments || []).reduce(
-        (sum, t: FormTreatmentInput) => sum + t.price * t.quantity,
-        0
-      ),
-      otherCharges: form.otherCharges || [],
-      grantsOrDiscounts: form.grantsOrDiscounts || 0,
-      totalBeforeDiscount:
-        (form.bedCharges || 0) +
-        (form.treatments || []).reduce((sum, t: FormTreatmentInput) => sum + t.price * t.quantity, 0) +
-        (form.otherCharges || []).reduce((sum, oc) => sum + oc.amount, 0),
-      finalAmount:
-        (form.bedCharges || 0) +
-        (form.treatments || []).reduce((sum, t: FormTreatmentInput) => sum + t.price * t.quantity, 0) +
-        (form.otherCharges || []).reduce((sum, oc) => sum + oc.amount, 0) -
-        (form.grantsOrDiscounts || 0),
-      paidAmount: ipd?.billing.paidAmount || 0,
-      paymentStatus: ipd?.billing.paymentStatus || "pending",
-    },
-    paymentStatus: ipd?.paymentStatus || "pending",
-    status: ipd?.status || "Admitted",
-    createdAt: ipd?.createdAt || new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
 
   return (
     <>
@@ -431,22 +344,6 @@ export default function UpdateIPD({ open, onOpenChange, ipd, onUpdate }: Props) 
           </form>
         </DialogContent>
       </Dialog>
-
-      <InvoiceActionsDialog
-        open={actionDialogOpen}
-        onOpenChange={setActionDialogOpen}
-        onPrintA4={handlePrintA4}
-        onPrint58mm={handlePrint58mm}
-        onPrint80mm={handlePrint80mm}
-      />
-
-      {/* <div style={{ display: "none" }}>
-        <div ref={previewRef}>
-          {previewType === "A4" && <InvoicePreview invoice={previewIPD} />}
-          {previewType === "58mm" && <POSReceipt58mm business={{}} invoice={previewIPD} />}
-          {previewType === "80mm" && <POSReceipt80mm business={{}} invoice={previewIPD} />}
-        </div>
-      </div> */}
     </>
   );
 }
