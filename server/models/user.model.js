@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
 
         type: {
             type: String,
-            enum: ["billrest_general", "billrest_health"],
+            enum: ["billrest_general", "billrest_health", "billrest_master", "billrest_support"],
             required: true
         },
 

@@ -63,7 +63,7 @@ export const updateTicketStatusForGeneral = async (req, res) => {
   try {
     const { status, respondedBy } = req.body;
     const ticket = await SupportTicketForGeneral.findOneAndUpdate(
-      { serialNumber: parseInt(req.params.serialNumber) },
+      { _id: req.params.id },
       { status, respondedBy },
       { new: true }
     );
@@ -150,7 +150,7 @@ export const updateHealthTicketStatus = async (req, res) => {
   try {
     const { status, respondedBy } = req.body;
     const ticket = await SupportTicketForHealth.findOneAndUpdate(
-      { serialNumber: parseInt(req.params.serialNumber) },
+      { _id: req.params.id },
       { status, respondedBy },
       { new: true }
     );

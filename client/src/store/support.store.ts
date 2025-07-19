@@ -27,7 +27,9 @@ interface SupportStore {
   fetchAllTickets: () => Promise<void>;
   fetchTicketBySerialNumber: (serialNumber: number) => Promise<void>;
   submitTicket: (subject: string, message: string) => Promise<void>;
-  updateTicketStatus: (id: string, status: string) => Promise<void>;
+
+  updateGeneralTicketStatus: (id: string, status: string) => Promise<void>;
+  updateHealthTicketStatus: (id: string, status: string) => Promise<void>;
 }
 
 export const useSupportStore = create<SupportStore>((set) => ({
@@ -53,11 +55,14 @@ export const useSupportStore = create<SupportStore>((set) => ({
   fetchAllTickets: async () => {
     try {
       set({ loading: true });
-      const user = useAuthStore.getState().user;
-      const tickets = user?.role === 'clinic'
-        ? await getAllSupportTicketsForHealth()
-        : await getAllSupportTicketsForGeneral();
-      set({ allTickets: tickets, loading: false });
+
+      const [generalTickets, healthTickets] = await Promise.all([
+        getAllSupportTicketsForGeneral(),
+        getAllSupportTicketsForHealth()
+      ]);
+
+      const combinedTickets = [...generalTickets, ...healthTickets];
+      set({ allTickets: combinedTickets, loading: false });
     } catch (err: any) {
       set({ error: err.message || 'Failed to fetch all tickets', loading: false });
     }
@@ -93,21 +98,34 @@ export const useSupportStore = create<SupportStore>((set) => ({
     }
   },
 
-  updateTicketStatus: async (id, status) => {
+  updateGeneralTicketStatus: async (id, status) => {
     try {
       set({ loading: true });
-      const user = useAuthStore.getState().user;
-      const { ticket } = user?.role === 'clinic'
-        ? await updateTicketStatusForHealth(id, status)
-        : await updateTicketStatusForGeneral(id, status);
-
+      const { ticket } = await updateTicketStatusForGeneral(id, status);
       set((state) => ({
         tickets: state.tickets.map(t => t._id === ticket._id ? ticket : t),
         allTickets: state.allTickets.map(t => t._id === ticket._id ? ticket : t),
         loading: false,
       }));
     } catch (err: any) {
-      set({ error: err.message || 'Failed to update ticket status', loading: false });
+      console.error("Error updating general ticket:", err);
+      set({ error: err.message || 'Failed to update general ticket', loading: false });
     }
   },
+
+  updateHealthTicketStatus: async (id, status) => {
+    try {
+      set({ loading: true });
+      const { ticket } = await updateTicketStatusForHealth(id, status);
+      set((state) => ({
+        tickets: state.tickets.map(t => t._id === ticket._id ? ticket : t),
+        allTickets: state.allTickets.map(t => t._id === ticket._id ? ticket : t),
+        loading: false,
+      }));
+    } catch (err: any) {
+      console.error("Error updating health ticket:", err);
+      set({ error: err.message || 'Failed to update health ticket', loading: false });
+    }
+  }
+
 }));

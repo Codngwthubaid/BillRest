@@ -22,7 +22,8 @@ export const getTicketBySerialNumberForGeneral = async (serialNumber: number): P
 
 export const getAllSupportTicketsForGeneral = async (): Promise<SupportTicket[]> => {
   const res = await axiosInstance.get("/support/general/allTickets");
-  return res.data;
+  console.log(res.data.tickets)
+  return res.data.tickets;
 };
 
 export const updateTicketStatusForGeneral = async (id: string, status: string) => {
@@ -51,8 +52,10 @@ export const getTicketBySerialNumberForHealth = async (serialNumber: number): Pr
 
 export const getAllSupportTicketsForHealth = async (): Promise<SupportTicket[]> => {
   const res = await axiosInstance.get("/support/health/allTickets");
-  return res.data;
+  console.log(res.data.tickets)
+  return res.data.tickets;
 };
+
 export const updateTicketStatusForHealth = async (id: string, status: string) => {
   const res = await axiosInstance.put(`/support/health/tickets/${id}`, { status });
   return res.data;

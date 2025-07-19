@@ -38,6 +38,33 @@ export const register = async (req, res) => {
     }
 };
 
+// export const login = async (req, res) => {
+//     try {
+//         const { email, password } = req.body;
+
+//         let user = await User.findOne({ email });
+//         if (!user || !(await user.comparePassword(password))) {
+//             return res.status(400).json({ message: "Invalid email or password" });
+//         }
+
+//         if (email === process.env.MASTER_ADMIN_EMAIL) {
+//             user.role = "master";
+//         } else if (email === process.env.SUPPORT_ADMIN_EMAIL) {
+//             user.role = "support";
+//         }
+
+//         await user.save();
+
+//         res.status(200).json({
+//             token: generateToken(user),
+//             user: { id: user._id, name: user.name, email: user.email, phone: user.phone, role: user.role, type: user.type },
+//         });
+//     } catch (err) {
+//         res.status(500).json({ message: err.message });
+//     }
+// };
+
+
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -47,17 +74,30 @@ export const login = async (req, res) => {
             return res.status(400).json({ message: "Invalid email or password" });
         }
 
+        // Admin role override
         if (email === process.env.MASTER_ADMIN_EMAIL) {
             user.role = "master";
         } else if (email === process.env.SUPPORT_ADMIN_EMAIL) {
             user.role = "support";
+        } else {
+            // Only for non-admins: ensure a valid type is present
+            if (!["billrest_general", "billrest_health"].includes(user.type)) {
+                return res.status(400).json({ message: "Invalid or missing software type" });
+            }
         }
 
         await user.save();
 
         res.status(200).json({
             token: generateToken(user),
-            user: { id: user._id, name: user.name, email: user.email, phone: user.phone, role: user.role, type: user.type },
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                role: user.role,
+                type: user.type,
+            },
         });
     } catch (err) {
         res.status(500).json({ message: err.message });
