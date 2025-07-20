@@ -24,6 +24,7 @@ export interface Appointment {
   admitted: boolean;
   createdAt: string;
   updatedAt: string;
+  count: number;
 }
 
 

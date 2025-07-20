@@ -25,3 +25,9 @@ export const searchServices = async (query: string): Promise<Service[]> => {
   const res = await axiosInstance.get(`/services/search?q=${encodeURIComponent(query)}`);
   return res.data;
 };
+
+
+export const getAllServices = async (): Promise<Service[]> => {
+  const res = await axiosInstance.get("/services/allServices");
+  return res.data;
+}

@@ -45,7 +45,7 @@ export default function AppointmentDetailDialog({
               <span className="text-sm font-medium text-gray-600">Status:</span>
               <span
                 className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  appointment.status === 'Completed'
+                  appointment.status === 'Admitted'
                     ? 'bg-green-100 text-green-800'
                     : appointment.status === 'Pending'
                     ? 'bg-orange-100 text-orange-800'

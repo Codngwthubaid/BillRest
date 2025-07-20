@@ -17,6 +17,8 @@ export default function PatientDetailsDialog({
     return null;
   }
 
+console.log(patient);
+
   return (
     <Dialog open={!!(patient && patient._id)}>
       <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose} />
@@ -43,9 +45,9 @@ export default function PatientDetailsDialog({
           <div className="p-6 overflow-y-auto max-h-96">
             {patient.visits && patient.visits.length > 0 ? (
               <div className="space-y-3">
-                {patient.visits.map((visit) => (
+                {patient.visits.map((visit, index) => (
                   <div
-                    key={visit._id}
+                    key={visit._id || index}
                     onClick={() => onSelectVisit(visit)}
                     className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                   >
@@ -60,7 +62,7 @@ export default function PatientDetailsDialog({
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-500">
-                          {visit.createdAt.slice(0, 10)}
+                          {typeof visit.createdAt === "string" ? visit.createdAt.slice(0, 10) : ""}
                         </p>
                       </div>
                     </div>

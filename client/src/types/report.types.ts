@@ -69,7 +69,6 @@ export interface TopPatient {
   visits: number;
 }
 
-// New type for top appointments
 export interface TopAppointment {
   description: string;
   count: number;

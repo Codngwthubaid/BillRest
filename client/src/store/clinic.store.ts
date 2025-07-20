@@ -1,10 +1,11 @@
 import { create } from "zustand";
 import type { Clinic, ClinicPayload } from "@/types/clinic.types";
-import { upsertClinic, getClinic } from "@/services/clinic.service";
+import { upsertClinic, getClinic, getAllClinics } from "@/services/clinic.service";
 import { useAuthStore } from "./auth.store";
 
 interface ClinicStore {
   clinic: Clinic | null;
+  allClinics: Clinic | null;
   loading: boolean;
   error: string | null;
   isPinVerified: boolean;
@@ -12,6 +13,7 @@ interface ClinicStore {
   verifyPin: () => void;
   resetPinVerification: () => void;
   fetchClinic: () => Promise<void>;
+  fetchAllClinics: () => Promise<void>;
   clearClinic: () => void;
   saveClinicProfile: (data: ClinicPayload) => Promise<void>;
 }
@@ -35,13 +37,13 @@ export const useClinicStore = create<ClinicStore>((set) => {
     }
   };
 
-  // Auto-load clinic if user is a clinic
   if (user?.role === "clinic") {
     loadClinic();
   }
 
   return {
     clinic: null,
+    allClinics: null,
     loading: true,
     error: null,
     isPinVerified: false,
@@ -62,6 +64,17 @@ export const useClinicStore = create<ClinicStore>((set) => {
       } catch (err: any) {
         console.error("Failed to save clinic profile:", err);
         set({ error: err.message || "Failed to save clinic profile", loading: false });
+      }
+    },
+
+    fetchAllClinics: async () => {
+      set({ loading: true, error: null });
+      try {
+        const res = await getAllClinics();
+        set({ allClinics: res, loading: false });
+      } catch (err: any) {
+        console.error("Failed to load all clinics:", err);
+        set({ error: err.message || "Failed to load clinics", loading: false });
       }
     },
   };

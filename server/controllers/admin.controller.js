@@ -416,6 +416,7 @@ export const getAllPatients = async (req, res) => {
   try {
     const patients = await Patient.find()
       .populate("clinic")
+      .populate("visits")
       .sort({ createdAt: -1 });
     res.json({ count: patients.length, patients });
   } catch (err) {

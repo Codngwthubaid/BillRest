@@ -1,24 +1,27 @@
 import { create } from "zustand";
 import {
   createIPD,
-  getAllIPDs,
+  getIPDs,
   getIPDById,
   updateIPD,
   dischargeIPD,
   deleteIPD,
   downloadIPDPDF,
   printIPDPDF,
+  getAllIPDs,
 } from "@/services/ipd.service";
 
 import type { IPDInput, IPDResponse } from "@/types/ipd.types";
 
 interface IPDState {
   ipds: IPDResponse[];
+  allIPDs: IPDResponse[];
   selectedIPD: IPDResponse | null;
   loading: boolean;
   error: string | null;
 
   fetchIPDs: () => Promise<void>;
+  fetchAllIPDs: () => Promise<void>;
   fetchIPD: (id: string) => Promise<void>;
   createIPDRecord: (data: IPDInput) => Promise<void>;
   updateIPDRecord: (id: string, data: Partial<IPDInput>) => Promise<void>;
@@ -31,6 +34,7 @@ interface IPDState {
 
 export const useIPDStore = create<IPDState>((set) => ({
   ipds: [],
+  allIPDs: [],
   selectedIPD: null,
   loading: false,
   error: null,
@@ -38,7 +42,7 @@ export const useIPDStore = create<IPDState>((set) => ({
   fetchIPDs: async () => {
     set({ loading: true, error: null });
     try {
-      const ipds = await getAllIPDs();
+      const ipds = await getIPDs();
       set({ ipds });
     } catch (err: any) {
       set({ error: err.message || "Failed to fetch IPDs" });
@@ -139,6 +143,19 @@ export const useIPDStore = create<IPDState>((set) => ({
       }
     } catch (err: any) {
       set({ error: err.message || "Failed to print IPD PDF" });
+    }
+  },
+
+  fetchAllIPDs: async () => {
+    set({ loading: true, error: null });
+    try {
+      const ipds = await getAllIPDs();
+      console.log("Fetched all IPDs:", ipds);
+      set({ allIPDs: ipds });
+    } catch (err: any) {
+      set({ error: err.message || "Failed to fetch all IPDs" });
+    } finally {
+      set({ loading: false });
     }
   },
 

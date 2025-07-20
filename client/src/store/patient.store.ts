@@ -2,16 +2,19 @@ import { create } from "zustand";
 import type { Patient } from "@/types/patient.types";
 import {
   getPatients as apiGetPatients,
-  deletePatient as apiDeletePatient
+  deletePatient as apiDeletePatient,
+  getAllPatients as apiGetAllPatients
 } from "@/services/patient.service";
 
 interface PatientState {
   patients: Patient[];
+  allPatients: Patient[];
   loading: boolean;
   error: string | null;
 
   // Actions
   fetchPatients: () => Promise<void>;
+  fetchAllPatients: () => Promise<Patient[]>;
   deletePatient: (id: string) => Promise<boolean>;
 
   setPatients: (patients: Patient[]) => void;
@@ -19,6 +22,7 @@ interface PatientState {
 
 export const usePatientStore = create<PatientState>((set) => ({
   patients: [],
+  allPatients: [],
   loading: false,
   error: null,
 
@@ -56,4 +60,21 @@ export const usePatientStore = create<PatientState>((set) => ({
       return false;
     }
   },
+
+  fetchAllPatients: async () => {
+    set({ loading: true, error: null });
+    try {
+      const data = await apiGetAllPatients();
+      set({ allPatients: data, loading: false });
+      return data;
+    } catch (err: any) {
+      console.error("Fetch all patients error:", err);
+      set({
+        error: err.message || "Failed to fetch all patients",
+        loading: false,
+      });
+      return [];
+    }
+  },
+
 }));

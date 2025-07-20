@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuthStore } from "@/store/auth.store";
-import { FileText, IndianRupee, Clock, Calendar, Download, PenLine, Trash, Printer, Eye } from "lucide-react";
+import { FileText, IndianRupee, Download, PenLine, Trash, Printer, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,11 +17,8 @@ import { downloadIPDPDF } from "@/services/ipd.service";
 import { useIPDStore } from "@/store/ipd.store";
 
 export default function Billing() {
-  const { ipds, fetchIPDs, deleteIPDRecord, printIPDPDF } = useIPDStore();
+  const { ipds, allIPDs, fetchAllIPDs, fetchIPDs, deleteIPDRecord, printIPDPDF } = useIPDStore();
   const { user } = useAuthStore();
-
-  console.log(ipds);
-
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -33,16 +30,22 @@ export default function Billing() {
 
   const previewRef = useRef<HTMLDivElement>(null);
 
+  const isClinic = user?.role === "clinic";
+  const isSupportOrMaster = user?.role === "support" || user?.role === "master";
+
   useEffect(() => {
-    const fetch = async () => {
-      await fetchIPDs();
+    const fetchData = async () => {
+      if (isClinic) {
+        await fetchIPDs();
+      } else if (isSupportOrMaster) {
+        await fetchAllIPDs();
+      }
       setLoading(false);
     };
-    fetch();
-  }, [fetchIPDs]);
+    fetchData();
+  }, [user?.role]);
 
-  const data = ipds;
-  // console.log(data)
+  const data = isClinic ? ipds : allIPDs;
 
   const summary = {
     total: data.length,
@@ -86,7 +89,7 @@ export default function Billing() {
   const handleConfirmDelete = async () => {
     if (!selectedIPD?._id) return;
     await deleteIPDRecord(selectedIPD._id);
-    await fetchIPDs();
+    isClinic ? await fetchIPDs() : await fetchAllIPDs();
     setShowDeleteDialog(false);
   };
 
@@ -99,7 +102,7 @@ export default function Billing() {
           <h1 className="text-2xl font-bold">Billings Record</h1>
           <p className="text-gray-500">Manage your in-patient department records</p>
         </div>
-        {user?.role === "clinic" && (
+        {isClinic && (
           <>
             <Button onClick={() => setShowCreateDialog(true)} className="bg-blue-600 hover:bg-blue-700">
               + Create Bill
@@ -109,65 +112,25 @@ export default function Billing() {
         )}
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-blue-600">
-              <FileText className="w-4 h-4" />
-              <span>Total</span>
-            </div>
-            <span className="font-bold text-lg">{summary.total}</span>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-yellow-600">
-              <Clock className="w-4 h-4" />
-              <span>Admitted</span>
-            </div>
-            <span className="font-bold text-lg">{summary.admitted}</span>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-green-600">
-              <Calendar className="w-4 h-4" />
-              <span>Discharged</span>
-            </div>
-            <span className="font-bold text-lg">{summary.discharged}</span>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-yellow-600">
-              <Clock className="w-4 h-4" />
-              <span>Pending</span>
-            </div>
-            <span className="font-bold text-lg">{summary.pending}</span>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-green-600">
-              <IndianRupee className="w-4 h-4" />
-              <span>Paid</span>
-            </div>
-            <span className="font-bold text-lg">{summary.paid}</span>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-primary">
-              <IndianRupee className="w-4 h-4" />
-              <span>Total Amount</span>
-            </div>
-            <span className="font-bold text-lg">₹{summary.totalAmount.toLocaleString()}</span>
-          </CardContent>
-        </Card>
-      </div>
+      {isClinic && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-6">
+          {/* Summary cards */}
+          {Object.entries(summary).map(([key, value]) => (
+            <Card key={key}>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 capitalize text-muted-foreground">
+                  {key === "totalAmount" ? <IndianRupee className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                  <span>{key.replace(/([A-Z])/g, " $1")}</span>
+                </div>
+                <span className="font-bold text-lg">
+                  {key === "totalAmount" ? `₹${value.toLocaleString()}` : value}
+                </span>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
-      {/* Search */}
       <Input
         placeholder="Search IPD records by IPD number or patient name..."
         value={search}
@@ -211,52 +174,37 @@ export default function Billing() {
                 <td>{getPaymentStatusBadge(ipd.paymentStatus)}</td>
                 <td>{ipd.admissionDate?.slice(0, 10)}</td>
                 <td className="flex gap-2 p-2 flex-wrap">
-                  <button
-                    onClick={() => {
-                      setSelectedIPD(ipd);       // Set the IPD object
-                      setShowPreviewDialog(true); // Open dialog
-                    }}
-                  >
+                  <button onClick={() => { setSelectedIPD(ipd); setShowPreviewDialog(true); }}>
                     <Eye className="w-4 h-4 text-blue-500 hover:scale-110" />
                   </button>
-
-                  <button
-                    onClick={async () => {
-                      if (!ipd._id) return;
-                      try {
-                        const blob = await downloadIPDPDF(ipd._id);
-                        const url = window.URL.createObjectURL(new Blob([blob]));
-                        const link = document.createElement("a");
-                        link.href = url;
-                        link.setAttribute("download", `${ipd.ipdNumber}_bill.pdf`);
-                        document.body.appendChild(link);
-                        link.click();
-                        link.remove();
-                        window.URL.revokeObjectURL(url);
-                      } catch (err) {
-                        console.error("Download failed", err);
-                      }
-                    }}
-                  >
+                  <button onClick={async () => {
+                    try {
+                      const blob = await downloadIPDPDF(ipd._id);
+                      const url = window.URL.createObjectURL(new Blob([blob]));
+                      const link = document.createElement("a");
+                      link.href = url;
+                      link.setAttribute("download", `${ipd.ipdNumber}_bill.pdf`);
+                      document.body.appendChild(link);
+                      link.click();
+                      link.remove();
+                      window.URL.revokeObjectURL(url);
+                    } catch (err) {
+                      console.error("Download failed", err);
+                    }
+                  }}>
                     <Download className="w-4 h-4 text-green-600 hover:scale-110" />
                   </button>
-
-                  {/* Print PDF Button */}
                   <button onClick={() => printIPDPDF(ipd._id)}>
                     <Printer className="w-4 h-4 text-orange-600 hover:scale-110" />
                   </button>
-
-
                   <button onClick={() => { setSelectedIPD(ipd); setShowUpdateDialog(true); }}>
                     <PenLine className="w-4 h-4 text-emerald-600 hover:scale-110" />
                   </button>
-                  <button
-                    onClick={() => {
-                      setSelectedIPD(ipd);
-                      setSelectedBill(ipd.ipdNumber);
-                      setShowDeleteDialog(true);
-                    }}
-                  >
+                  <button onClick={() => {
+                    setSelectedIPD(ipd);
+                    setSelectedBill(ipd.ipdNumber);
+                    setShowDeleteDialog(true);
+                  }}>
                     <Trash className="w-4 h-4 text-red-600 hover:scale-110" />
                   </button>
                 </td>
@@ -280,7 +228,7 @@ export default function Billing() {
         ipd={selectedIPD}
         onUpdate={async (id, fields) => {
           await updateIPD(id, fields);
-          await fetchIPDs();
+          isClinic ? await fetchIPDs() : await fetchAllIPDs();
         }}
       />
 
@@ -291,22 +239,18 @@ export default function Billing() {
         onConfirmDelete={handleConfirmDelete}
       />
 
-
       <div style={{ display: "none" }}>
         <div ref={previewRef} className="m-10">
           {selectedIPD && <IPDPreview IPD={selectedIPD} />}
         </div>
       </div>
 
-
       <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
         <DialogContent className="max-w-4xl h-[80vh] overflow-y-scroll">
           <DialogHeader>
             <DialogTitle>Preview IPD Bill</DialogTitle>
           </DialogHeader>
-
           {selectedIPD && <IPDPreview IPD={selectedIPD} />}
-
           <DialogFooter>
             <Button variant="secondary" onClick={() => setShowPreviewDialog(false)}>
               Close

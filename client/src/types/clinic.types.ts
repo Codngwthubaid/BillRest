@@ -7,6 +7,7 @@ export interface Clinic {
   protectedPin?: string;
   createdAt: string;
   updatedAt: string;
+  count?: number;
 }
 
 export interface ClinicPayload {

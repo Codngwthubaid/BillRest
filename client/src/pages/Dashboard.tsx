@@ -65,8 +65,8 @@ export default function Dashboard() {
 
         {user?.role === "clinic" && (
           <>
-            <PatientChart />
             <TopServicesChart />
+            <PatientChart />
           </>
         )}
       </div>

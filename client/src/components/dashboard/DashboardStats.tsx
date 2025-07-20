@@ -5,8 +5,12 @@ import { useBusinessStore } from "@/store/business.store";
 import { useInvoiceStore } from "@/store/invoice.store";
 import { useSupportStore } from "@/store/support.store";
 import { useReportStore } from "@/store/report.store";
-import { IndianRupee, FileText, Package, StoreIcon, UserRoundCheck, HelpCircle, FileTerminal, ListOrdered, SquareUserRound } from "lucide-react";
+import { IndianRupee, FileText, Package, StoreIcon, UserRoundCheck, HelpCircle, FileTerminal, ListOrdered, SquareUserRound, FileTerminalIcon, Hospital } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
+import { useClinicStore } from "@/store/clinic.store";
+import { useServiceStore } from "@/store/service.store";
+import { useAppointmentStore } from "@/store/appointment.store";
+
 
 export default function DashboardStats() {
   const { user } = useAuthStore();
@@ -15,6 +19,9 @@ export default function DashboardStats() {
   const { businesses, fetchAllBusinesses } = useBusinessStore();
   const { allInvoices, fetchAllInvoices } = useInvoiceStore();
   const { allTickets, fetchAllTickets } = useSupportStore();
+  const { allClinics, fetchAllClinics } = useClinicStore();
+  const { allServices, fetchAllServices } = useServiceStore();
+  const { allAppointments, fetchAllAppointments } = useAppointmentStore();
 
   useEffect(() => {
     fetchGeneralReport("monthly", new Date().toISOString().split("T")[0]);
@@ -23,7 +30,10 @@ export default function DashboardStats() {
     fetchAllBusinesses();
     fetchAllInvoices();
     fetchAllTickets();
-  }, [fetchGeneralReport, fetchHealthReport , fetchAllCustomers, fetchAllBusinesses, fetchAllInvoices, fetchAllTickets]);
+    fetchAllClinics();
+    fetchAllServices();
+    fetchAllAppointments();
+  }, [fetchGeneralReport, fetchHealthReport, fetchAllCustomers, fetchAllBusinesses, fetchAllInvoices, fetchAllTickets, fetchAllClinics, fetchAllServices, fetchAllAppointments]);
 
   let dashboardStats = [];
 
@@ -47,6 +57,24 @@ export default function DashboardStats() {
         icon: UserRoundCheck,
         color: "bg-purple-500",
       },
+      {
+        title: "Total Appointments",
+        value: allAppointments?.count || 0,
+        icon: FileTerminalIcon,
+        color: "bg-yellow-500",
+      },
+      {
+        title: "Total Clinics",
+        value: allClinics?.count || 0,
+        icon: Hospital,
+        color: "bg-red-500",
+      },
+      {
+        title: "Total Services",
+        value: allServices?.count || 0,
+        icon: ListOrdered,
+        color: "bg-sky-500",
+      },
     ];
   } else if (user?.role === "master") {
     dashboardStats = [
@@ -63,16 +91,28 @@ export default function DashboardStats() {
         color: "bg-red-500",
       },
       {
-        title: "Total Businesses",
-        value: businesses.length || 0,
-        icon: StoreIcon,
-        color: "bg-green-500",
-      },
-      {
         title: "Total Customers",
         value: allCustomers?.length || 0,
         icon: UserRoundCheck,
         color: "bg-purple-500",
+      },
+      {
+        title: "Total Clinics",
+        value: allClinics?.count || 0,
+        icon: Hospital,
+        color: "bg-blue-500",
+      },
+      {
+        title: "Total Appointments",
+        value: allAppointments?.count || 0,
+        icon: FileTerminalIcon,
+        color: "bg-yellow-500",
+      },
+      {
+        title: "Total Services",
+        value: allServices?.count || 0,
+        icon: ListOrdered,
+        color: "bg-sky-500",
       },
     ];
   } else if (user?.role === "clinic") {

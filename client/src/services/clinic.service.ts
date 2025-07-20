@@ -28,6 +28,7 @@ export const getClinic = async (): Promise<Clinic> => {
 // Admin: Get all clinics
 export const getAllClinics = async () => {
   const res = await axiosInstance.get("/clinic/allClinics");
+  console.log("Loaded clinics:", res.data);
   return res.data;
 };
 

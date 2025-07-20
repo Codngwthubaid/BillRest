@@ -24,7 +24,7 @@ export default function RecentAppointments() {
 
   const appointmentsToShow =
     role === "support" || role === "master"
-      ? (Array.isArray(allAppointments) ? allAppointments.slice(0, 4) : [])
+      ? (Array.isArray(allAppointments?.appointments) ? allAppointments.appointments.slice(0, 4) : [])
       : (Array.isArray(healthReport?.topAppointments) ? healthReport.topAppointments.slice(0, 4) : []);
 
   return (
@@ -39,7 +39,7 @@ export default function RecentAppointments() {
       </CardHeader>
       <CardContent className="pb-6">
         <div className="space-y-4">
-          {appointmentsToShow?.map((app, index) => (
+          {appointmentsToShow?.map((app : any, index : number) => (
             <div key={index} className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -47,9 +47,16 @@ export default function RecentAppointments() {
                 </div>
                 <div>
                   <p className="font-medium">{app.description}</p>
-                  <p className="text-sm text-gray-600">
-                    Total Visits: {app.count}  
-                  </p>
+                  {role === "clinic" && (
+                    <p className="text-sm text-gray-600">
+                      Total Visits: {app.count}
+                    </p>
+                  )}
+                  {(role === "support" || role === "master") && (
+                    <p className="text-sm text-gray-600">
+                      Patient: {app.patient?.name || "Unknown"}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

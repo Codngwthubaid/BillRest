@@ -10,3 +10,8 @@ export const deletePatient = async (id: string): Promise<{ message: string }> =>
   const res = await axiosInstance.delete(`/patients/${id}`);
   return res.data;
 };
+
+export const getAllPatients = async (): Promise<Patient[]> => {
+  const res = await axiosInstance.get("/patients/allPatients");
+  return res.data;
+};

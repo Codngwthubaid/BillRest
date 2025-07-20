@@ -6,10 +6,12 @@ import {
   updateService as apiUpdateService,
   deleteService as apiDeleteService,
   searchServices as apiSearchServices,
+  getAllServices as apiGetAllServices
 } from "@/services/service.service";
 
 interface ServiceState {
   services: Service[];
+  allServices: Service[];
   filteredServices: Service[];
   selectedService: Service | null;
   loading: boolean;
@@ -17,6 +19,7 @@ interface ServiceState {
 
   // Actions
   fetchServices: () => Promise<void>;
+  fetchAllServices: () => Promise<void>;
   createService: (payload: CreateServicePayload) => Promise<Service | null>;
   updateService: (id: string, payload: UpdateServicePayload) => Promise<Service | null>;
   deleteService: (id: string) => Promise<boolean>;
@@ -28,6 +31,7 @@ interface ServiceState {
 
 export const useServiceStore = create<ServiceState>((set) => ({
   services: [],
+  allServices: [],  
   filteredServices: [],
   selectedService: null,
   loading: false,
@@ -107,4 +111,16 @@ export const useServiceStore = create<ServiceState>((set) => ({
       set({ error: err.message || "Failed to search services", loading: false });
     }
   },
+
+  fetchAllServices: async () => {
+    set({ loading: true, error: null });
+    try {
+      const data = await apiGetAllServices();
+      set({ allServices: data, loading: false });
+    } catch (err: any) {
+      console.error("Fetch all services error:", err);
+      set({ error: err.message || "Failed to fetch all services", loading: false });
+    }
+  },
+
 }));
