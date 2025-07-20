@@ -3,6 +3,11 @@ import { Product } from "../models/product.model.js";
 import { Invoice } from "../models/invoice.model.js";
 import { Business } from "../models/business.model.js";
 import { Customer } from "../models/customer.model.js";
+import { Patient } from "../models/patient.model.js";
+import { Service } from "../models/service.model.js";
+import { Appointment } from "../models/appointment.model.js";
+import { IPD } from "../models/ipd.model.js";
+import { Clinic } from "../models/clinic.model.js";
 import { SupportTicketForGeneral } from "../models/supportTicketForGeneral.model.js";
 import { SupportTicketForHealth } from "../models/supportTicketForHealth.model.js"
 
@@ -168,7 +173,6 @@ export const getAllSupportTicketsForGeneral = async (req, res) => {
     const tickets = await SupportTicketForGeneral.find()
       .populate("user") // Get limited user info
       .sort({ createdAt: -1 }); // Show newest tickets first
-    console.log(tickets)
     res.json({ tickets });
   } catch (err) {
     console.error("Error fetching tickets:", err);
@@ -208,7 +212,6 @@ export const getAllSupportTicketsForHealth = async (req, res) => {
     const tickets = await SupportTicketForHealth.find()
       .populate("user") // Get limited user info
       .sort({ createdAt: -1 }); // Show newest tickets first
-    console.log(tickets)
     res.json({ tickets });
   } catch (err) {
     console.error("Error fetching tickets:", err);
@@ -408,3 +411,66 @@ export const getAllCutomers = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+export const getAllPatients = async (req, res) => {
+  try {
+    const patients = await Patient.find()
+      .populate("clinic")
+      .sort({ createdAt: -1 });
+    res.json({ count: patients.length, patients });
+  } catch (err) {
+    console.error("Error fetching patients:", err);
+    res.status(500).json({ message: "Failed to fetch patients" });
+  }
+};
+
+export const getAllServices = async (req, res) => {
+  try {
+    const services = await Service.find()
+      .populate("clinic")
+      .sort({ createdAt: -1 });
+    res.json({ count: services.length, services });
+  } catch (err) {
+    console.error("Error fetching services:", err);
+    res.status(500).json({ message: "Failed to fetch services" });
+  }
+};
+
+export const getAllAppointments = async (req, res) => {
+  try {
+    const appointments = await Appointment.find()
+      .populate("clinic")
+      .populate("patient")
+      .sort({ createdAt: -1 });
+    res.json({ count: appointments.length, appointments });
+  } catch (err) {
+    console.error("Error fetching appointments:", err);
+    res.status(500).json({ message: "Failed to fetch appointments" });
+  }
+};
+
+export const getAllIPDs = async (req, res) => {
+  try {
+    const ipds = await IPD.find()
+      .populate("clinic")
+      .populate("patient")
+      .populate("appointment")
+      .sort({ createdAt: -1 });
+    res.json({ count: ipds.length, ipds });
+  } catch (err) {
+    console.error("Error fetching IPDs:", err);
+    res.status(500).json({ message: "Failed to fetch IPDs" });
+  }
+};
+
+export const getAllClinics = async (req, res) => {
+  try {
+    const clinics = await Clinic.find()
+      .populate("user")
+      .sort({ createdAt: -1 });
+    res.json({ count: clinics.length, clinics });
+  } catch (err) {
+    console.error("Error fetching clinics:", err);
+    res.status(500).json({ message: "Failed to fetch clinics" });
+  }
+}

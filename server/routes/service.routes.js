@@ -9,7 +9,7 @@ import {
 
 import { verifyToken, checkRole } from "../middlewares/auth.middleware.js";
 import { checkSubscription } from "../middlewares/subscription.middleware.js";
-// import { getAllServices } from "../controllers/admin.controller.js";
+import { getAllServices } from "../controllers/admin.controller.js";
 
 const router = express.Router();
 
@@ -18,8 +18,6 @@ router.get("/", verifyToken, checkRole(["clinic"]), checkSubscription, getServic
 router.get("/search", verifyToken, checkRole(["clinic"]), checkSubscription, searchServices);
 router.put("/:id", verifyToken, checkRole(["clinic"]), checkSubscription, updateService);
 router.delete("/:id", verifyToken, checkRole(["clinic"]), checkSubscription, deleteService);
-
-
-// router.get("/allServices", verifyToken, checkRole(["support", "master"]), getAllServices);
+router.get("/allServices", verifyToken, checkRole(["support", "master"]), getAllServices);
 
 export default router;

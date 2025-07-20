@@ -61,7 +61,6 @@ export const useInvoiceStore = create<InvoiceState>((set) => ({
     set({ loading: true, error: null });
     try {
       const data = await apiGetAllInvoices();
-      console.log("Loaded all invoices:", data);
       set({ allInvoices: data, loading: false });
     } catch (err: any) {
       console.error("Fetch all invoices error:", err);
@@ -105,7 +104,7 @@ export const useInvoiceStore = create<InvoiceState>((set) => ({
         allInvoices: {
           ...state.allInvoices,
           invoices: state.allInvoices.invoices.map((inv: Invoice) => (inv._id === id ? invoice : inv))
-        }, // ✅ keep admin data updated too
+        },
         selectedInvoice: state.selectedInvoice?._id === id ? invoice : state.selectedInvoice,
         loading: false,
       }));

@@ -10,16 +10,19 @@ import {
     getAppointmentById as apiGetAppointmentById,
     updateAppointment as apiUpdateAppointment,
     deleteAppointment as apiDeleteAppointment,
+    getAllAppointments as apiGetAllAppointments,
 } from "@/services/appointment.service";
 
 interface AppointmentState {
     appointments: Appointment[];
+    allAppointments: Appointment[];
     selectedAppointment: Appointment | null;
     loading: boolean;
     error: string | null;
 
     // Actions
     fetchAppointments: () => Promise<void>;
+    fetchAllAppointments: () => Promise<void>;
     fetchAppointmentById: (id: string) => Promise<void>;
     createAppointment: (payload: CreateAppointmentPayload) => Promise<Appointment | null>;
     updateAppointment: (id: string, payload: UpdateAppointmentPayload) => Promise<Appointment | null>;
@@ -31,6 +34,7 @@ interface AppointmentState {
 
 export const useAppointmentStore = create<AppointmentState>((set) => ({
     appointments: [],
+    allAppointments: [],
     selectedAppointment: null,
     loading: false,
     error: null,
@@ -132,4 +136,19 @@ export const useAppointmentStore = create<AppointmentState>((set) => ({
             return false;
         }
     },
+
+    fetchAllAppointments: async () => {
+        set({ loading: true, error: null });
+        try {
+            const data = await apiGetAllAppointments();
+            set({ allAppointments: data, loading: false });
+        } catch (err: any) {
+            console.error("Fetch all appointments error:", err);
+            set({
+                error: err.message || "Failed to fetch all appointments",
+                loading: false,
+            });
+        }
+    },
+
 }));

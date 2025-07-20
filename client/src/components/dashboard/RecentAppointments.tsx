@@ -13,19 +13,19 @@ export default function RecentAppointments() {
 
   const { healthReport } = useReportStore();
   const { fetchPatients } = usePatientStore();
-  const { appointments, fetchAppointments } = useAppointmentStore();
+  const { allAppointments, fetchAllAppointments } = useAppointmentStore();
 
   useEffect(() => {
     if (role === "support" || role === "master") {
       fetchPatients();
-      fetchAppointments();
+      fetchAllAppointments();
     }
-  }, [role, fetchPatients, fetchAppointments]);
+  }, [role, fetchPatients, fetchAllAppointments]);
 
   const appointmentsToShow =
     role === "support" || role === "master"
-      ? appointments?.slice(0, 4)
-      : healthReport?.topAppointments?.slice(0, 4);
+      ? (Array.isArray(allAppointments) ? allAppointments.slice(0, 4) : [])
+      : (Array.isArray(healthReport?.topAppointments) ? healthReport.topAppointments.slice(0, 4) : []);
 
   return (
     <Card className="rounded-lg shadow-sm border">

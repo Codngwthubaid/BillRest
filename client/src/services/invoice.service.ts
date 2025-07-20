@@ -3,7 +3,6 @@ import type { AllInvoicesResponse, CreateInvoicePayload, Invoice } from "@/types
 
 export const createInvoice = async (payload: CreateInvoicePayload): Promise<{ message: string; invoice: Invoice }> => {
   const res = await axiosInstance.post("/invoices", payload);
-  console.log(res.data)
   return res.data;
 };
 
@@ -51,12 +50,10 @@ export const downloadPOSReceiptPDF = async (invoiceId: string, size: "58mm" | "8
 
 export const printInvoicePDF = async (id: string): Promise<void> => {
   const printUrl = await axiosInstance.get(`/invoices/${id}/print`);
-  console.log("Opening print invoice at:", printUrl.data);
   window.open(printUrl.data);
 };
 
 export const getAllInvoices = async (): Promise<AllInvoicesResponse> => {
   const res = await axiosInstance.get("/invoices/allInvoices");
-  console.log(res.data)
   return res.data;
 };

@@ -29,7 +29,6 @@ export const useBusinessStore = create<BusinessState>((set, get) => {
     set({ loading: true, error: null });
     try {
       const data = await getBusiness();
-      console.log("Loaded business:", data);
       set({ business: data, loading: false });
     } catch (err: any) {
       console.error("Failed to load business:", err);
@@ -62,7 +61,6 @@ export const useBusinessStore = create<BusinessState>((set, get) => {
       set({ loading: true, error: null });
       try {
         const data = await getAllBusinesses();
-        console.log("Loaded all businesses:", data);
         set({ businesses: data.businesses, loading: false });
       } catch (err: any) {
         console.error("Failed to load all businesses:", err);
@@ -73,9 +71,7 @@ export const useBusinessStore = create<BusinessState>((set, get) => {
     updateBusinessFeaturesInStore: async (id, features) => {
       set({ loading: true, error: null });
       try {
-        const data = await updateBusinessFeatures(id, features);
-        console.log("Updated business features:", data);
-
+        const data = await updateBusinessFeatures(id, features);;
         const updatedBusinesses = get().businesses.map((b) =>
           b.user._id === id
             ? { ...b, user: { ...b.user, features: data.features } }

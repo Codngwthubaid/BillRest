@@ -42,7 +42,6 @@ export const useCustomerStore = create<CustomerState>((set) => ({
     set({ loading: true, error: null });
     try {
       const data = await getAllCustomers();
-      console.log("Loaded all customers:", data);
       set({ allCustomers: data, loading: false });
     } catch (err: any) {
       console.error("Fetch all customers failed:", err);

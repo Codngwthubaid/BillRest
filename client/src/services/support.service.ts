@@ -22,7 +22,6 @@ export const getTicketBySerialNumberForGeneral = async (serialNumber: number): P
 
 export const getAllSupportTicketsForGeneral = async (): Promise<SupportTicket[]> => {
   const res = await axiosInstance.get("/support/general/allTickets");
-  console.log(res.data.tickets)
   return res.data.tickets;
 };
 
@@ -52,7 +51,6 @@ export const getTicketBySerialNumberForHealth = async (serialNumber: number): Pr
 
 export const getAllSupportTicketsForHealth = async (): Promise<SupportTicket[]> => {
   const res = await axiosInstance.get("/support/health/allTickets");
-  console.log(res.data.tickets)
   return res.data.tickets;
 };
 

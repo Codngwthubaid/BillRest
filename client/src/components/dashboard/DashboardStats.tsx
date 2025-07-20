@@ -16,10 +16,6 @@ export default function DashboardStats() {
   const { allInvoices, fetchAllInvoices } = useInvoiceStore();
   const { allTickets, fetchAllTickets } = useSupportStore();
 
-
-  console.log("Health report:", healthReport);
-
-
   useEffect(() => {
     fetchGeneralReport("monthly", new Date().toISOString().split("T")[0]);
     fetchHealthReport("monthly", new Date().toISOString().split("T")[0]);

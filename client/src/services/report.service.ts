@@ -37,6 +37,5 @@ export const getSalesReportForHealth = async (
   });
 
   const res = await axiosInstance.get(`/report/sales/health/?${queryParams}`);
-  console.log(res);
   return res.data;
 };

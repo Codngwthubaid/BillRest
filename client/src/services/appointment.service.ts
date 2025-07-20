@@ -26,3 +26,8 @@ export const deleteAppointment = async (id: string): Promise<{ message: string }
   const res = await axiosInstance.delete(`/appointments/${id}`);
   return res.data;
 };
+
+export const getAllAppointments = async (): Promise<Appointment[]> => {
+  const res = await axiosInstance.get("/appointments/allAppointments");
+  return res.data;
+}

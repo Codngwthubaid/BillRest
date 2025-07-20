@@ -42,7 +42,6 @@ export const useReportStore = create<ReportState>((set) => ({
     set({ loading: true, error: null });
     try {
       const data = await getSalesReportForHealth(filterType, startDate, endDate);
-      console.log(data)
       set({ healthReport: data, loading: false });
     } catch (err: any) {
       console.error("Fetch health report error:", err);
