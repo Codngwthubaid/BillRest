@@ -14,7 +14,7 @@ import ProtectedPinDialog from "@/components/invoices/ProtectedPinDialog";
 import ConfirmDeleteDialog from "@/components/customer/DeleteCustomerDialog";
 
 export default function Patients() {
-    const { patients, allPatients, loading, fetchPatients, fetchAllPatients, deletePatient } = usePatientStore();
+    const { patients, loading, fetchPatients, deletePatient } = usePatientStore();
     const { user } = useAuthStore();
 
     const [search, setSearch] = useState("");
@@ -24,13 +24,13 @@ export default function Patients() {
     const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
     const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
-    const patientList = user?.role === "clinic" ? patients : allPatients;
+    const patientList = (user?.role === "clinic" ? patients : []) || [];
 
     useEffect(() => {
         if (user?.role === "clinic") {
             fetchPatients();
         } else if (user?.role === "support" || user?.role === "master") {
-            fetchAllPatients();
+            // fetchAllPatients();
         }
     }, [user?.role]);
 
@@ -58,7 +58,8 @@ export default function Patients() {
     }).length;
 
     const activeThisMonth = patients.filter(patient =>
-        patient.appointments?.some(a =>
+        Array.isArray(patient.appointments) &&
+        patient.appointments.some((a: any) =>
             isSameMonth(parseISO(a.createdAt), currentMonth)
         )
     ).length;

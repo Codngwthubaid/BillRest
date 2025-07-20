@@ -23,11 +23,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { useAuthStore } from "@/store/auth.store";
 import type { SupportTicket } from "@/types/support.types"; // Make sure this path is correct
 
 export default function SupportAndMasterContactPage() {
-  const { user } = useAuthStore();
   const {
     allTickets,
     fetchAllTickets,
@@ -43,20 +41,16 @@ export default function SupportAndMasterContactPage() {
   const handleStatusChange = async (ticketId: string, status: SupportTicket["status"]) => {
     try {
       const ticket = allTickets.find(t => t._id === ticketId);
-      if (!ticket) {
-        toast("Ticket not found.");
-        return;
-      }
+      if (!ticket) return toast("Ticket not found.");
 
-      const isHealth = ticket.type === "billrest_health";
+      const isHealth = ticket?.user?.type === 'billrest_health';
+      const isGeneral = ticket?.user?.type === 'billrest_general';
 
-      if (isHealth) {
-        await updateHealthTicketStatus(ticketId, status);
-      } else {
-        await updateGeneralTicketStatus(ticketId, status);
-      }
+      if (isHealth) await updateHealthTicketStatus(ticketId, status)
+      if (isGeneral) await updateGeneralTicketStatus(ticketId, status);
 
       toast(`Ticket status changed to ${status}.`);
+      await fetchAllTickets();
     } catch (err) {
       toast("There was a problem updating the ticket status.");
     }
@@ -98,40 +92,38 @@ export default function SupportAndMasterContactPage() {
                 <TableHead>Phone</TableHead>
                 <TableHead>Message</TableHead>
                 <TableHead>Status</TableHead>
-                {user?.role === "support" && <TableHead>Change Status</TableHead>}
+                <TableHead>Change Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {Array.isArray(allTickets) && allTickets.map((ticket: SupportTicket) => (
                 <TableRow key={ticket._id}>
-                  <TableCell>{ticket.serialNumber ?? "-"}</TableCell>
-                  <TableCell>{ticket.user?.name ?? "-"}</TableCell>
-                  <TableCell>{ticket.user?.type ?? "-"}</TableCell>
-                  <TableCell>{ticket.user?.email ?? "-"}</TableCell>
-                  <TableCell>{ticket.user?.phone ?? "-"}</TableCell>
-                  <TableCell>{ticket.message ?? "-"}</TableCell>
+                  <TableCell>{ticket.serialNumber}</TableCell>
+                  <TableCell>{ticket.user?.name}</TableCell>
+                  <TableCell>{ticket.user?.type}</TableCell>
+                  <TableCell>{ticket.user?.email}</TableCell>
+                  <TableCell>{ticket.user?.phone}</TableCell>
+                  <TableCell>{ticket.message}</TableCell>
                   <TableCell>
                     <Badge className={`${getStatusBadgeColor(ticket.status)} px-2 py-1 rounded`}>
                       {ticket.status}
                     </Badge>
                   </TableCell>
-                  {user?.role === "support" && (
-                    <TableCell>
-                      <Select
-                        value={ticket.status}
-                        onValueChange={(status: SupportTicket["status"]) => handleStatusChange(ticket._id, status)}
-                      >
-                        <SelectTrigger className="w-36">
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="resolved">Resolved</SelectItem>
-                          <SelectItem value="escalated">Escalated</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                  )}
+                  <TableCell>
+                    <Select
+                      value={ticket.status}
+                      onValueChange={(status: SupportTicket["status"]) => handleStatusChange(ticket._id, status)}
+                    >
+                      <SelectTrigger className="w-36">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="resolved">Resolved</SelectItem>
+                        <SelectItem value="escalated">Escalated</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

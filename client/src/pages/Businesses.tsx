@@ -61,8 +61,8 @@ export default function Businesses() {
               <TableHead>User Name</TableHead>
               <TableHead>Address</TableHead>
               <TableHead>Protected PIN</TableHead>
-              <TableHead>PWA Status</TableHead>
-              {user?.role === "master" && <TableHead>PWA Enabled</TableHead>}
+              <TableHead>WA Status</TableHead>
+              {user?.role === "master" && <TableHead>WA Enabled</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>

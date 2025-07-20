@@ -12,7 +12,8 @@ import {
     FileTerminal,
     SquareUserRound,
     ListOrdered,
-    Receipt
+    Receipt,
+    Hospital
 } from "lucide-react";
 
 export const items = {
@@ -142,6 +143,31 @@ export const items = {
             icon: StoreIcon,
         },
         {
+            title: "Clinics",
+            href: "/clinics",
+            icon: Hospital,
+        },
+        {
+            title: "Appointments",
+            href: "/appointments",
+            icon: FileTerminal,
+        },
+        {
+            title: "Patients",
+            href: "/patients",
+            icon: SquareUserRound,
+        },
+        {
+            title: "Services",
+            href: "/services",
+            icon: ListOrdered,
+        },
+        {
+            title: "Billings",
+            href: "/billings",
+            icon: Receipt,
+        },
+        {
             title: "Contact",
             href: "/contact",
             icon: Mail,
@@ -164,6 +190,11 @@ export const items = {
             icon: Home,
         },
         {
+            title: "Businesses",
+            href: "/business",
+            icon: StoreIcon,
+        },
+        {
             title: "Invoices",
             href: "/invoices",
             icon: FileText,
@@ -174,14 +205,34 @@ export const items = {
             icon: ShoppingBag,
         },
         {
-            title: "Business",
-            href: "/business",
-            icon: StoreIcon,
-        },
-        {
             title: "Customers",
             href: "/customers",
             icon: UserRoundCheck,
+        },
+        {
+            title: "Clinics",
+            href: "/clinics",
+            icon: Hospital,
+        },
+        {
+            title: "Appointments",
+            href: "/appointments",
+            icon: FileTerminal,
+        },
+        {
+            title: "Patients",
+            href: "/patients",
+            icon: SquareUserRound,
+        },
+        {
+            title: "Services",
+            href: "/services",
+            icon: ListOrdered,
+        },
+        {
+            title: "Billings",
+            href: "/billings",
+            icon: Receipt,
         },
         {
             title: "Profile",

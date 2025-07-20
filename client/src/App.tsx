@@ -22,6 +22,7 @@ import Appointments from "./pages/Appointments";
 import Billing from "./pages/Billing";
 import Services from "./pages/Services";
 import Patients from "./pages/Patients";
+import ClinicsPage from "./pages/Clinics";
 
 export default function App() {
   const { user } = useAuthStore();
@@ -55,7 +56,7 @@ export default function App() {
                 <Route path="/help" element={<HelpPage />} />
               </Route>
             )}
-            
+
             {user?.role === "clinic" && (
               <Route element={<SubscriptionRoute />}>
                 <Route path="/profile" element={<Profile />} />
@@ -77,6 +78,11 @@ export default function App() {
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/customers" element={<CustomerPage />} />
                 <Route path="/businesses" element={<BusinessPage />} />
+                <Route path="/clinics" element={<ClinicsPage />} />
+                <Route path="/appointments" element={<Appointments />} />
+                <Route path="/billings" element={<Billing />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/patients" element={<Patients />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/help" element={<HelpPage />} />
@@ -90,6 +96,11 @@ export default function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/customers" element={<CustomerPage />} />
+                <Route path="/clinics" element={<ClinicsPage />} />
+                <Route path="/appointments" element={<Appointments />} />
+                <Route path="/billings" element={<Billing />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/patients" element={<Patients />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/help" element={<HelpPage />} />
                 <Route path="/business" element={<BusinessPage />} />

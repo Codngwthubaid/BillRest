@@ -100,7 +100,7 @@ export default function CreateAppointmentDialog({ open, onOpenChange }: Props) {
                 <Select
                   value={form.status ?? "Pending"}
                   onValueChange={(value) =>
-                    setForm({ ...form, status: value as "Pending" | "Completed" | "Canceled" })
+                    setForm({ ...form, status: value as "Pending" | "Admitted" | "Discharged" })
                   }
                 >
                   <SelectTrigger className="w-full">
