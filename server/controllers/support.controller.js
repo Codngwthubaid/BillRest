@@ -79,8 +79,6 @@ export const updateTicketStatusForGeneral = async (req, res) => {
   }
 };
 
-
-// Create a support ticket
 export const createTicketForHealth = async (req, res) => {
   try {
     const { subject, message } = req.body;
@@ -114,7 +112,6 @@ export const createTicketForHealth = async (req, res) => {
   }
 };
 
-// Get all tickets for logged-in user
 export const getMyHealthTickets = async (req, res) => {
   try {
     const tickets = await SupportTicketForHealth.find({ user: req.user.id })
@@ -126,7 +123,6 @@ export const getMyHealthTickets = async (req, res) => {
   }
 };
 
-// Get single ticket by serial number
 export const getHealthTicketBySerialNumber = async (req, res) => {
   try {
     const ticket = await SupportTicketForHealth.findOne({
@@ -145,7 +141,6 @@ export const getHealthTicketBySerialNumber = async (req, res) => {
   }
 };
 
-// Update status (for admin or support role)
 export const updateHealthTicketStatus = async (req, res) => {
   try {
     const { status, respondedBy } = req.body;
@@ -163,5 +158,53 @@ export const updateHealthTicketStatus = async (req, res) => {
   } catch (err) {
     console.error("Failed to update ticket:", err.message);
     res.status(500).json({ message: "Failed to update ticket" });
+  }
+};
+export const sendMsgToAdmin = async (req, res) => {
+  try {
+    const { ticketType, ticketId, message } = req.body; 
+    const user = req.user;
+
+    if (user.role !== "support") return res.status(403).json({ message: "Access denied" });
+
+    const TicketModel = ticketType === "billrest_health" ? SupportTicketForHealth : SupportTicketForGeneral;
+
+    const ticket = await TicketModel.findById(ticketId);
+    if (!ticket) return res.status(404).json({ message: "Ticket not found" })
+
+    ticket.messages = ticket.messages || [];
+    ticket.messages.push({
+      senderRole: "support",
+      message,
+      timestamp: new Date(),
+    });
+
+    await ticket.save();
+
+    res.status(200).json({ message: "Message sent to admin", ticket });
+  } catch (err) {
+    console.error("Failed to send message to admin:", err.message);
+    res.status(500).json({ message: "Failed to send message" });
+  }
+};
+
+export const getAllMessagesForTicket = async (req, res) => {
+  try {
+    const { ticketType, ticketId } = req.params;
+    const user = req.user;
+
+    if (!["master"].includes(user.role)) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const TicketModel = ticketType === "billrest_health" ? SupportTicketForHealth : SupportTicketForGeneral;
+
+    const ticket = await TicketModel.findById(ticketId);
+    if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+
+    res.status(200).json({ messages: ticket.messages || [] });
+  } catch (err) {
+    console.error("Failed to fetch messages:", err.message);
+    res.status(500).json({ message: "Failed to fetch messages" });
   }
 };

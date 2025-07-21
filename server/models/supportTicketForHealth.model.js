@@ -11,6 +11,12 @@ const supportTicketSchemaForHealth = new mongoose.Schema(
       enum: ["pending", "resolved", "escalated"],
       default: "pending",
     },
+    messages: [
+      {
+        senderRole: { type: String, enum: ['support'], required: true },
+        message: { type: String, required: true },
+      }
+    ],
     respondedBy: { type: String },
   },
   { timestamps: true }

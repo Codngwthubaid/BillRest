@@ -2,7 +2,7 @@ import express from "express";
 import { verifyToken, checkRole } from "../middlewares/auth.middleware.js";
 import { checkSubscription } from "../middlewares/subscription.middleware.js";
 import { getAllSupportTicketsForGeneral, getAllSupportTicketsForHealth } from "../controllers/admin.controller.js";
-import { 
+import {
     createTicketForGeneral,
     updateTicketStatusForGeneral,
     getMyTicketsForGeneral,
@@ -10,7 +10,9 @@ import {
     getHealthTicketBySerialNumber,
     getMyHealthTickets,
     updateHealthTicketStatus,
-    createTicketForHealth
+    createTicketForHealth,
+    sendMsgToAdmin,
+    getAllMessagesForTicket
 } from "../controllers/support.controller.js";
 
 const router = express.Router();
@@ -22,7 +24,8 @@ router.post("/health", verifyToken, checkRole(["clinic"]), checkSubscription, cr
 router.get("/health", verifyToken, checkRole(["clinic"]), checkSubscription, getMyHealthTickets);
 router.get("/health/ticket/:serialNumber", verifyToken, checkRole(["clinic"]), checkSubscription, getHealthTicketBySerialNumber)
 
-
+router.post("/sendMsgToAdmin", verifyToken, checkRole(["support"]), sendMsgToAdmin)
+router.get("/messages/:ticketType/:ticketId", verifyToken, checkRole(["master"]), getAllMessagesForTicket);
 router.put("/general/tickets/:id", verifyToken, checkRole(["support", "master"]), updateTicketStatusForGeneral);
 router.get("/general/allTickets", verifyToken, checkRole(["support", "master"]), getAllSupportTicketsForGeneral);
 router.put("/health/tickets/:id", verifyToken, checkRole(["support", "master"]), updateHealthTicketStatus);

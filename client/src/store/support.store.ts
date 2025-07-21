@@ -8,6 +8,8 @@ import {
   getTicketBySerialNumberForGeneral,
   getAllSupportTicketsForGeneral,
   updateTicketStatusForGeneral,
+  sendMsgToAdmin,
+  getAllMessagesSendToAdmin,
 
   createSupportTicketForHealth,
   getMyTicketsForHealth,
@@ -22,6 +24,7 @@ interface SupportStore {
   ticket?: SupportTicket;
   loading: boolean;
   error: string | null;
+  messages: { senderRole: string; message: string; timestamp?: string }[];
 
   fetchTickets: () => Promise<void>;
   fetchAllTickets: () => Promise<void>;
@@ -30,10 +33,18 @@ interface SupportStore {
 
   updateGeneralTicketStatus: (id: string, status: string) => Promise<void>;
   updateHealthTicketStatus: (id: string, status: string) => Promise<void>;
+  fetchMessagesForTicket: (ticketId: string, ticketType: string) => Promise<void>;
+  sendMessageToAdmin: (data: {
+    ticketId: string;
+    message: string;
+    ticketType: string;
+  }) => Promise<void>;
+
 }
 
 export const useSupportStore = create<SupportStore>((set) => ({
   tickets: [],
+  messages: [],
   allTickets: [],
   ticket: undefined,
   loading: false,
@@ -126,6 +137,34 @@ export const useSupportStore = create<SupportStore>((set) => ({
       console.error("Error updating health ticket:", err);
       set({ error: err.message || 'Failed to update health ticket', loading: false });
     }
-  }
+  },
 
+  sendMessageToAdmin: async ({ ticketId, message, ticketType }) => {
+    try {
+      set({ loading: true });
+
+      const { ticket } = await sendMsgToAdmin({ ticketId, message, ticketType });
+
+      set((state) => ({
+        tickets: state.tickets.map(t => t._id === ticket._id ? ticket : t),
+        allTickets: state.allTickets.map(t => t._id === ticket._id ? ticket : t),
+        ticket: state.ticket?._id === ticket._id ? ticket : state.ticket,
+        loading: false,
+      }));
+    } catch (err: any) {
+      console.error("Failed to send message to admin:", err);
+      set({ error: err.message || "Failed to send message to admin", loading: false });
+    }
+  },
+  
+  fetchMessagesForTicket: async (ticketId, ticketType) => {
+    try {
+      set({ loading: true });
+      const { messages } = await getAllMessagesSendToAdmin(ticketId, ticketType);
+      set({ messages, loading: false });
+    } catch (err: any) {
+      console.error("Failed to fetch messages:", err);
+      set({ error: err.message || "Failed to fetch messages", loading: false });
+    }
+  },
 }));

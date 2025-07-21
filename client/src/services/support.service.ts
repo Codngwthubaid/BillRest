@@ -58,3 +58,17 @@ export const updateTicketStatusForHealth = async (id: string, status: string) =>
   const res = await axiosInstance.put(`/support/health/tickets/${id}`, { status });
   return res.data;
 };
+
+export const sendMsgToAdmin = async (data: {
+  ticketId: string;
+  message: string;
+  ticketType: string;
+}): Promise<{ message: string; ticket: SupportTicket }> => {
+  const res = await axiosInstance.post('/support/sendMsgToAdmin', data);
+  return res.data;
+};
+
+export const getAllMessagesSendToAdmin = async (ticketId: string, ticketType: string): Promise<{ messages: { senderRole: string; message: string }[] }> => {
+  const res = await axiosInstance.get(`/support/messages/${ticketType}/${ticketId}`);
+  return res.data;
+}

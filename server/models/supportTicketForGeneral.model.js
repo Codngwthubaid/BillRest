@@ -12,6 +12,12 @@ const supportTicketSchemaForGeneral = new mongoose.Schema(
       default: "pending",
     },
     respondedBy: { type: String },
+    messages: [
+      {
+        senderRole: { type: String, enum: ['support'], required: true },
+        message: { type: String, required: true },
+      }
+    ]
   },
   { timestamps: true }
 );

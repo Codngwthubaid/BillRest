@@ -8,6 +8,7 @@ export interface SupportTicket {
   respondedBy?: string;
   createdAt: string;
   updatedAt: string;
+  descText: string;
   user: {
     type: 'billrest_general' | 'billrest_health';
     name: string;
