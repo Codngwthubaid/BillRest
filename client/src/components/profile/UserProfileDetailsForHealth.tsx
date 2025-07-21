@@ -128,6 +128,13 @@ export default function UserProfileDetailsForHealth() {
                 <span>{formData.businessName || "N/A"}</span>
               </div>
             </div>
+            <div>
+              <Label className="text-sm font-medium mb-2">Clinic Name</Label>
+              <div className="flex items-center space-x-3">
+                <Building className="w-4 h-4 " />
+                <span>{clinic?.clinicId || "N/A"}</span>
+              </div>
+            </div>
             <div className="md:col-span-2">
               <Label className="text-sm font-medium mb-2">Address</Label>
               <div className="flex items-start space-x-3">

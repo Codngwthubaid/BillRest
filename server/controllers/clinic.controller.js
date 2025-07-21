@@ -1,5 +1,6 @@
 import { Clinic } from "../models/clinic.model.js";
 import { User } from "../models/user.model.js";
+import { generateBusinessId } from "../utils/idGenerator.js";
 
 export const createOrUpdateClinic = async (req, res) => {
   try {
@@ -38,9 +39,12 @@ export const createOrUpdateClinic = async (req, res) => {
 
       await clinic.save();
     } else {
+      const clinicId = generateBusinessId();
+
       clinic = await Clinic.create({
         user: userId,
         businessName,
+        clinicId,
         address,
         isOnboarded: true,
         protectedPin

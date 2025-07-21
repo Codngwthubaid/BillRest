@@ -1,6 +1,7 @@
 export interface Clinic {
   _id: string;
-  user: string; // ObjectId of the user
+  user: string; 
+  clinicId : string;
   businessName: string;
   address?: string;
   isOnboarded: boolean;

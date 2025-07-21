@@ -26,8 +26,6 @@ export default function UserProfileDetailsForGeneral() {
   const [showPin, setShowPin] = useState(false);
   const [protectedPinDialogOpen, setProtectedPinDialogOpen] = useState(false);
 
-  console.log(currentSubscription)
-
   const [formData, setFormData] = useState<BusinessPayload & { protectedPin?: string }>({
     name: user?.name || "",
     phone: user?.phone || "",
@@ -74,7 +72,7 @@ export default function UserProfileDetailsForGeneral() {
       }
 
       await upsertBusiness(formData);
-      await fetchBusiness();  // 🔥 replace setBusiness
+      await fetchBusiness();
       toast.success("Profile updated successfully");
       setOpen(false);
     } catch (err: any) {
@@ -153,6 +151,13 @@ export default function UserProfileDetailsForGeneral() {
               <div className="flex items-center space-x-3">
                 <Building className="w-4 h-4 " />
                 <span className="">{formData.businessName || "N/A"}</span>
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2">Business ID</Label>
+              <div className="flex items-center space-x-3">
+                <FileText className="w-4 h-4" />
+                <span>{business?.businessId || "N/A"}</span>
               </div>
             </div>
             <div className="md:col-span-2">

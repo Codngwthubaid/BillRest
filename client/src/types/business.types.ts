@@ -11,6 +11,7 @@ export interface BusinessFeatures {
 }
 
 export interface Business {
+  businessId: string;
   _id?: string;
   user: {
     _id: string;
@@ -27,7 +28,7 @@ export interface Business {
   gstSlabs: GstSlab[];
   isOnboarded: boolean;
   protectedPin?: string;
-  features?: BusinessFeatures;  
+  features?: BusinessFeatures;
   createdAt?: string;
   updatedAt?: string;
 }

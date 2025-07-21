@@ -1,5 +1,6 @@
 import { Business } from "../models/business.model.js";
 import { User } from "../models/user.model.js";
+import { generateBusinessId } from "../utils/idGenerator.js";
 
 export const createOrUpdateBusiness = async (req, res) => {
   try {
@@ -44,8 +45,11 @@ export const createOrUpdateBusiness = async (req, res) => {
 
       await business.save();
     } else {
+      const businessId = generateBusinessId();
+
       business = await Business.create({
         user: userId,
+        businessId,
         businessName,
         address,
         gstNumber,

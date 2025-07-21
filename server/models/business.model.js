@@ -7,6 +7,12 @@ const gstSlabSchema = new mongoose.Schema({
 
 const businessSchema = new mongoose.Schema(
   {
+    businessId: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

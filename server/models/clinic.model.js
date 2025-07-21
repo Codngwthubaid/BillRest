@@ -2,6 +2,12 @@ import mongoose from "mongoose";
 
 const clinicSchema = new mongoose.Schema(
   {
+    clinicId: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
