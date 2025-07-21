@@ -31,14 +31,15 @@ export default function Appointments() {
         deleteAppointment,
     } = useAppointmentStore();
 
+    console.log("All Appointments:", allAppointments);
+    console.log("Appointments:", appointments);
+
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
     const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
     const [showUpdateDialog, setShowUpdateDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
-
-    console.log("Appointments component rendered", allAppointments);
 
     useEffect(() => {
         const fetch = async () => {

@@ -26,6 +26,8 @@ export default function InvoicesPage() {
     const { invoices, setInvoices, allInvoices, fetchAllInvoices } = useInvoiceStore();
     const { user } = useAuthStore();
 
+    console.log("InvoicesPage rendered", allInvoices);
+
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
     const [showDialog, setShowDialog] = useState(false);

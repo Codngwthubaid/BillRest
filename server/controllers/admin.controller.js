@@ -78,7 +78,7 @@ export const getDashboardStats = async (req, res) => {
 export const getAllBusinesses = async (req, res) => {
   try {
     const businesses = await Business.find()
-      .populate("user", "name email phone isActive features") // populate from User
+      .populate("user")
       .sort({ createdAt: -1 });
 
     res.json({ businesses });

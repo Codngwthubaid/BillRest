@@ -1,6 +1,6 @@
 import { Patient } from "../models/patient.model.js";
+import { Clinic } from "../models/clinic.model.js";
 
-// GET ALL patients for the clinic
 export const getPatients = async (req, res) => {
   try {
     const clinicId = req.user.id;
@@ -8,10 +8,13 @@ export const getPatients = async (req, res) => {
     const patients = await Patient.find({ clinic: clinicId })
       .populate({
         path: 'visits',
-        select: 'appointmentNumber status createdAt' // just example fields
+        select: 'appointmentNumber status createdAt'
       })
+      .populate("clinicData")
       .sort({ createdAt: -1 })
       .lean();
+
+      console.log("Fetched patients:", patients);
 
     res.json(patients);
   } catch (err) {
@@ -20,7 +23,6 @@ export const getPatients = async (req, res) => {
   }
 };
 
-// DELETE a patient
 export const deletePatient = async (req, res) => {
   try {
     const clinicId = req.user.id;

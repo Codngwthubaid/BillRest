@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const patientSchema = new mongoose.Schema({
   clinic: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  clinicData: { type: mongoose.Schema.Types.ObjectId, ref: "Clinic", required: true },
   name: { type: String, required: true },
   phoneNumber: { type: String, required: true },
   address: String,

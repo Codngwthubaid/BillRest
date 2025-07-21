@@ -27,6 +27,7 @@ export const createOrUpdateBusiness = async (req, res) => {
 
     let business = await Business.findOne({ user: userId });
 
+
     if (business) {
       if (business.protectedPin && protectedPin && business.protectedPin !== protectedPin) {
         return res.status(400).json({ message: "Protected PIN is already set and cannot be changed." });

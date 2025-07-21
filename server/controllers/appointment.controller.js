@@ -1,9 +1,7 @@
 import { Appointment } from "../models/appointment.model.js";
 import { Patient } from "../models/patient.model.js";
 import { Counter } from "../models/counter.model.js";
-import { Business } from "../models/business.model.js";
-import { generateInvoicePDF } from "../utils/pdfGeneratorForGeneral.js";
-import { sendInvoiceViaWhatsApp } from "../utils/sendWhatsApp.js";
+import { Clinic } from "../models/clinic.model.js";
 
 
 const getNextAppointmentNumber = async () => {
@@ -45,11 +43,13 @@ export const createAppointment = async (req, res) => {
       return res.status(400).json({ message: "Patient name and phone number are required." });
     }
 
+    const clinicDetails = await Clinic.findOne({ user: userId });
     let patient = await Patient.findOne({ clinic: userId, phoneNumber });
     if (!patient) {
       patient = await Patient.create({
         clinic: userId,
-        name, phoneNumber, address, age, gender, visits: []
+        name, phoneNumber, address, age, gender, visits: [],
+        clinicData: clinicDetails,
       });
     } else {
       patient.name = name;
@@ -77,10 +77,12 @@ export const createAppointment = async (req, res) => {
       }
     }
 
+
     const appointment = await Appointment.create({
       clinic: userId,
       appointmentNumber: finalAppointmentNumber,
-      patient: patient._id,
+      patient: patient?._id,
+      clinicData: clinicDetails,
       description,
       status,
       admitted
@@ -208,7 +210,10 @@ export const getAppointments = async (req, res) => {
 
     const appointments = await Appointment.find(query)
       .populate("patient")
+      .populate("clinicData")
       .sort({ createdAt: -1 });
+
+      console.log("Fetched appointments:", appointments);
 
     res.json(appointments);
   } catch (err) {
