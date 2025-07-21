@@ -19,6 +19,8 @@ export default function ProductsPage() {
         allProducts, fetchAllProducts
     } = useProductStore();
 
+    console.log("All Products", allProducts)
+
     const [search, setSearch] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
     const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -26,10 +28,14 @@ export default function ProductsPage() {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
+    const [selectedEmail, setSelectedEmail] = useState("");
+
 
     const isCustomer = user?.role === "customer";
     const isSupportOrMaster = user?.role === "support" || user?.role === "master";
     const data = isCustomer ? products : allProducts ?? [];
+    const uniqueEmails = Array.from(new Set((Array.isArray(data) ? data : []).map(p => p.user?.email).filter(Boolean)));
+
 
     useEffect(() => {
         if (isCustomer) {
@@ -87,8 +93,8 @@ export default function ProductsPage() {
             </div>
 
             {/* Search & Filters */}
-            <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-                <div className="flex-1 relative">
+            <div className="flex flex-col md:flex-row flex-wrap gap-4">
+                <div className="relative flex-1 min-w-[200px]">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
                     <Input
                         placeholder="Search products..."
@@ -97,19 +103,30 @@ export default function ProductsPage() {
                         className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
-                <div>
-                    <select
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                        <option value="">All Categories</option>
-                        {categories.map(category => (
-                            <option key={category} value={category}>{category}</option>
-                        ))}
-                    </select>
-                </div>
+
+                <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[180px]"
+                >
+                    <option value="">All Categories</option>
+                    {categories.map(category => (
+                        <option key={category} value={category}>{category}</option>
+                    ))}
+                </select>
+
+                <select
+                    value={selectedEmail}
+                    onChange={(e) => setSelectedEmail(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[180px]"
+                >
+                    <option value="">All Users</option>
+                    {uniqueEmails.map(email => (
+                        <option key={email} value={email}>{email}</option>
+                    ))}
+                </select>
             </div>
+
 
             {/* Product Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

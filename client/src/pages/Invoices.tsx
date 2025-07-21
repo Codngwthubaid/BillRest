@@ -43,11 +43,19 @@ export default function InvoicesPage() {
     const [showDownloadDialog, setShowDownloadDialog] = useState(false);
     const [pinCallback, setPinCallback] = useState<() => void>(() => () => { });
     const [previewType, setPreviewType] = useState<"A4" | "58mm" | "80mm">("A4");
+    const [statusFilter, setStatusFilter] = useState("");
+    const [emailFilter, setEmailFilter] = useState("");
+
+
 
     const previewRef = useRef<HTMLDivElement>(null);
     const handlePrint = useReactToPrint({ contentRef: previewRef });
 
     const data = user?.role === "customer" ? invoices : allInvoices?.invoices ?? [];
+    const uniqueEmails = Array.from(new Set(data.map(inv => inv.user?.email).filter(Boolean)));
+
+
+    console.log("Invoices data", allInvoices);
 
     const summary = {
         total: data.length,
@@ -58,10 +66,17 @@ export default function InvoicesPage() {
         totalAmount: data.reduce((acc, i) => acc + i.totalAmount, 0),
     };
 
-    const filtered = data.filter((inv) =>
-        inv.invoiceNumber.toLowerCase().includes(search.toLowerCase()) ||
-        inv.customerName.toLowerCase().includes(search.toLowerCase())
-    );
+    const filtered = data.filter((inv) => {
+        const matchesSearch =
+            inv.invoiceNumber.toLowerCase().includes(search.toLowerCase()) ||
+            inv.customerName.toLowerCase().includes(search.toLowerCase()) ||
+            inv.user?.email.toLowerCase().includes(search.toLowerCase());
+
+        const matchesEmail = emailFilter === "" || inv.user?.email.toLowerCase().includes(emailFilter.toLowerCase());
+        const matchesStatus = statusFilter === "" || inv.status === statusFilter;
+
+        return matchesSearch && matchesEmail && matchesStatus;
+    });
 
     useEffect(() => {
         const fetch = async () => {
@@ -121,46 +136,150 @@ export default function InvoicesPage() {
 
             {user?.role === "customer" && (
                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-6">
-                    <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-blue-600"><FileText className="w-4 h-4" />
-                        <span className="text-sm">Total</span></div><span className="font-bold text-lg">{summary.total}</span></CardContent></Card>
-                    <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-green-600"><IndianRupee className="w-4 h-4" />
-                        <span className="text-sm">Paid</span></div><span className="font-bold text-lg">{summary.paid}</span></CardContent></Card>
-                    <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-yellow-600"><Clock className="w-4 h-4" />
-                        <span className="text-sm">Pending</span></div><span className="font-bold text-lg">{summary.pending}</span></CardContent></Card>
-                    <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-red-600"><Calendar className="w-4 h-4" />
-                        <span className="text-sm">Overdue</span></div><span className="font-bold text-lg">{summary.overdue}</span></CardContent></Card>
-                    <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-gray-600"><Calendar className="w-4 h-4" />
-                        <span className="text-sm">Draft</span></div><span className="font-bold text-lg">{summary.draft}</span></CardContent></Card>
-                    <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-primary"><IndianRupee className="w-4 h-4" />
-                        <span className="text-sm">Total Amount</span></div><span className="font-bold text-lg">₹{summary.totalAmount.toLocaleString()}</span></CardContent></Card>
+                    <Card>
+                        <CardContent className="p-4">
+                            <div className="flex items-center gap-2 text-blue-600">
+                                <FileText className="w-4 h-4" />
+                                <span className="text-sm">Total</span>
+                            </div>
+                            <span className="font-bold text-lg">{summary.total}</span>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="p-4">
+                            <div className="flex items-center gap-2 text-green-600">
+                                <IndianRupee className="w-4 h-4" />
+                                <span className="text-sm">Paid</span>
+                            </div>
+                            <span className="font-bold text-lg">{summary.paid}</span>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="p-4">
+                            <div className="flex items-center gap-2 text-yellow-600">
+                                <Clock className="w-4 h-4" />
+                                <span className="text-sm">Pending</span>
+                            </div>
+                            <span className="font-bold text-lg">{summary.pending}</span>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="p-4">
+                            <div className="flex items-center gap-2 text-red-600">
+                                <Calendar className="w-4 h-4" />
+                                <span className="text-sm">Overdue</span>
+                            </div>
+                            <span className="font-bold text-lg">{summary.overdue}</span>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="p-4">
+                            <div className="flex items-center gap-2 text-gray-600">
+                                <Calendar className="w-4 h-4" />
+                                <span className="text-sm">Draft</span>
+                            </div>
+                            <span className="font-bold text-lg">{summary.draft}</span>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="p-4">
+                            <div className="flex items-center gap-2 text-primary">
+                                <IndianRupee className="w-4 h-4" />
+                                <span className="text-sm">Total Amount</span>
+                            </div>
+                            <span className="font-bold text-lg">₹{summary.totalAmount.toLocaleString()}</span>
+                        </CardContent>
+                    </Card>
                 </div>
             )}
+            
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
+                <Input
+                    placeholder="Search by invoice ID or customer name"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full"
+                />
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                <Input placeholder="Search invoices by invoice ID or customer name..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full" />
+                <select
+                    value={emailFilter}
+                    onChange={(e) => setEmailFilter(e.target.value)}
+                    className="border border-gray-300 rounded-md px-3 py-2 text-sm "
+                >
+                    <option value="">All Emails</option>
+                    {uniqueEmails.map((email) => (
+                        <option key={email} value={email}>
+                            {email}
+                        </option>
+                    ))}
+                </select>
+
+                <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="border border-gray-300 rounded-md px-3 py-2 text-sm "
+                >
+                    <option value="">All Statuses</option>
+                    <option value="paid">Paid</option>
+                    <option value="pending">Pending</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="draft">Draft</option>
+                </select>
             </div>
 
             <div className="rounded-lg border overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead className="bg-muted text-gray-600 text-left">
-                        <tr><th className="p-4">Invoice</th><th>Customer</th><th>Amount</th><th>Status</th><th>Due Date</th><th>Actions</th></tr>
+                        <tr>
+                            <th className="p-4">Business Email</th>
+                            <th className="p-4">Invoice</th>
+                            <th className="p-4">Customer</th>
+                            <th className="p-4">Amount</th>
+                            <th className="p-4">Status</th>
+                            <th className="p-4">Due Date</th>
+                            <th className="p-4">Actions</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {filtered.map((invoice) => (
                             <tr key={invoice._id} className="border-t hover:bg-muted/30">
-                                <td className="p-4"><div className="font-medium text-blue-600">{invoice.invoiceNumber}</div><div className="text-xs text-muted-foreground">{invoice.createdAt?.slice(0, 10)}</div></td>
-                                <td><div>{invoice.customerName}</div><div className="text-xs text-muted-foreground">{invoice.phoneNumber}</div></td>
-                                <td>₹{invoice.totalAmount.toLocaleString()}<br /><span className="text-xs text-muted-foreground">Tax: ₹{invoice.gstAmount}</span></td>
+                                <td className="p-4">
+                                    <div className="font-medium text-blue-600">{invoice?.user?.email}</div>
+                                </td>
+                                <td className="p-4">
+                                    <div className="font-medium text-blue-600">{invoice.invoiceNumber}</div>
+                                    <div className="text-xs text-muted-foreground">{invoice.createdAt?.slice(0, 10)}</div>
+                                </td>
+                                <td>
+                                    <div>{invoice.customerName}</div>
+                                    <div className="text-xs text-muted-foreground">{invoice.phoneNumber}</div>
+                                </td>
+                                <td>
+                                    ₹{invoice.totalAmount.toLocaleString()}<br />
+                                    <span className="text-xs text-muted-foreground">Tax: ₹{invoice.gstAmount}</span>
+                                </td>
                                 <td>{getStatusBadge(invoice.status)}</td>
                                 <td>{invoice.createdAt?.slice(0, 10)}</td>
                                 <td className="flex gap-2 p-2 mt-5 flex-wrap">
-                                    <button onClick={() => { setSelectedInvoice(invoice); setShowDialog(true); }}><Eye className="w-4 h-4 text-primary hover:scale-110 cursor-pointer" /></button>
+                                    <button onClick={() => { setSelectedInvoice(invoice); setShowDialog(true); }}>
+                                        <Eye className="w-4 h-4 text-primary hover:scale-110 cursor-pointer" />
+                                    </button>
                                     {user?.role === "customer" && <>
-                                        <button onClick={() => { setSelectedInvoice(invoice); setShowDownloadDialog(true); }}><Download className="w-4 h-4 text-green-600 hover:scale-110" /></button>
-                                        <button onClick={() => { setSelectedInvoice(invoice); setShowPrintDialog(true); }}><Printer className="w-4 h-4 text-orange-600 hover:scale-110" /></button>
-                                        <button onClick={() => { setShareInvoice(invoice); setShowShareDialog(true); }}><Share className="w-4 h-4 text-teal-600 hover:scale-110" /></button>
-                                        <button onClick={() => askForPin(() => { setSelectedInvoice(invoice); setShowUpdateDialog(true); })}><PenLine className="w-4 h-4 text-emerald-600 hover:scale-110" /></button>
-                                        <button onClick={() => askForPin(() => { setSelectedInvoice(invoice); setShowDeleteDialog(true); })}><Trash className="w-4 h-4 text-red-600 hover:scale-110" /></button>
+                                        <button onClick={() => { setSelectedInvoice(invoice); setShowDownloadDialog(true); }}>
+                                            <Download className="w-4 h-4 text-green-600 hover:scale-110" />
+                                        </button>
+                                        <button onClick={() => { setSelectedInvoice(invoice); setShowPrintDialog(true); }}>
+                                            <Printer className="w-4 h-4 text-orange-600 hover:scale-110" />
+                                        </button>
+                                        <button onClick={() => { setShareInvoice(invoice); setShowShareDialog(true); }}>
+                                            <Share className="w-4 h-4 text-teal-600 hover:scale-110" />
+                                        </button>
+                                        <button onClick={() => askForPin(() => { setSelectedInvoice(invoice); setShowUpdateDialog(true); })}>
+                                            <PenLine className="w-4 h-4 text-emerald-600 hover:scale-110" />
+                                        </button>
+                                        <button onClick={() => askForPin(() => { setSelectedInvoice(invoice); setShowDeleteDialog(true); })}>
+                                            <Trash className="w-4 h-4 text-red-600 hover:scale-110" />
+                                        </button>
                                     </>}
                                 </td>
                             </tr>
@@ -198,13 +317,40 @@ export default function InvoicesPage() {
                 }}
             />
 
-            <ProtectedPinDialog open={showPinDialog} onClose={() => setShowPinDialog(false)} onVerified={() => pinCallback()} />
-            <DownloadInvoiceDialog open={showDownloadDialog} invoice={selectedInvoice} onClose={() => setShowDownloadDialog(false)} />
-            <ViewInvoiceSizeDialog open={showDialog} invoice={selectedInvoice} previewType={previewType} onClose={() => setShowDialog(false)} />
-            <InvoiceActionsDialog open={showPrintDialog} onOpenChange={setShowPrintDialog}
-                onPrintA4={() => { setPreviewType("A4"); setPrintInvoice(selectedInvoice); setTimeout(() => handlePrint(), 50); setShowPrintDialog(false); }}
-                onPrint58mm={() => { setPreviewType("58mm"); setPrintInvoice(selectedInvoice); setTimeout(() => handlePrint(), 50); setShowPrintDialog(false); }}
-                onPrint80mm={() => { setPreviewType("80mm"); setPrintInvoice(selectedInvoice); setTimeout(() => handlePrint(), 50); setShowPrintDialog(false); }}
+            <ProtectedPinDialog
+                open={showPinDialog}
+                onClose={() => setShowPinDialog(false)}
+                onVerified={() => pinCallback()} />
+            <DownloadInvoiceDialog
+                open={showDownloadDialog}
+                invoice={selectedInvoice}
+                onClose={() => setShowDownloadDialog(false)} />
+            <ViewInvoiceSizeDialog
+                open={showDialog}
+                invoice={selectedInvoice}
+                previewType={previewType}
+                onClose={() => setShowDialog(false)} />
+            <InvoiceActionsDialog
+                open={showPrintDialog}
+                onOpenChange={setShowPrintDialog}
+                onPrintA4={() => {
+                    setPreviewType("A4");
+                    setPrintInvoice(selectedInvoice);
+                    setTimeout(() => handlePrint(), 50);
+                    setShowPrintDialog(false);
+                }}
+                onPrint58mm={() => {
+                    setPreviewType("58mm");
+                    setPrintInvoice(selectedInvoice);
+                    setTimeout(() => handlePrint(), 50);
+                    setShowPrintDialog(false);
+                }}
+                onPrint80mm={() => {
+                    setPreviewType("80mm");
+                    setPrintInvoice(selectedInvoice);
+                    setTimeout(() => handlePrint(), 50);
+                    setShowPrintDialog(false);
+                }}
             />
 
             <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>

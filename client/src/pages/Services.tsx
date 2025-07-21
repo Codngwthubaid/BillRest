@@ -19,8 +19,12 @@ export default function Services() {
     allServices, fetchAllServices
   } = useServiceStore();
 
+
+  console.log("Services component rendered", allServices);
+
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedEmail, setSelectedEmail] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -43,13 +47,18 @@ export default function Services() {
     return [];
   }, [user?.role, services, allServices]);
 
-  const categories = [...new Set(serviceList.map((svc : Service) => svc.category).filter(Boolean))];
+  const categories = [...new Set(serviceList.map((svc: Service) => svc.category).filter(Boolean))];
+  const uniqueEmails = Array.from(
+    new Set(serviceList.map((svc) => svc.clinic?.email).filter(Boolean))
+  );
 
-  const filtered = serviceList.filter((service : Service) => {
+  const filtered = serviceList.filter((service: Service) => {
     const matchesSearch = service.name.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = !selectedCategory || service.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesEmail = !selectedEmail || service.clinic?.email === selectedEmail;
+    return matchesSearch && matchesCategory && matchesEmail;
   });
+
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1000);
@@ -87,7 +96,7 @@ export default function Services() {
       </div>
 
       {/* Search & Filters */}
-      <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+      <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
           <Input
@@ -97,6 +106,20 @@ export default function Services() {
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
+        {user?.role !== "clinic" && (
+          <div>
+            <select
+              value={selectedEmail}
+              onChange={(e) => setSelectedEmail(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">All Users</option>
+              {uniqueEmails.map((email) => (
+                <option key={email} value={email}>{email}</option>
+              ))}
+            </select>
+          </div>
+        )}
         <div>
           <select
             value={selectedCategory}
@@ -116,7 +139,7 @@ export default function Services() {
 
       {/* Service Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filtered.map((service : Service) => (
+        {filtered.map((service: Service) => (
           <Card key={service._id} className="overflow-hidden">
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">

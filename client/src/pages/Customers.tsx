@@ -14,6 +14,10 @@ import { useAuthStore } from "@/store/auth.store";
 
 export default function CustomerPage() {
     const { customers, allCustomers, loading, fetchCustomers, fetchAllCustomers, deleteCustomer } = useCustomerStore();
+
+    console.log("All customers:", allCustomers);
+
+
     const { user } = useAuthStore();
     const [search, setSearch] = useState("");
     const [showPinDialog, setShowPinDialog] = useState(false);
@@ -21,8 +25,14 @@ export default function CustomerPage() {
     const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+    const [selectedEmail, setSelectedEmail] = useState("");
+    const [selectedState, setSelectedState] = useState("");
+
 
     const customerList = user?.role === "customer" ? customers : allCustomers;
+    const uniqueEmails = Array.from(new Set((customerList ?? []).map(c => c.user?.email).filter(Boolean)));
+    const uniqueStates = Array.from(new Set((customerList ?? []).map(c => c.state).filter(Boolean)));
+
     console.log("All customers:", allCustomers);
     console.log("customers:", customers);
 
@@ -87,13 +97,36 @@ export default function CustomerPage() {
             )}
 
             {/* Search & Export */}
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-6">
                 <Input
                     placeholder="Search by name, phone, or state..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="flex-1"
+                    className="flex-1 min-w-[220px]"
                 />
+
+                <select
+                    value={selectedEmail}
+                    onChange={(e) => setSelectedEmail(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg min-w-[200px]"
+                >
+                    <option value="">All Emails</option>
+                    {uniqueEmails.map(email => (
+                        <option key={email} value={email}>{email}</option>
+                    ))}
+                </select>
+
+                <select
+                    value={selectedState}
+                    onChange={(e) => setSelectedState(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg min-w-[200px]"
+                >
+                    <option value="">All States</option>
+                    {uniqueStates.map(state => (
+                        <option key={state} value={state}>{state}</option>
+                    ))}
+                </select>
+
                 {user?.role === "customer" && (
                     <Button
                         onClick={() => exportToCSV(customers, "customers.csv")}
@@ -104,15 +137,22 @@ export default function CustomerPage() {
                 )}
             </div>
 
+
             {/* Customer cards */}
             {loading && <p>Loading...</p>}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {customerList
-                    .filter(c =>
-                        c.phoneNumber.includes(search) ||
-                        c.name.toLowerCase().includes(search.toLowerCase()) ||
-                        c.state?.toLowerCase().includes(search.toLowerCase())
-                    )
+                    .filter(c => {
+                        const matchesSearch =
+                            c.phoneNumber.includes(search) ||
+                            c.name.toLowerCase().includes(search.toLowerCase()) ||
+                            c.state?.toLowerCase().includes(search.toLowerCase());
+
+                        const matchesEmail = !selectedEmail || c.user?.email === selectedEmail;
+                        const matchesState = !selectedState || c.state === selectedState;
+
+                        return matchesSearch && matchesEmail && matchesState;
+                    })
                     .map(customer => (
                         <CustomerCard
                             key={customer._id}

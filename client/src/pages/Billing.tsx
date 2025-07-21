@@ -27,8 +27,14 @@ export default function Billing() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedIPD, setSelectedIPD] = useState<IPDResponse | null>(null);
   const [selectedBill, setSelectedBill] = useState<string>("");
+  const [selectedEmail, setSelectedEmail] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+
 
   const previewRef = useRef<HTMLDivElement>(null);
+
+
+  console.log("Billing page rendered", allIPDs);
 
   const isClinic = user?.role === "clinic";
   const isSupportOrMaster = user?.role === "support" || user?.role === "master";
@@ -46,6 +52,9 @@ export default function Billing() {
   }, [user?.role]);
 
   const data = isClinic ? ipds : allIPDs?.ipds ?? [];
+  const uniqueClinicEmails = Array.from(
+    new Set(data.map((ipd) => ipd.clinic?.email).filter(Boolean))
+  );
 
 
   const summary = {
@@ -61,7 +70,11 @@ export default function Billing() {
     ? data.filter((ipd) => {
       const ipdNum = ipd.ipdNumber?.toLowerCase() ?? "";
       const patientName = ipd.patient?.name?.toLowerCase() ?? "";
-      return ipdNum.includes(search.toLowerCase()) || patientName.includes(search.toLowerCase());
+      const matchesSearch =
+        ipdNum.includes(search.toLowerCase()) || patientName.includes(search.toLowerCase());
+      const matchesEmail = !selectedEmail || ipd.clinic?.email === selectedEmail;
+      const matchesStatus = !selectedStatus || ipd.status === selectedStatus;
+      return matchesSearch && matchesEmail && matchesStatus;
     })
     : [];
 
@@ -135,30 +148,63 @@ export default function Billing() {
         </div>
       )}
 
-      <Input
-        placeholder="Search IPD records by IPD number or patient name..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="mb-4"
-      />
+
+      <div className="flex flex-col md:flex-row gap-4 mb-4">
+        <Input
+          placeholder="Search IPD records by IPD number or patient name..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        {user?.role !== "clinic" && (
+          <select
+            value={selectedEmail}
+            onChange={(e) => setSelectedEmail(e.target.value)}
+            className="px-4 border border-gray-300 rounded-md"
+          >
+            <option value="">All Clinics</option>
+            {uniqueClinicEmails.map((email) => (
+              <option key={email} value={email}>{email}</option>
+            ))}
+          </select>
+        )}
+
+        {/* Status Filter */}
+        <select
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+          className="px-4 border border-gray-300 rounded-md"
+        >
+          <option value="">All Status</option>
+          <option value="Admitted">Admitted</option>
+          <option value="Discharged">Discharged</option>
+        </select>
+      </div>
+
 
       {/* Table */}
       <div className="rounded-lg border overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-muted text-gray-600 text-left">
             <tr>
+              {!isClinic && <th className="p-4">Clinic Email</th>}
               <th className="p-4">IPD Record</th>
-              <th>Patient</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Payment</th>
-              <th>Admission Date</th>
-              <th>Actions</th>
+              <th className="p-4">Patient</th>
+              <th className="p-4">Amount</th>
+              <th className="p-4">Status</th>
+              <th className="p-4">Payment</th>
+              <th className="p-4">Admission Date</th>
+              <th className="p-4">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((ipd) => (
               <tr key={ipd._id} className="border-t hover:bg-muted/30">
+                {!isClinic && (
+                  <td className="p-4">
+                    <div className="font-medium text-blue-600">{ipd.clinic?.email}</div>
+                  </td>
+                )}
                 <td className="p-4">
                   <div className="font-medium text-blue-600">{ipd.ipdNumber}</div>
                   <div className="text-xs text-muted-foreground">{ipd.createdAt?.slice(0, 10)}</div>
@@ -177,9 +223,9 @@ export default function Billing() {
                 <td>{getStatusBadge(ipd.status)}</td>
                 <td>{getPaymentStatusBadge(ipd.paymentStatus)}</td>
                 <td>{ipd.admissionDate?.slice(0, 10)}</td>
-                <td className="flex gap-2 p-2 flex-wrap">
+                <td>
                   <button onClick={() => { setSelectedIPD(ipd); setShowPreviewDialog(true); }}>
-                    <Eye className="w-4 h-4 text-blue-500 hover:scale-110" />
+                    <Eye className="w-4 h-4 mr-2 text-blue-500 hover:scale-110" />
                   </button>
                   {user?.role === "clinic" && (
                     <>
@@ -198,13 +244,13 @@ export default function Billing() {
                           console.error("Download failed", err);
                         }
                       }}>
-                        <Download className="w-4 h-4 text-green-600 hover:scale-110" />
+                        <Download className="w-4 h-4 mr-2 text-green-600 hover:scale-110" />
                       </button>
                       <button onClick={() => printIPDPDF(ipd._id)}>
-                        <Printer className="w-4 h-4 text-orange-600 hover:scale-110" />
+                        <Printer className="w-4 h-4 mr-2 text-orange-600 hover:scale-110" />
                       </button>
                       <button onClick={() => { setSelectedIPD(ipd); setShowUpdateDialog(true); }}>
-                        <PenLine className="w-4 h-4 text-emerald-600 hover:scale-110" />
+                        <PenLine className="w-4 h-4 mr-2 text-emerald-600 hover:scale-110" />
                       </button>
                       <button onClick={() => {
                         setSelectedIPD(ipd);

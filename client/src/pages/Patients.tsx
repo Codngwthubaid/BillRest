@@ -25,11 +25,13 @@ export default function Patients() {
 
   const { user } = useAuthStore();
 
-  console.log("Patients component rendered with user:", patients);
+  console.log("Patients component rendered with user:", allPatients);
 
   const [search, setSearch] = useState("");
   const [showPinDialog, setShowPinDialog] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState("");
+  const [selectedPhone, setSelectedPhone] = useState("");
   const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
@@ -40,8 +42,18 @@ export default function Patients() {
   const patientList: Patient[] = isAdmin
     ? allPatients?.patients || []
     : Array.isArray(patients)
-    ? patients
-    : [];
+      ? patients
+      : [];
+
+
+  const uniqueEmails = Array.from(
+    new Set(patientList.map((p) => p.clinic?.email).filter(Boolean))
+  );
+
+  const uniquePhones = Array.from(
+    new Set(patientList.map((p) => p.phoneNumber).filter(Boolean))
+  );
+
 
   useEffect(() => {
     if (isAdmin) {
@@ -108,14 +120,42 @@ export default function Patients() {
         </div>
       )}
 
-      {/* Search & Export */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6 flex-wrap">
         <Input
           placeholder="Search by name, phone, or condition..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1"
+          className="flex-1 min-w-[200px]"
         />
+
+        {user?.role !== "clinic" && (
+          <select
+            value={selectedEmail}
+            onChange={(e) => setSelectedEmail(e.target.value)}
+            className="p-2 border rounded-md min-w-[180px]"
+          >
+            <option value="">All Clinics</option>
+            {uniqueEmails.map((email) => (
+              <option key={email} value={email}>
+                {email}
+              </option>
+            ))}
+          </select>
+        )}
+
+        <select
+          value={selectedPhone}
+          onChange={(e) => setSelectedPhone(e.target.value)}
+          className="p-2 border rounded-md min-w-[160px]"
+        >
+          <option value="">All Phone Numbers</option>
+          {uniquePhones.map((phone) => (
+            <option key={phone} value={phone}>
+              {phone}
+            </option>
+          ))}
+        </select>
+
         {isClinic && (
           <Button
             onClick={() => exportToCSV(patients, "patients.csv")}
@@ -126,16 +166,23 @@ export default function Patients() {
         )}
       </div>
 
+
       {/* Patient cards */}
       {loading && <p>Loading...</p>}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {patientList
-          .filter(
-            (p: any) =>
+          .filter((p: any) => {
+            const matchesSearch =
               p.phoneNumber.includes(search) ||
               p.name.toLowerCase().includes(search.toLowerCase()) ||
-              p.condition?.toLowerCase().includes(search.toLowerCase())
-          )
+              p.condition?.toLowerCase().includes(search.toLowerCase());
+
+            const matchesEmail = !selectedEmail || p.clinic?.email === selectedEmail;
+            const matchesPhone = !selectedPhone || p.phoneNumber === selectedPhone;
+
+            return matchesSearch && matchesEmail && matchesPhone;
+          })
+
           .map((patient: Patient) => (
             <PatientCard
               key={patient._id}

@@ -40,6 +40,9 @@ export default function Appointments() {
     const [showUpdateDialog, setShowUpdateDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
+    const [selectedEmail, setSelectedEmail] = useState("");
+    const [selectedStatus, setSelectedStatus] = useState("");
+
 
     useEffect(() => {
         const fetch = async () => {
@@ -58,6 +61,10 @@ export default function Appointments() {
             ? allAppointments?.appointments || []
             : Array.isArray(appointments) ? appointments : [];
 
+    const uniqueEmails = Array.from(
+        new Set(appointmentsList.map(a => a.clinic?.email).filter(Boolean))
+    );
+
 
     const summary = {
         total: appointmentsList.length,
@@ -66,10 +73,17 @@ export default function Appointments() {
         discharged: appointmentsList.filter((a: any) => a.status === "Discharged").length,
     };
 
-    const filtered = appointmentsList.filter((app: any) =>
-        app.appointmentNumber.toLowerCase().includes(search.toLowerCase()) ||
-        app.patient?.name.toLowerCase().includes(search.toLowerCase())
-    );
+    const filtered = appointmentsList.filter((app: Appointment) => {
+        const matchesSearch =
+            app.appointmentNumber.toLowerCase().includes(search.toLowerCase()) ||
+            app.patient?.name.toLowerCase().includes(search.toLowerCase());
+
+        const matchesEmail = !selectedEmail || app.clinic?.email === selectedEmail;
+        const matchesStatus = !selectedStatus || app.status === selectedStatus;
+
+        return matchesSearch && matchesEmail && matchesStatus;
+    });
+
 
     const handleDelete = async () => {
         if (!selectedAppointment?._id) return;
@@ -164,30 +178,66 @@ export default function Appointments() {
                     </Card>
                 </div>
             )}
-
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row gap-4 mb-4">
                 <Input
-                    placeholder="Search appointments by ID or patient name..."
+                    placeholder="Search by appointment ID or patient name..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="w-full"
                 />
+
+                {user?.role !== "clinic" && (
+                    <select
+                        value={selectedEmail}
+                        onChange={(e) => setSelectedEmail(e.target.value)}
+                        className="p-2 border rounded-md"
+                    >
+                        <option value="">All Clinics</option>
+                        {uniqueEmails.map((email) => (
+                            <option key={email} value={email}>
+                                {email}
+                            </option>
+                        ))}
+                    </select>
+                )}
+
+                <select
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    className=" p-2 border rounded-md"
+                >
+                    <option value="">All Statuses</option>
+                    <option value="Admitted">Admitted</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Canceled">Canceled</option>
+                </select>
             </div>
 
             <div className="rounded-lg border overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead className="bg-muted text-gray-600 text-left">
                         <tr>
-                            <th className="p-4">Appointment</th>
-                            <th>Patient</th>
-                            <th>Status</th>
-                            <th>Created At</th>
-                            {role === "clinic" && <th>Actions</th>}
+                            {user?.role !== "clinic" && (
+                                <th className="p-4">Clinic Email</th>
+                            )}
+                            <th className="p-4">Appointment ID</th>
+                            <th className="p-4">Patient</th>
+                            <th className="p-4">Status</th>
+                            <th className="p-4">Created At</th>
+                            {role === "clinic" && <th className="p-4">Actions</th>}
                         </tr>
                     </thead>
                     <tbody>
                         {filtered.map((app: Appointment) => (
                             <tr key={app._id} className="border-t hover:bg-muted/30">
+                                {user?.role !== "clinic" && (
+                                    <td className="p-4">
+                                        <div className="font-medium text-blue-600">
+                                            {app.clinic?.email || "N/A"}
+                                        </div>
+                                    </td>
+                                )}
                                 <td className="p-4">
                                     <div className="font-medium text-blue-600">
                                         {app.appointmentNumber}
@@ -196,16 +246,16 @@ export default function Appointments() {
                                         {app.createdAt?.slice(0, 10)}
                                     </div>
                                 </td>
-                                <td>
+                                <td className="p-4">
                                     <div>{app.patient?.name}</div>
                                     <div className="text-xs text-muted-foreground">
                                         {app.patient?.phoneNumber}
                                     </div>
                                 </td>
-                                <td>{getStatusBadge(app.status)}</td>
-                                <td>{app.createdAt?.slice(0, 10)}</td>
+                                <td className="p-4">{getStatusBadge(app.status)}</td>
+                                <td className="p-4">{app.createdAt?.slice(0, 10)}</td>
                                 {role === "clinic" && (
-                                    <td className="flex gap-2 p-2 mt-5 flex-wrap">
+                                    <td className="flex gap-2 mt-5 flex-wrap p-4">
                                         <button
                                             onClick={() => {
                                                 setSelectedAppointment(app);

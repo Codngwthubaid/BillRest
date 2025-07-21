@@ -181,8 +181,8 @@ export default function SupportAndMasterContactPage() {
                 {
                   user?.role === "support" && (
                     <>
-                      <TableHead>Submit</TableHead>
                       <TableHead>Desc Text</TableHead>
+                      <TableHead>Submit</TableHead>
                     </>
                   )
                 }
@@ -253,7 +253,7 @@ export default function SupportAndMasterContactPage() {
                               )
                             }
                           >
-                            Submit
+                            Send
                           </Button>
                         </TableCell>
                       </>

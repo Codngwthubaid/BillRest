@@ -129,7 +129,7 @@ export default function UserProfileDetailsForHealth() {
               </div>
             </div>
             <div>
-              <Label className="text-sm font-medium mb-2">Clinic Name</Label>
+              <Label className="text-sm font-medium mb-2">Clinic ID</Label>
               <div className="flex items-center space-x-3">
                 <Building className="w-4 h-4 " />
                 <span>{clinic?.clinicId || "N/A"}</span>

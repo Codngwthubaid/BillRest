@@ -438,6 +438,7 @@ export const getAllCutomers = async (req, res) => {
   try {
     const customers = await Customer.find()
       .populate("invoices")
+      .populate("user")
       .lean();
     res.json(customers);
   } catch (err) {
