@@ -16,6 +16,10 @@ import { getAllIPDs } from "../controllers/admin.controller.js";
 
 const router = express.Router();
 
+
+router.get("/all", verifyToken, checkRole(["support", "master"]), getAllIPDs);
+
+
 router.post("/", verifyToken, checkRole(["clinic"]), checkSubscription, createIPD);
 router.get("/", verifyToken, checkRole(["clinic"]), checkSubscription, getIPDs);
 router.get("/:id", verifyToken, checkRole(["clinic"]), checkSubscription, getIPDById);
@@ -24,7 +28,5 @@ router.patch("/:id/discharge", verifyToken, checkRole(["clinic"]), checkSubscrip
 router.delete("/:id", verifyToken, checkRole(["clinic"]), checkSubscription, deleteIPD);
 router.get("/:id/download-pdf", verifyToken, checkRole(["clinic"]), checkSubscription, downloadIPDPDF);
 router.get("/:id/print-pdf", verifyToken, checkRole(["clinic"]), checkSubscription, printIPDPDF);
-
-router.get("/allIPDs", verifyToken, checkRole(["support", "master"]), getAllIPDs);
 
 export default router;

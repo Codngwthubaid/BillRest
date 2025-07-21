@@ -356,7 +356,6 @@ export const downloadIPDPDF = async (req, res) => {
   }
 };
 
-
 export const printIPDPDF = async (req, res) => {
   try {
     const ipd = await IPD.findOne({

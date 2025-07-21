@@ -181,7 +181,7 @@ export default function Appointments() {
                             <th>Patient</th>
                             <th>Status</th>
                             <th>Created At</th>
-                            <th>Actions</th>
+                            {role === "clinic" && <th>Actions</th>}
                         </tr>
                     </thead>
                     <tbody>
@@ -203,24 +203,26 @@ export default function Appointments() {
                                 </td>
                                 <td>{getStatusBadge(app.status)}</td>
                                 <td>{app.createdAt?.slice(0, 10)}</td>
-                                <td className="flex gap-2 p-2 mt-5 flex-wrap">
-                                    <button
-                                        onClick={() => {
-                                            setSelectedAppointment(app);
-                                            setShowUpdateDialog(true);
-                                        }}
-                                    >
-                                        <PenLine className="w-4 h-4 text-emerald-600 hover:scale-110" />
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setSelectedAppointment(app);
-                                            setShowDeleteDialog(true);
-                                        }}
-                                    >
-                                        <Trash className="w-4 h-4 text-red-600 hover:scale-110" />
-                                    </button>
-                                </td>
+                                {role === "clinic" && (
+                                    <td className="flex gap-2 p-2 mt-5 flex-wrap">
+                                        <button
+                                            onClick={() => {
+                                                setSelectedAppointment(app);
+                                                setShowUpdateDialog(true);
+                                            }}
+                                        >
+                                            <PenLine className="w-4 h-4 text-emerald-600 hover:scale-110" />
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setSelectedAppointment(app);
+                                                setShowDeleteDialog(true);
+                                            }}
+                                        >
+                                            <Trash className="w-4 h-4 text-red-600 hover:scale-110" />
+                                        </button>
+                                    </td>
+                                )}
                             </tr>
                         ))}
                         {filtered.length === 0 && (

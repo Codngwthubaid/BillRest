@@ -139,6 +139,40 @@ export const updateBusinessFeatures = async (req, res) => {
   }
 };
 
+export const updateClinicFeatures = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { features } = req.body;
+
+    console.log("Received features to update:", features);
+
+    const user = await User.findById(id);
+
+    if (!user || user.role !== "clinic") {
+      return res.status(404).json({ message: "Clinic not found" });
+    }
+
+    console.log("Before update - existing features:", user.features);
+
+    user.features = {
+      ...user.features,
+      ...features,
+    };
+
+    await user.save();
+
+    console.log("After update - saved features:", user.features);
+
+    res.json({
+      message: "Clinic features updated successfully",
+      features: user.features,
+    });
+  } catch (err) {
+    console.error("Update clinic features failed:", err.message);
+    res.status(500).json({ message: "Error updating clinic features" });
+  }
+};
+
 // not used
 export const updateCustomerFeatures = async (req, res) => {
   try {

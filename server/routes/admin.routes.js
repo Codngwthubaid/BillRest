@@ -13,7 +13,8 @@ import {
   getAllSupportTicketsForGeneral,
   updateTicketStatusForGeneral,
   getAllSupportTicketsForHealth,
-  updateTicketStatusForHealth
+  updateTicketStatusForHealth,
+  updateClinicFeatures
 } from "../controllers/admin.controller.js";
 
 import { verifyToken, checkRole } from "../middlewares/auth.middleware.js";
@@ -27,6 +28,7 @@ router.get("/dashboard", getDashboardStats);
 router.get("/businesses", getAllBusinesses);
 router.patch("/businesses/:id/toggle", toggleBusinessActive);
 router.patch("/businesses/:id/features", updateBusinessFeatures);
+router.patch("/clinics/:id/features", updateClinicFeatures);
 router.get("/general/tickets", getAllSupportTicketsForGeneral);
 router.patch("/general/tickets/:id", updateTicketStatusForGeneral);
 router.get("/health/tickets", getAllSupportTicketsForHealth);

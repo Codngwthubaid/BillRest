@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSupportStore } from "@/store/support.store";
 import {
   CardHeader,
@@ -21,9 +21,10 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import type { SupportTicket } from "@/types/support.types"; // Make sure this path is correct
+import type { SupportTicket } from "@/types/support.types";
 
 export default function SupportAndMasterContactPage() {
   const {
@@ -33,6 +34,10 @@ export default function SupportAndMasterContactPage() {
     updateHealthTicketStatus,
     loading
   } = useSupportStore();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
 
   useEffect(() => {
     fetchAllTickets();
@@ -69,6 +74,14 @@ export default function SupportAndMasterContactPage() {
     }
   };
 
+  // ✅ Filter tickets
+  const filteredTickets = allTickets.filter((ticket) => {
+    const matchesName = ticket.user?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter ? ticket.status === statusFilter : true;
+    const matchesType = typeFilter ? ticket.user?.type === typeFilter : true;
+    return matchesName && matchesStatus && matchesType;
+  });
+
   return (
     <div className="mx-auto px-4 py-8 space-y-8">
       <CardHeader>
@@ -76,6 +89,37 @@ export default function SupportAndMasterContactPage() {
         <CardDescription>All the complain requests are rendered here.</CardDescription>
       </CardHeader>
 
+      {/* 🔍 Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Input
+          placeholder="Search by user name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="border rounded-lg px-3 py-2"
+        >
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="resolved">Resolved</option>
+          <option value="escalated">Escalated</option>
+        </select>
+
+        <select
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+          className="border rounded-lg px-3 py-2"
+        >
+          <option value="">All Types</option>
+          <option value="billrest_health">billrest_health</option>
+          <option value="billrest_general">billrest_general</option>
+        </select>
+      </div>
+
+      {/* 🧾 Table */}
       {loading ? (
         <div className="flex justify-center py-10">
           <Loader2 className="animate-spin size-10 text-blue-600" />
@@ -96,7 +140,7 @@ export default function SupportAndMasterContactPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {Array.isArray(allTickets) && allTickets.map((ticket: SupportTicket) => (
+              {filteredTickets.map((ticket: SupportTicket) => (
                 <TableRow key={ticket._id}>
                   <TableCell>{ticket.serialNumber}</TableCell>
                   <TableCell>{ticket.user?.name}</TableCell>
@@ -112,7 +156,9 @@ export default function SupportAndMasterContactPage() {
                   <TableCell>
                     <Select
                       value={ticket.status}
-                      onValueChange={(status: SupportTicket["status"]) => handleStatusChange(ticket._id, status)}
+                      onValueChange={(status: SupportTicket["status"]) =>
+                        handleStatusChange(ticket._id, status)
+                      }
                     >
                       <SelectTrigger className="w-36">
                         <SelectValue placeholder="Select status" />
@@ -128,7 +174,8 @@ export default function SupportAndMasterContactPage() {
               ))}
             </TableBody>
           </Table>
-          {allTickets.length === 0 && (
+
+          {filteredTickets.length === 0 && (
             <div className="text-center p-6 text-muted-foreground">
               No support tickets found.
             </div>

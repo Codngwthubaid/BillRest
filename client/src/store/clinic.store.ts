@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { Clinic, ClinicPayload } from "@/types/clinic.types";
-import { upsertClinic, getClinic, getAllClinics } from "@/services/clinic.service";
+import { upsertClinic, getClinic, getAllClinics, updateClinicFeatures } from "@/services/clinic.service";
 import { useAuthStore } from "./auth.store";
 
 interface ClinicStore {
@@ -18,7 +18,7 @@ interface ClinicStore {
   saveClinicProfile: (data: ClinicPayload) => Promise<void>;
 }
 
-export const useClinicStore = create<ClinicStore>((set) => {
+export const useClinicStore = create<ClinicStore>((set, get) => {
   const user = useAuthStore.getState().user;
 
   const loadClinic = async () => {
@@ -77,5 +77,99 @@ export const useClinicStore = create<ClinicStore>((set) => {
         set({ error: err.message || "Failed to load clinics", loading: false });
       }
     },
+
+    // updateClinicFeaturesInStore: async (userId: string, features: any) => {
+    //   set({ loading: true, error: null });
+    //   try {
+    //     const data = await updateClinicFeatures(userId, features);
+
+    //     const updatedClinics = get().allClinics?.clinics.map((c: any) =>
+    //       c.user?._id === userId
+    //         ? {
+    //           ...c,
+    //           user: {
+    //             ...c.user,
+    //             features: data.features,
+    //           },
+    //         }
+    //         : c
+    //     ) || [];
+
+    //     const currentClinic = get().clinic;
+    //     const updatedClinic =
+    //       currentClinic?.user?._id === userId
+    //         ? {
+    //           ...currentClinic,
+    //           user: {
+    //             ...currentClinic.user,
+    //             features: data.features,
+    //           },
+    //         }
+    //         : currentClinic;
+
+    //     set({
+    //       allClinics: { clinics: updatedClinics },
+    //       clinic: updatedClinic,
+    //       loading: false,
+    //     });
+    //   } catch (err: any) {
+    //     console.error("Failed to update clinic features:", err);
+    //     set({
+    //       error: err.message || "Failed to update clinic features",
+    //       loading: false,
+    //     });
+    //   }
+    // }
+    updateClinicFeaturesInStore: async (userId: string, newFeatures: any) => {
+      set({ loading: true, error: null });
+
+      try {
+        const data = await updateClinicFeatures(userId, newFeatures); // assumes it returns updated fields like { ipd: true }
+
+        const updateFeatures = (originalFeatures: any) => ({
+          ...originalFeatures,
+          ...data.features, // Merge old + new
+        });
+
+        const updatedClinics =
+          get().allClinics?.clinics.map((c: any) =>
+            c.user?._id === userId
+              ? {
+                ...c,
+                user: {
+                  ...c.user,
+                  features: updateFeatures(c.user?.features || {}),
+                },
+              }
+              : c
+          ) || [];
+
+        const currentClinic = get().clinic;
+        const updatedClinic =
+          currentClinic?.user?._id === userId
+            ? {
+              ...currentClinic,
+              user: {
+                ...currentClinic.user,
+                features: updateFeatures(currentClinic.user?.features || {}),
+              },
+            }
+            : currentClinic;
+
+        console.log("Updated clinic features:", updatedClinics);
+
+        set({
+          allClinics: { clinics: updatedClinics },
+          clinic: updatedClinic,
+          loading: false,
+        });
+      } catch (err: any) {
+        console.error("Failed to update clinic features:", err);
+        set({
+          error: err.message || "Failed to update clinic features",
+          loading: false,
+        });
+      }
+    }
   };
 });

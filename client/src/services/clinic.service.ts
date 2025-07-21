@@ -13,26 +13,21 @@ interface ClinicResponse {
   clinic: Clinic;
 }
 
-// Create or Update a clinic profile
+export const getAllClinics = async () => {
+  const res = await axiosInstance.get("/clinic/all");
+  return res.data;
+};
+
 export const upsertClinic = async (payload: ClinicPayload): Promise<ClinicResponse> => {
   const res = await axiosInstance.post("/clinic", payload);
   return res.data;
 };
 
-// Get current logged-in clinic's profile
 export const getClinic = async (): Promise<Clinic> => {
   const res = await axiosInstance.get("/clinic");
   return res.data;
 };
 
-// Admin: Get all clinics
-export const getAllClinics = async () => {
-  const res = await axiosInstance.get("/clinic/allClinics");
-  console.log("Loaded clinics:", res.data);
-  return res.data;
-};
-
-// Admin: Update clinic features
 export const updateClinicFeatures = async (id: string, features: ClinicFeatures) => {
   const res = await axiosInstance.patch(`/admin/clinics/${id}/features`, {
     features

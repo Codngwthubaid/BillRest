@@ -1,5 +1,4 @@
 import { useClinicStore } from "@/store/clinic.store";
-import { useBusinessStore } from "@/store/business.store"; // ✅ Only for updateBusinessFeaturesInStore
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,23 +12,42 @@ import {
 import { useAuthStore } from "@/store/auth.store";
 import { Switch } from "@/components/ui/switch";
 import type { Clinic } from "@/types/clinic.types";
-
+import { toast } from "sonner";
 
 export default function ClinicsPage() {
   const { user } = useAuthStore();
-  const { clinic, fetchClinic } = useClinicStore(); // ✅ use clinics and fetchAllClinics
-  const { updateBusinessFeaturesInStore } = useBusinessStore(); // ✅ only importing this one function
+  const {
+    clinic,
+    allClinics,
+    fetchAllClinics,
+    fetchClinic,
+  } = useClinicStore();
+
+  const { updateClinicFeaturesInStore } = useClinicStore()
   const [search, setSearch] = useState("");
 
-  console.log("ClinicsPage ", clinic);
-
+  // Conditionally fetch clinics based on role
   useEffect(() => {
-    fetchClinic();
-  }, [fetchClinic]);
+    if (user?.role === "support" || user?.role === "master") {
+      fetchAllClinics();
+    } else if (user?.role === "clinic") {
+      fetchClinic();
+    }
+  }, [user?.role, fetchAllClinics, fetchClinic]);
 
-  const clinicsArray: Clinic[] = Array.isArray(clinic) ? clinic : clinic ? [clinic] : [];
+  // Conditionally choose clinics array
+  const clinicsArray: Clinic[] =
+    user?.role === "support" || user?.role === "master"
+      ? Array.isArray(allClinics?.clinics)
+        ? allClinics.clinics
+        : []
+      : clinic
+        ? [clinic]
+        : [];
+
+
   const filteredClinics = clinicsArray.filter((c: Clinic) =>
-    c.businessName.toLowerCase().includes(search.toLowerCase())
+    c.businessName?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -56,8 +74,10 @@ export default function ClinicsPage() {
               <TableHead>User Name</TableHead>
               <TableHead>Address</TableHead>
               <TableHead>Protected PIN</TableHead>
-              <TableHead>PWA Status</TableHead>
-              {user?.role === "master" && <TableHead>PWA Enabled</TableHead>}
+              <TableHead>WAI Status</TableHead>
+              <TableHead>IPD Status</TableHead>
+              {user?.role === "master" && <TableHead>WAI Enabled</TableHead>}
+              {user?.role === "master" && <TableHead>IPD Enabled</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -71,7 +91,14 @@ export default function ClinicsPage() {
                 <TableCell>{c.address || "N/A"}</TableCell>
                 <TableCell>{c.protectedPin || "N/A"}</TableCell>
                 <TableCell>
-                  {c.user?.features?.pwa ? (
+                  {c.user?.features?.whatsappInvoice ? (
+                    <span className="text-green-600 font-semibold">Yes</span>
+                  ) : (
+                    <span className="text-red-600 font-semibold">No</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {c.user?.features?.IPD ? (
                     <span className="text-green-600 font-semibold">Yes</span>
                   ) : (
                     <span className="text-red-600 font-semibold">No</span>
@@ -80,11 +107,21 @@ export default function ClinicsPage() {
                 {user?.role === "master" && (
                   <TableCell>
                     <Switch
-                      checked={c.user?.features?.pwa}
+                      checked={c.user?.features?.whatsappInvoice}
                       onCheckedChange={(checked) => {
-                        updateBusinessFeaturesInStore(c.user._id, {
-                          pwa: checked,
-                        });
+                        updateClinicFeaturesInStore(c.user._id, { whatsappInvoice: checked });
+                        toast.success("Feature updated!");
+                      }}
+                    />
+                  </TableCell>
+                )}
+                {user?.role === "master" && (
+                  <TableCell>
+                    <Switch
+                      checked={c.user?.features?.IPD}
+                      onCheckedChange={(checked) => {
+                        updateClinicFeaturesInStore(c.user._id, { IPD: checked });
+                        toast.success("Feature updated!");
                       }}
                     />
                   </TableCell>

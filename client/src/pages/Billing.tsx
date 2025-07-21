@@ -45,22 +45,26 @@ export default function Billing() {
     fetchData();
   }, [user?.role]);
 
-  const data = isClinic ? ipds : allIPDs;
+  const data = isClinic ? ipds : allIPDs?.ipds ?? [];
+
 
   const summary = {
-    total: data.length,
-    admitted: data.filter((i) => i.status === "Admitted").length,
-    discharged: data.filter((i) => i.status === "Discharged").length,
-    pending: data.filter((i) => i.paymentStatus === "pending").length,
-    paid: data.filter((i) => i.paymentStatus === "paid").length,
-    totalAmount: data.reduce((acc, i) => acc + i.billing.finalAmount, 0),
+    total: Array.isArray(data) ? data.length : 0,
+    admitted: Array.isArray(data) ? data.filter((i) => i.status === "Admitted").length : 0,
+    discharged: Array.isArray(data) ? data.filter((i) => i.status === "Discharged").length : 0,
+    pending: Array.isArray(data) ? data.filter((i) => i.paymentStatus === "pending").length : 0,
+    paid: Array.isArray(data) ? data.filter((i) => i.paymentStatus === "paid").length : 0,
+    totalAmount: Array.isArray(data) ? data.reduce((acc, i) => acc + i.billing.finalAmount, 0) : 0,
   };
 
-  const filtered = data.filter(
-    (ipd) =>
-      ipd.ipdNumber.toLowerCase().includes(search.toLowerCase()) ||
-      (ipd.patient?.name?.toLowerCase()?.includes(search.toLowerCase()) ?? false)
-  );
+  const filtered = Array.isArray(data)
+    ? data.filter((ipd) => {
+      const ipdNum = ipd.ipdNumber?.toLowerCase() ?? "";
+      const patientName = ipd.patient?.name?.toLowerCase() ?? "";
+      return ipdNum.includes(search.toLowerCase()) || patientName.includes(search.toLowerCase());
+    })
+    : [];
+
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -177,36 +181,40 @@ export default function Billing() {
                   <button onClick={() => { setSelectedIPD(ipd); setShowPreviewDialog(true); }}>
                     <Eye className="w-4 h-4 text-blue-500 hover:scale-110" />
                   </button>
-                  <button onClick={async () => {
-                    try {
-                      const blob = await downloadIPDPDF(ipd._id);
-                      const url = window.URL.createObjectURL(new Blob([blob]));
-                      const link = document.createElement("a");
-                      link.href = url;
-                      link.setAttribute("download", `${ipd.ipdNumber}_bill.pdf`);
-                      document.body.appendChild(link);
-                      link.click();
-                      link.remove();
-                      window.URL.revokeObjectURL(url);
-                    } catch (err) {
-                      console.error("Download failed", err);
-                    }
-                  }}>
-                    <Download className="w-4 h-4 text-green-600 hover:scale-110" />
-                  </button>
-                  <button onClick={() => printIPDPDF(ipd._id)}>
-                    <Printer className="w-4 h-4 text-orange-600 hover:scale-110" />
-                  </button>
-                  <button onClick={() => { setSelectedIPD(ipd); setShowUpdateDialog(true); }}>
-                    <PenLine className="w-4 h-4 text-emerald-600 hover:scale-110" />
-                  </button>
-                  <button onClick={() => {
-                    setSelectedIPD(ipd);
-                    setSelectedBill(ipd.ipdNumber);
-                    setShowDeleteDialog(true);
-                  }}>
-                    <Trash className="w-4 h-4 text-red-600 hover:scale-110" />
-                  </button>
+                  {user?.role === "clinic" && (
+                    <>
+                      <button onClick={async () => {
+                        try {
+                          const blob = await downloadIPDPDF(ipd._id);
+                          const url = window.URL.createObjectURL(new Blob([blob]));
+                          const link = document.createElement("a");
+                          link.href = url;
+                          link.setAttribute("download", `${ipd.ipdNumber}_bill.pdf`);
+                          document.body.appendChild(link);
+                          link.click();
+                          link.remove();
+                          window.URL.revokeObjectURL(url);
+                        } catch (err) {
+                          console.error("Download failed", err);
+                        }
+                      }}>
+                        <Download className="w-4 h-4 text-green-600 hover:scale-110" />
+                      </button>
+                      <button onClick={() => printIPDPDF(ipd._id)}>
+                        <Printer className="w-4 h-4 text-orange-600 hover:scale-110" />
+                      </button>
+                      <button onClick={() => { setSelectedIPD(ipd); setShowUpdateDialog(true); }}>
+                        <PenLine className="w-4 h-4 text-emerald-600 hover:scale-110" />
+                      </button>
+                      <button onClick={() => {
+                        setSelectedIPD(ipd);
+                        setSelectedBill(ipd.ipdNumber);
+                        setShowDeleteDialog(true);
+                      }}>
+                        <Trash className="w-4 h-4 text-red-600 hover:scale-110" />
+                      </button>
+                    </>
+                  )}
                 </td>
               </tr>
             ))}

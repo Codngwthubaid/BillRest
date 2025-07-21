@@ -6,8 +6,9 @@ import { getAllClinics } from "../controllers/admin.controller.js";
 
 const router = express.Router();
 
+router.get("/all", verifyToken, checkRole(["support", "master"]), getAllClinics);
+
 router.post("/", verifyToken, checkRole(["clinic"]), checkSubscription, createOrUpdateClinic);
 router.get("/", verifyToken, checkRole(["clinic"]), checkSubscription, getClinicByUser);
-router.get("/allClinics", verifyToken, checkRole(["support", "master"]), getAllClinics);
 
 export default router;

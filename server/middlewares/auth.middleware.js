@@ -19,8 +19,14 @@ export const verifyToken = async (req, res, next) => {
 };
 
 export const checkRole = (roles) => (req, res, next) => {
-  if (!roles.includes(req.user.role)) {
+  const userRole = String(req.user?.role).trim();
+  console.log("Allowed roles:", roles);
+  console.log("User role:", userRole);
+
+  if (!roles.includes(userRole)) {
+    console.log("❌ Role not allowed:", userRole);
     return res.status(403).json({ message: "Access denied" });
   }
+  console.log("✅ Access Granted", userRole);
   next();
 };

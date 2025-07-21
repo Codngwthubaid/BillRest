@@ -24,7 +24,7 @@ type BusinessWithUser = Business & {
 
 export default function Businesses() {
   const { user } = useAuthStore()
-  const { businesses, fetchAllBusinesses , updateBusinessFeaturesInStore} = useBusinessStore();
+  const { businesses, fetchAllBusinesses, updateBusinessFeaturesInStore } = useBusinessStore();
   const [search, setSearch] = useState("");
 
   console.log(businesses)
@@ -61,8 +61,8 @@ export default function Businesses() {
               <TableHead>User Name</TableHead>
               <TableHead>Address</TableHead>
               <TableHead>Protected PIN</TableHead>
-              <TableHead>WA Status</TableHead>
-              {user?.role === "master" && <TableHead>WA Enabled</TableHead>}
+              <TableHead>WAI Status</TableHead>
+              {user?.role === "master" && <TableHead>WAI Enabled</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -74,7 +74,7 @@ export default function Businesses() {
                 <TableCell>{b.address || "N/A"}</TableCell>
                 <TableCell>{b.protectedPin || "N/A"}</TableCell>
                 <TableCell>
-                  {b.user?.features?.pwa ? (
+                  {b.user?.features?.whatsappInvoice ? (
                     <span className="text-green-600 font-semibold">Yes</span>
                   ) : (
                     <span className="text-red-600 font-semibold">No</span>
@@ -84,9 +84,9 @@ export default function Businesses() {
                   user?.role === "master" && (
                     <TableCell>
                       <Switch
-                        checked={b.user?.features?.pwa}
+                        checked={b.user?.features?.whatsappInvoice}
                         onCheckedChange={(checked) => {
-                          updateBusinessFeaturesInStore(b.user._id, { pwa: checked });
+                          updateBusinessFeaturesInStore(b.user._id, { whatsappInvoice: checked });
                         }}
                       />
                     </TableCell>
