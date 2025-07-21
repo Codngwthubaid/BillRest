@@ -192,7 +192,7 @@ export default function InvoicesPage() {
                     </Card>
                 </div>
             )}
-            
+
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
                 <Input
                     placeholder="Search by invoice ID or customer name"
@@ -201,18 +201,22 @@ export default function InvoicesPage() {
                     className="w-full"
                 />
 
-                <select
-                    value={emailFilter}
-                    onChange={(e) => setEmailFilter(e.target.value)}
-                    className="border border-gray-300 rounded-md px-3 py-2 text-sm "
-                >
-                    <option value="">All Emails</option>
-                    {uniqueEmails.map((email) => (
-                        <option key={email} value={email}>
-                            {email}
-                        </option>
-                    ))}
-                </select>
+                {
+                    user?.role !== "customer" && (
+                        <select
+                            value={emailFilter}
+                            onChange={(e) => setEmailFilter(e.target.value)}
+                            className="border border-gray-300 rounded-md px-3 py-2 text-sm "
+                        >
+                            <option value="">All Emails</option>
+                            {uniqueEmails.map((email) => (
+                                <option key={email} value={email}>
+                                    {email}
+                                </option>
+                            ))}
+                        </select>
+                    )
+                }
 
                 <select
                     value={statusFilter}
@@ -231,7 +235,7 @@ export default function InvoicesPage() {
                 <table className="w-full text-sm">
                     <thead className="bg-muted text-gray-600 text-left">
                         <tr>
-                            <th className="p-4">Business Email</th>
+                            {user?.role !== "customer" && <th className="p-4">Business Email</th>}
                             <th className="p-4">Invoice</th>
                             <th className="p-4">Customer</th>
                             <th className="p-4">Amount</th>
@@ -243,9 +247,11 @@ export default function InvoicesPage() {
                     <tbody>
                         {filtered.map((invoice) => (
                             <tr key={invoice._id} className="border-t hover:bg-muted/30">
-                                <td className="p-4">
-                                    <div className="font-medium text-blue-600">{invoice?.user?.email}</div>
-                                </td>
+                                {user?.role !== "customer" && (
+                                    <td className="p-4">
+                                        <div className="font-medium text-blue-600">{invoice?.user?.email}</div>
+                                    </td>
+                                )}
                                 <td className="p-4">
                                     <div className="font-medium text-blue-600">{invoice.invoiceNumber}</div>
                                     <div className="text-xs text-muted-foreground">{invoice.createdAt?.slice(0, 10)}</div>

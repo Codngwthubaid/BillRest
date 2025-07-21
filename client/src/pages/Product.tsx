@@ -115,16 +115,18 @@ export default function ProductsPage() {
                     ))}
                 </select>
 
-                <select
-                    value={selectedEmail}
-                    onChange={(e) => setSelectedEmail(e.target.value)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[180px]"
-                >
-                    <option value="">All Users</option>
-                    {uniqueEmails.map(email => (
-                        <option key={email} value={email}>{email}</option>
-                    ))}
-                </select>
+                {user?.role !== "customer" && (
+                    <select
+                        value={selectedEmail}
+                        onChange={(e) => setSelectedEmail(e.target.value)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[180px]"
+                    >
+                        <option value="">All Users</option>
+                        {uniqueEmails.map(email => (
+                            <option key={email} value={email}>{email}</option>
+                        ))}
+                    </select>
+                )}
             </div>
 
 
