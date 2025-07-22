@@ -41,9 +41,9 @@ export const verifyPaymentAndActivate = async (req, res) => {
       .update(razorpay_order_id + "|" + razorpay_payment_id)
       .digest("hex");
 
-    // if (generatedSignature !== razorpay_signature) {
-    //   return res.status(400).json({ message: "Invalid signature" });
-    // }
+    if (generatedSignature !== razorpay_signature) {
+      return res.status(400).json({ message: "Invalid signature" });
+    }
 
     let plan = await PlanForGeneral.findById(planId);
     if (!plan) {

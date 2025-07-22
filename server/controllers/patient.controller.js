@@ -10,7 +10,6 @@ export const getPatients = async (req, res) => {
         path: 'visits',
         select: 'appointmentNumber status createdAt'
       })
-      .populate("clinicData")
       .sort({ createdAt: -1 })
       .lean();
 

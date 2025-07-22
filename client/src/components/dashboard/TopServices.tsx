@@ -48,16 +48,27 @@ export default function TopServices() {
                   </div>
                   <div>
                     <p className="font-medium">{service.name}</p>
-                    <p className="text-sm">
+                    {(user?.role === "support" || user?.role === "master") && (
+                      <p className="text-sm text-gray-500">
+                        By: {service.clinic?.email}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                {user?.role === "clinic" && (
+                  <div className="text-right">
+                    <p className="font-semibold">
                       Amount : {"₹" + Number(service?.price || 0)}
                     </p>
                   </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold">
-                    ₹{(service.totalSales || 0).toFixed(2)}
-                  </p>
-                </div>
+                )}
+                {(user?.role === "master" || user?.role === "support") && (
+                  <div className="text-right">
+                    <p className="font-semibold">
+                      ₹{(service.price || 0).toFixed(2)}
+                    </p>
+                  </div>
+                )}
               </div>
             ))
           ) : (

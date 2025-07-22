@@ -50,8 +50,10 @@ export default function ProductsPage() {
     const filtered = (Array.isArray(data) ? data : []).filter((product) => {
         const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
         const matchesCategory = !selectedCategory || product.category === selectedCategory;
-        return matchesSearch && matchesCategory;
+        const matchesEmail = !selectedEmail || product.user?.email === selectedEmail;
+        return matchesSearch && matchesCategory && matchesEmail;
     });
+
 
     const getStockStatus = (stock: number) => {
         if (stock === 0) return 'text-red-600 bg-red-100';

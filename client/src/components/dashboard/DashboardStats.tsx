@@ -23,6 +23,9 @@ export default function DashboardStats() {
   const { allServices, fetchAllServices } = useServiceStore();
   const { allAppointments, fetchAllAppointments } = useAppointmentStore();
 
+  console.log("total businesses", businesses);
+
+
   useEffect(() => {
     fetchGeneralReport("monthly", new Date().toISOString().split("T")[0]);
     fetchHealthReport("monthly", new Date().toISOString().split("T")[0]);
@@ -80,7 +83,7 @@ export default function DashboardStats() {
     dashboardStats = [
       {
         title: "Total Businesses",
-        value: businesses ? 1 : 0,
+        value: businesses.length || 0,
         icon: StoreIcon,
         color: "bg-green-500",
       },

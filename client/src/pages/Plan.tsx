@@ -30,6 +30,8 @@ export default function Plans() {
   const packagePlans = isCustomer ? packageGeneralPlans : isClinic ? packageHealthPlans : [];
   const individualPlans = isCustomer ? individualGeneralPlans : isClinic ? individualHealthPlans : [];
 
+  console.log("Package Plans:", packagePlans);
+
   useEffect(() => {
     if (isCustomer) {
       fetchPackageGeneralPlans();
@@ -128,7 +130,7 @@ export default function Plans() {
 
         {packagePlans?.length > 0 && (
           <div className="mb-20">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className={`grid grid-cols-1 sm:grid-cols-2 ${user?.role === "clinic" ? "lg:grid-cols-2" : "lg:grid-cols-3"} gap-8`}>
               {packagePlans.map((plan) => {
                 const isRecommended = plan.name.toLowerCase() === "12 months" && plan.durationInDays === 365;
                 return (
@@ -146,6 +148,7 @@ export default function Plans() {
                     )}
                     <div className="mt-6">
                       <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
+                      {user?.role === "clinic" && <h2 className="text-xl font-bold mb-2">{plan?.role}</h2>}
                       <div className="text-4xl font-bold mb-1">
                         ₹{plan.pricePerMonth}.00
                         <span className="text-base font-medium text-gray-600">/mo</span>

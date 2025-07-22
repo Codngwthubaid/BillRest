@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 const appointmentSchema = new mongoose.Schema({
   clinic: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   patient: { type: mongoose.Schema.Types.ObjectId, ref: "Patient", required: true },
-  clinicData: { type: mongoose.Schema.Types.ObjectId, ref: "Clinic", required: true },
 
   appointmentNumber: { type: String, required: true, unique: true },
 

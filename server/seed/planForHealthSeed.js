@@ -13,13 +13,14 @@ const seedPlans = async () => {
             {
                 name: "12 Months",
                 type: "package",
+                role: "clinic",
                 durationInDays: 365,
                 pricePerMonth: 799,
                 totalPrice: 9588,
                 includedInvoices: 300,
                 description: [
                     "Patient Management",
-                    "Invoice management (creation, updation, deletion)",
+                    "Basic Bill management",
                     "Medical record management (creation, updation, deletion)",
                     "Provider listing & management",
                     "View Reports for patient demographics, billing, revenue, and status",
@@ -29,13 +30,14 @@ const seedPlans = async () => {
             {
                 name: "6 Months",
                 type: "package",
+                role: "clinic",
                 durationInDays: 180,
                 pricePerMonth: 999,
                 totalPrice: 5994,
                 includedInvoices: 300,
                 description: [
                     "Patient Management",
-                    "Invoice management (creation, updation, deletion)",
+                    "Basic Bill management",
                     "Medical record management (creation, updation, deletion)",
                     "Provider listing & management",
                     "View Reports for patient demographics, billing, revenue, and status",
@@ -43,15 +45,33 @@ const seedPlans = async () => {
                 ]
             },
             {
-                name: "3 Months",
+                name: "12 Months",
                 type: "package",
-                durationInDays: 90,
-                pricePerMonth: 1199,
-                totalPrice: 3597,
+                role: "doctor",
+                durationInDays: 365,
+                pricePerMonth: 799,
+                totalPrice: 9588,
                 includedInvoices: 300,
                 description: [
                     "Patient Management",
-                    "Invoice management (creation, updation, deletion)",
+                    "Billing management with IPD",
+                    "Medical record management (creation, updation, deletion)",
+                    "Provider listing & management",
+                    "View Reports for patient demographics, billing, revenue, and status",
+                    "Support for medical inquiries and compliance questions"
+                ]
+            },
+            {
+                name: "6 Months",
+                type: "package",
+                role: "doctor",
+                durationInDays: 180,
+                pricePerMonth: 999,
+                totalPrice: 5994,
+                includedInvoices: 300,
+                description: [
+                    "Patient Management",
+                    "Billing management With IPD ",
                     "Medical record management (creation, updation, deletion)",
                     "Provider listing & management",
                     "View Reports for patient demographics, billing, revenue, and status",
