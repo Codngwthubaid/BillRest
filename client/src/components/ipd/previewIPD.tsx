@@ -14,16 +14,16 @@ export default function IPDPreview({ IPD }: IPDPreviewProps) {
   const { user } = useAuthStore();
   const { business } = useBusinessStore();
 
+  console.log(IPD)
+
   return (
     <div className="mx-auto bg-white rounded-lg text-sm font-sans">
       {/* Header */}
       <div className="flex justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold">{business?.businessName}</h2>
-          <p className="text-xs">Address: {business?.address}</p>
           <p className="text-xs">Phone: {user?.phone}</p>
           <p className="text-xs">Email: {user?.email}</p>
-          <p className="text-xs">GSTIN: {business?.gstNumber || "N/A"}</p>
         </div>
         <div className="text-right">
           <h3 className="text-lg font-bold text-emerald-600 mb-1">IPD IPD</h3>
@@ -36,9 +36,9 @@ export default function IPDPreview({ IPD }: IPDPreviewProps) {
       {/* Patient Info */}
       <div className="mb-4">
         <p className="whitespace-pre-line">
-          {IPD.patient?.name}
+          Name : {IPD.patient?.name}
           {"\n"}
-          {IPD.patient?.phoneNumber}
+          Phone : {IPD.patient?.phoneNumber}
           {"\n"}
           Age: {IPD?.patient?.age || "N/A"}
           {"\n"}

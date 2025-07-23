@@ -48,7 +48,7 @@ export default function App() {
               <Route element={<SubscriptionRoute />}>
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/invoices" element={<InvoicesPage />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/" element={<Dashboard />} />
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/customers" element={<CustomerPage />} />
                 <Route path="/reports" element={<ReportPage />} />
@@ -61,7 +61,7 @@ export default function App() {
               <Route element={<SubscriptionRoute />}>
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/appointments" element={<Appointments />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/" element={<Dashboard />} />
                 <Route path="/billings" element={<Billing />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/patients" element={<Patients />} />
@@ -73,7 +73,7 @@ export default function App() {
 
             {user?.role === "support" && (
               <>
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/" element={<Dashboard />} />
                 <Route path="/invoices" element={<InvoicesPage />} />
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/customers" element={<CustomerPage />} />
@@ -93,7 +93,7 @@ export default function App() {
               <>
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/invoices" element={<InvoicesPage />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/" element={<Dashboard />} />
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/customers" element={<CustomerPage />} />
                 <Route path="/clinics" element={<ClinicsPage />} />

@@ -491,6 +491,7 @@ export const getAllIPDs = async (req, res) => {
       .populate("clinic")
       .populate("patient")
       .populate("appointment")
+      .populate("treatments.service")
       .sort({ createdAt: -1 });
     res.json({ count: ipds.length, ipds });
   } catch (err) {

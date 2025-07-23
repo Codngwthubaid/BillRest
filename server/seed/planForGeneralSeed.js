@@ -14,8 +14,8 @@ const seedPlans = async () => {
         name: "12 Months",
         type: "package",
         durationInDays: 365,
-        pricePerMonth: 799,
-        totalPrice: 9588,
+        pricePerMonth: 499,
+        totalPrice: 5988,
         includedInvoices: 300,
         description: [
           "Business Management",
@@ -30,8 +30,8 @@ const seedPlans = async () => {
         name: "6 Months",
         type: "package",
         durationInDays: 180,
-        pricePerMonth: 999,
-        totalPrice: 5994,
+        pricePerMonth: 799,
+        totalPrice: 4794,
         includedInvoices: 300,
         description: [
           "Business Management",
@@ -43,9 +43,9 @@ const seedPlans = async () => {
         ]
       },
       {
-        name: "3 Months",
+        name: "1 Months",
         type: "package",
-        durationInDays: 90,
+        durationInDays: 30,
         pricePerMonth: 1199,
         totalPrice: 3597,
         includedInvoices: 300,

@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from "react";
-import { useReactToPrint } from "react-to-print";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,12 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useIPDStore } from "@/store/ipd.store";
 import { useAppointmentStore } from "@/store/appointment.store";
 import { useServiceStore } from "@/store/service.store";
-import type { IPDInput, IPDResponse, TreatmentInput } from "@/types/ipd.types";
-import InvoicePreview from "@/components/invoices/InvoicePreview"; // Adjust for IPD preview
-import POSReceipt58mm from "@/components/invoices/POSReceipt58mm"; // Adjust for IPD
-import POSReceipt80mm from "@/components/invoices/POSReceipt80mm"; // Adjust for IPD
-import InvoiceActionsDialog from "@/components/invoices/InvoiceActionsDialog"; // Adjust for IPD actions
-
+import type { IPDInput, TreatmentInput } from "@/types/ipd.types";
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -37,12 +31,6 @@ const defaultForm: IPDInput = {
 
 export default function CreateIPDDialog({ open, onOpenChange }: Props) {
   const [form, setForm] = useState<IPDInput>({ ...defaultForm, treatments: [] });
-  const [previewType, setPreviewType] = useState<"A4" | "58mm" | "80mm">("A4");
-  const [actionDialogOpen, setActionDialogOpen] = useState(false);
-
-  const previewRef = useRef<HTMLDivElement>(null);
-  const handlePrint = useReactToPrint({ contentRef: previewRef });
-
   const { createIPDRecord } = useIPDStore();
   const { appointments, fetchAppointments } = useAppointmentStore();
   const { services, fetchServices } = useServiceStore();
@@ -115,7 +103,6 @@ export default function CreateIPDDialog({ open, onOpenChange }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Map form treatments to match IPDInput's TreatmentInput type
     const submitForm: IPDInput = {
       ...form,
       treatments: (form.treatments || []).map((t) => ({
@@ -129,72 +116,72 @@ export default function CreateIPDDialog({ open, onOpenChange }: Props) {
     await createIPDRecord(submitForm);
     onOpenChange(false);
     setForm({ ...defaultForm, treatments: [] });
-    setActionDialogOpen(true);
+    // setActionDialogOpen(true);
   };
 
-  const safePrint = () => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => handlePrint());
-    });
-  };
+  // const safePrint = () => {
+  //   requestAnimationFrame(() => {
+  //     requestAnimationFrame(() => handlePrint());
+  //   });
+  // };
 
-  const handlePrintA4 = () => {
-    setPreviewType("A4");
-    safePrint();
-  };
+  // const handlePrintA4 = () => {
+  //   setPreviewType("A4");
+  //   safePrint();
+  // };
 
-  const previewIPD: IPDResponse = {
-    _id: "",
-    ipdNumber: "PREVIEW",
-    patient: {
-      _id: form.patientId,
-      name: appointments.find((appt) => appt._id === form.appointmentId)?.patient.name || "",
-      phoneNumber: appointments.find((appt) => appt._id === form.appointmentId)?.patient.phoneNumber || "",
-      age: appointments.find((appt) => appt._id === form.appointmentId)?.patient.age || 0,
-      gender: appointments.find((appt) => appt._id === form.appointmentId)?.patient.gender || "",
-      address: appointments.find((appt) => appt._id === form.appointmentId)?.patient.address || "",
-    },
-    clinic: "",
-    appointment: form.appointmentId,
-    isNewPatient: form.isNewPatient || false,
-    admissionDate: form.admissionDate || new Date().toISOString(),
-    bedNumber: form.bedNumber,
-    treatments: (form.treatments || []).map((t: FormTreatmentInput) => ({
-      service: {
-        _id: t.service,
-        name: services.find((s) => s._id === t.service)?.name || "",
-        price: t.price,
-        gstRate: t.gstRate,
-        category: t.category,
-      },
-      quantity: t.quantity,
-      totalCharges: t.price * t.quantity,
-    })),
-    billing: {
-      bedCharges: form.bedCharges || 0,
-      serviceCharges: (form.treatments || []).reduce(
-        (sum, t: FormTreatmentInput) => sum + t.price * t.quantity,
-        0
-      ),
-      otherCharges: form.otherCharges || [],
-      grantsOrDiscounts: form.grantsOrDiscounts || 0,
-      totalBeforeDiscount:
-        (form.bedCharges || 0) +
-        (form.treatments || []).reduce((sum, t: FormTreatmentInput) => sum + t.price * t.quantity, 0) +
-        (form.otherCharges || []).reduce((sum, oc) => sum + oc.amount, 0),
-      finalAmount:
-        (form.bedCharges || 0) +
-        (form.treatments || []).reduce((sum, t: FormTreatmentInput) => sum + t.price * t.quantity, 0) +
-        (form.otherCharges || []).reduce((sum, oc) => sum + oc.amount, 0) -
-        (form.grantsOrDiscounts || 0),
-      paidAmount: 0,
-      paymentStatus: "pending",
-    },
-    paymentStatus: "pending",
-    status: "Admitted",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
+  // const previewIPD: IPDResponse = {
+  //   _id: "",
+  //   ipdNumber: "PREVIEW",
+  //   patient: {
+  //     _id: form.patientId,
+  //     name: appointments.find((appt) => appt._id === form.appointmentId)?.patient.name || "",
+  //     phoneNumber: appointments.find((appt) => appt._id === form.appointmentId)?.patient.phoneNumber || "",
+  //     age: appointments.find((appt) => appt._id === form.appointmentId)?.patient.age || 0,
+  //     gender: appointments.find((appt) => appt._id === form.appointmentId)?.patient.gender || "",
+  //     address: appointments.find((appt) => appt._id === form.appointmentId)?.patient.address || "",
+  //   },
+  //   clinic: "",
+  //   appointment: form.appointmentId,
+  //   isNewPatient: form.isNewPatient || false,
+  //   admissionDate: form.admissionDate || new Date().toISOString(),
+  //   bedNumber: form.bedNumber,
+  //   treatments: (form.treatments || []).map((t: FormTreatmentInput) => ({
+  //     service: {
+  //       _id: t.service,
+  //       name: services.find((s) => s._id === t.service)?.name || "",
+  //       price: t.price,
+  //       gstRate: t.gstRate,
+  //       category: t.category,
+  //     },
+  //     quantity: t.quantity,
+  //     totalCharges: t.price * t.quantity,
+  //   })),
+  //   billing: {
+  //     bedCharges: form.bedCharges || 0,
+  //     serviceCharges: (form.treatments || []).reduce(
+  //       (sum, t: FormTreatmentInput) => sum + t.price * t.quantity,
+  //       0
+  //     ),
+  //     otherCharges: form.otherCharges || [],
+  //     grantsOrDiscounts: form.grantsOrDiscounts || 0,
+  //     totalBeforeDiscount:
+  //       (form.bedCharges || 0) +
+  //       (form.treatments || []).reduce((sum, t: FormTreatmentInput) => sum + t.price * t.quantity, 0) +
+  //       (form.otherCharges || []).reduce((sum, oc) => sum + oc.amount, 0),
+  //     finalAmount:
+  //       (form.bedCharges || 0) +
+  //       (form.treatments || []).reduce((sum, t: FormTreatmentInput) => sum + t.price * t.quantity, 0) +
+  //       (form.otherCharges || []).reduce((sum, oc) => sum + oc.amount, 0) -
+  //       (form.grantsOrDiscounts || 0),
+  //     paidAmount: 0,
+  //     paymentStatus: "pending",
+  //   },
+  //   paymentStatus: "pending",
+  //   status: "Admitted",
+  //   createdAt: new Date().toISOString(),
+  //   updatedAt: new Date().toISOString(),
+  // };
 
   return (
     <>
@@ -391,14 +378,6 @@ export default function CreateIPDDialog({ open, onOpenChange }: Props) {
           </form>
         </DialogContent>
       </Dialog>
-
-      {/* <div style={{ display: "none" }}>
-        <div ref={previewRef}>
-          {previewType === "A4" && <InvoicePreview invoice={previewIPD} />}
-          {previewType === "58mm" && <POSReceipt58mm business={{}} invoice={previewIPD} />}
-          {previewType === "80mm" && <POSReceipt80mm business={{}} invoice={previewIPD} />}
-        </div>
-      </div> */}
     </>
   );
 }

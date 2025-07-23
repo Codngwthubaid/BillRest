@@ -11,8 +11,7 @@ import { updateIPD } from "@/services/ipd.service";
 import UpdateIPD from "@/components/ipd/updateIPD";
 import IPDPreview from "@/components/ipd/previewIPD";
 import { DeleteIPD } from "@/components/ipd/deleteIPD";
-import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
-import { DialogFooter, DialogHeader } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { downloadIPDPDF } from "@/services/ipd.service";
 import { useIPDStore } from "@/store/ipd.store";
 
@@ -300,7 +299,7 @@ export default function Billing() {
       </div>
 
       <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
-        <DialogContent className="max-w-4xl h-[80vh] overflow-y-scroll">
+        <DialogContent className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white max-w-fit max-h-[80vh] p-5 overflow-y-auto border-2 rounded-md">
           <DialogHeader>
             <DialogTitle>Preview IPD Bill</DialogTitle>
           </DialogHeader>

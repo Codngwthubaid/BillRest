@@ -13,10 +13,10 @@ const seedPlans = async () => {
             {
                 name: "12 Months",
                 type: "package",
-                role: "clinic",
+                role: "Clinic",
                 durationInDays: 365,
-                pricePerMonth: 799,
-                totalPrice: 9588,
+                pricePerMonth: 699,
+                totalPrice: 8388,
                 includedInvoices: 300,
                 description: [
                     "Patient Management",
@@ -28,9 +28,9 @@ const seedPlans = async () => {
                 ]
             },
             {
-                name: "6 Months",
+                name: "3 Months",
                 type: "package",
-                role: "clinic",
+                role: "Clinic",
                 durationInDays: 180,
                 pricePerMonth: 999,
                 totalPrice: 5994,
@@ -47,10 +47,10 @@ const seedPlans = async () => {
             {
                 name: "12 Months",
                 type: "package",
-                role: "doctor",
+                role: "Hospital",
                 durationInDays: 365,
-                pricePerMonth: 799,
-                totalPrice: 9588,
+                pricePerMonth: 1199,
+                totalPrice: 14388,
                 includedInvoices: 300,
                 description: [
                     "Patient Management",
@@ -62,12 +62,12 @@ const seedPlans = async () => {
                 ]
             },
             {
-                name: "6 Months",
+                name: "3 Months",
                 type: "package",
-                role: "doctor",
+                role: "Hospital",
                 durationInDays: 180,
-                pricePerMonth: 999,
-                totalPrice: 5994,
+                pricePerMonth: 1799,
+                totalPrice: 5397,
                 includedInvoices: 300,
                 description: [
                     "Patient Management",
