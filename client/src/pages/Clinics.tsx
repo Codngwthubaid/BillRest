@@ -128,6 +128,7 @@ export default function ClinicsPage() {
               <TableHead>IPD Status</TableHead>
               {user?.role === "master" && <TableHead>WAI Enabled</TableHead>}
               {user?.role === "master" && <TableHead>IPD Enabled</TableHead>}
+              {/* <TableHead>View Report</TableHead> */}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -177,6 +178,9 @@ export default function ClinicsPage() {
                     />
                   </TableCell>
                 )}
+                {/* <TableCell>
+                  <Button className="bg-green-500 hover:bg-green-600 cursor-pointer">View Report</Button>
+                </TableCell> */}
               </TableRow>
             ))}
           </TableBody>

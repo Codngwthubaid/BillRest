@@ -57,6 +57,9 @@ export default function ReportsForGeneral() {
     const [endDate, setEndDate] = useState<string>('');
     const [isRefreshing, setIsRefreshing] = useState(false);
 
+
+    console.log(data)
+
     useEffect(() => {
         fetchReport(filterType, startDate, endDate || undefined);
     }, [filterType, startDate, endDate, fetchReport]);

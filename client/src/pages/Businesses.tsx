@@ -5,6 +5,8 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import type { Business } from "@/types/business.types";
 import { useAuthStore } from "@/store/auth.store";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import ReportsForGeneral from "@/components/reports/ReportsForGeneral";
 
 type BusinessWithUser = Business & {
   user: {
@@ -28,6 +30,9 @@ export default function Businesses() {
   const [search, setSearch] = useState("");
   const [selectedBusiness, setSelectedBusiness] = useState("");
   const [selectedWAIStatus, setSelectedWAIStatus] = useState("");
+  const [selectedReportEmail, setSelectedReportEmail] = useState<string | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false);
+
 
 
   console.log("Businesses component rendered", businesses);
@@ -98,6 +103,7 @@ export default function Businesses() {
               <TableHead>Protected PIN</TableHead>
               <TableHead>WAI Status</TableHead>
               {user?.role === "master" && <TableHead>WAI Enabled</TableHead>}
+              {/* <TableHead>View Report</TableHead> */}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -126,11 +132,38 @@ export default function Businesses() {
                     />
                   </TableCell>
                 )}
+                {/* <TableCell>
+                  <Button
+                    className="bg-blue-500 hover:bg-blue-600 cursor-pointer"
+                    onClick={() => {
+                      setSelectedReportEmail(b.user?.email);
+                      setShowReportModal(true);
+                    }}
+                  >
+                    View Report
+                  </Button>
+                </TableCell> */}
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
+
+      {showReportModal && selectedReportEmail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-md max-h-[90vh] w-[95vw] overflow-y-auto relative">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+              onClick={() => setShowReportModal(false)}
+            >
+              ✖
+            </button>
+
+            <ReportsForGeneral />
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
