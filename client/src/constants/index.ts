@@ -20,7 +20,7 @@ export const items = {
     sidebarOfCustomer: [
         {
             title: "Dashboard",
-            href: "/dashboard",
+            href: "/",
             icon: Home,
         },
         {
@@ -67,7 +67,7 @@ export const items = {
     sidebarOfHealth: [
         {
             title: "Dashboard",
-            href: "/dashboard",
+            href: "/",
             icon: Home,
         },
         {
@@ -119,7 +119,7 @@ export const items = {
     sidebarOfSupport: [
         {
             title: "Dashboard",
-            href: "/dashboard",
+            href: "/",
             icon: Home,
         },
         {
@@ -186,7 +186,7 @@ export const items = {
     sidebarOfAdmin: [
         {
             title: "Dashboard",
-            href: "/dashboard",
+            href: "/",
             icon: Home,
         },
         {
