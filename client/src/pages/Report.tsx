@@ -6,7 +6,7 @@ export default function ReportPage() {
     console.log(user?.email)
     return (
         <>
-            {(user?.role === "customer" || user?.role === "support" || user?.role === "master") && <ReportsForGeneral/>}
+            {user?.role === "customer" && <ReportsForGeneral/>}
             {user?.role === "clinic" && <ReportsForHealth />}
         </>
     )

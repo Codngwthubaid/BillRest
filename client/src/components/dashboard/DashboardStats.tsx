@@ -23,8 +23,7 @@ export default function DashboardStats() {
   const { allServices, fetchAllServices } = useServiceStore();
   const { allAppointments, fetchAllAppointments } = useAppointmentStore();
 
-  console.log("total businesses", businesses);
-
+  console.log("General Report", generalReport);
 
   useEffect(() => {
     fetchGeneralReport("monthly", new Date().toISOString().split("T")[0]);
