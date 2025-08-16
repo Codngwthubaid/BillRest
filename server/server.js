@@ -54,7 +54,7 @@ app.use("/api/patients", patientRoutes)
 app.use("/api/services", serviceRoutes)
 app.use("/api/ipd", ipdRoutes)
 
-app.get("/", (req, res) => res.send("🚀 Billing Software Backend Running"));
+app.get("/", (_, res) => res.send("🚀 Billing Software Backend Running"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));

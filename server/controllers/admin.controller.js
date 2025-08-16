@@ -241,6 +241,7 @@ export const updateTicketStatusForGeneral = async (req, res) => {
     res.status(500).json({ message: "Failed to update ticket" });
   }
 };
+
 export const getAllSupportTicketsForHealth = async (req, res) => {
   try {
     const tickets = await SupportTicketForHealth.find()
