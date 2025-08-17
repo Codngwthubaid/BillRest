@@ -208,9 +208,7 @@ export const getAppointments = async (req, res) => {
       .populate("patient")
       .sort({ createdAt: -1 });
 
-      console.log("Fetched appointments:", appointments);
-
-    res.json(appointments);
+      res.json(appointments);
   } catch (err) {
     console.error("Get appointments error:", err);
     res.status(500).json({ message: err.message });

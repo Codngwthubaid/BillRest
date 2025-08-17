@@ -5,11 +5,23 @@ import { useBusinessStore } from "@/store/business.store";
 import { useInvoiceStore } from "@/store/invoice.store";
 import { useSupportStore } from "@/store/support.store";
 import { useReportStore } from "@/store/report.store";
-import { IndianRupee, FileText, Package, StoreIcon, UserRoundCheck, HelpCircle, FileTerminal, ListOrdered, SquareUserRound, FileTerminalIcon, Hospital } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { useClinicStore } from "@/store/clinic.store";
 import { useServiceStore } from "@/store/service.store";
 import { useAppointmentStore } from "@/store/appointment.store";
+import {
+  IndianRupee,
+  FileText,
+  Package,
+  StoreIcon,
+  UserRoundCheck,
+  HelpCircle,
+  FileTerminal,
+  ListOrdered,
+  SquareUserRound,
+  FileTerminalIcon,
+  Hospital
+} from "lucide-react";
 
 
 export default function DashboardStats() {
@@ -23,7 +35,7 @@ export default function DashboardStats() {
   const { allServices, fetchAllServices } = useServiceStore();
   const { allAppointments, fetchAllAppointments } = useAppointmentStore();
 
-  console.log("General Report", generalReport);
+  console.log("Health Report", generalReport);
 
   useEffect(() => {
     fetchGeneralReport("monthly", new Date().toISOString().split("T")[0]);

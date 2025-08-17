@@ -5,6 +5,7 @@ import { checkSubscription } from "../middlewares/subscription.middleware.js";
 
 const router = Router();
 
+
 router.get("/sales/general", verifyToken, (req, res, next) => {
   if (req.user.role === "customer") {
     return checkSubscription(req, res, next);

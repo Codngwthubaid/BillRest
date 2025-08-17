@@ -16,7 +16,7 @@ export default function NotFoundPage() {
   }, [token, navigate]);
 
   const handleRedirect = () => {
-    navigate("/dashboard");
+    navigate("/");
   };
 
   return (

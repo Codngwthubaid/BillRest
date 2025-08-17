@@ -7,7 +7,6 @@ import {
   deleteAppointment,
 } from "../controllers/appointment.controller.js";
 import { verifyToken, checkRole } from "../middlewares/auth.middleware.js";
-import { checkFeatureAccess } from "../middlewares/feature.middleware.js";
 import { checkSubscription } from "../middlewares/subscription.middleware.js";
 import { getAllAppointments } from "../controllers/admin.controller.js";
 

@@ -36,13 +36,13 @@ app.use(express.json()); // ✅ Required for parsing JSON bodies
 
 
 // Routes
+app.use("/api/report", reportRoutes);
 app.use("/api/admin" , adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/business", businessRoutes);
 app.use("/api/clinic", clinicRoutes)
 app.use("/api/products", productRoutes);
 app.use("/api/invoices", invoiceRoutes);
-app.use("/api/report", reportRoutes);
 app.use("/api/sync", syncRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/subscription", subscriptionRoutes);

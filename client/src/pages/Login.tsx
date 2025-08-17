@@ -50,7 +50,7 @@ export default function Login() {
 
       if (res.user.role === "customer" || res.user.role === "clinic") {
         if (subscription && subscription.plan) {
-          navigate("/dashboard");
+          navigate("/");
         } else {
           navigate("/plans");
         }

@@ -180,7 +180,7 @@ export default function ReportsForHealth() {
                     </div>
                 )}
 
-                {!loading && (!data || (data.ipds.length === 0)) && (
+                {!loading && (!data || !data.ipds || data.ipds.length === 0) && (
                     <EmptyState
                         icon={FileText}
                         title="No report data available"
@@ -194,7 +194,7 @@ export default function ReportsForHealth() {
                     />
                 )}
 
-                {!loading && data && data.ipds.length > 0 && (
+                {!loading && data && Array.isArray(data.ipds) && data.ipds.length > 0 && (
                     <div className="space-y-8 animate-in fade-in-50 duration-500">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             <StatsCard

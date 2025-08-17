@@ -77,7 +77,7 @@ const ProtectedPinRoute = () => {
     setInputPin("");
     setShowPin(false);
     setOpen(false);
-    navigate("/dashboard");
+    navigate("/");
     toast.info("PIN entry cancelled.");
   };
 

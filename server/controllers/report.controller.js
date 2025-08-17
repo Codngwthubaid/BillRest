@@ -4,6 +4,7 @@ import { Patient } from "../models/patient.model.js";
 import { Service } from "../models/service.model.js";
 import { IPD } from "../models/ipd.model.js";
 
+
 export const getSalesReportForGeneral = async (req, res) => {
     try {
         const { filterType, startDate, endDate } = req.query;
@@ -264,6 +265,21 @@ export const getSalesReportForHealth = async (req, res) => {
         const topAppointments = Object.values(appointmentMap)
             .sort((a, b) => b.count - a.count)
             .slice(0, 5);
+
+        console.log({
+            totalRevenue,
+            count: ipds.length,
+            topServices,
+            ipds,
+            appointments,
+            patients,
+            services,
+            totalAppointments: appointments.length,
+            totalPatients: patients.length,
+            totalServices: services.length,
+            topPatients,
+            topAppointments
+        })
 
         res.json({
             totalRevenue,

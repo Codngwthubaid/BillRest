@@ -193,7 +193,6 @@ export const getIPDs = async (req, res) => {
       .populate("treatments.service")
       .sort({ createdAt: -1 });
 
-    console.log("ipds from backend:", ipds)
     res.json(ipds);
 
   } catch (err) {

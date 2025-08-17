@@ -13,8 +13,6 @@ export const getPatients = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-      console.log("Fetched patients:", patients);
-
     res.json(patients);
   } catch (err) {
     console.error("Get patients error:", err);

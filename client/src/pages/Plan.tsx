@@ -79,7 +79,7 @@ export default function Plans() {
 
           if (result) {
             toast.success("Subscription activated");
-            navigate("/dashboard");
+            navigate("/");
           } else {
             toast.error("Payment verification failed");
           }
