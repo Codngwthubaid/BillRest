@@ -190,19 +190,19 @@ export const getSalesReportForHealth = async (req, res) => {
         const [appointments, patients, services, ipds] = await Promise.all([
             Appointment.find({
                 clinic: userId,
-                createdAt: { $gte: start, $lte: end }
+                // createdAt: { $gte: start, $lte: end }
             }).populate("patient"),
             Patient.find({
                 clinic: userId,
-                createdAt: { $gte: start, $lte: end }
+                // createdAt: { $gte: start, $lte: end }
             }),
             Service.find({
                 clinic: userId,
-                createdAt: { $gte: start, $lte: end }
+                // createdAt: { $gte: start, $lte: end }
             }),
             IPD.find({
                 clinic: userId,
-                createdAt: { $gte: start, $lte: end }
+                // createdAt: { $gte: start, $lte: end }
             })
                 .populate("clinic", "-password")
                 .populate("patient")
