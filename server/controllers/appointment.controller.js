@@ -158,21 +158,31 @@ export const updateAppointment = async (req, res) => {
   }
 };
 
+
 export const deleteAppointment = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
 
+    // 1. Find and delete appointment
     const appointment = await Appointment.findOneAndDelete({ _id: id, clinic: userId });
     if (!appointment) {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
-    await Patient.updateMany(
+    // 2. Remove appointment reference from patient
+    const patient = await Patient.findOneAndUpdate(
       { visits: appointment._id },
-      { $pull: { visits: appointment._id } }
+      { $pull: { visits: appointment._id } },
+      { new: true }
     );
 
+    // 3. If patient has no more visits -> delete patient
+    if (patient && patient.visits.length === 0) {
+      await Patient.findByIdAndDelete(patient._id);
+    }
+
+    // 4. Recalculate appointment numbers for this clinic
     const appointments = await Appointment.find({ clinic: userId }).sort({ createdAt: 1 });
 
     let counter = 1;
@@ -188,7 +198,7 @@ export const deleteAppointment = async (req, res) => {
       { upsert: true }
     );
 
-    res.json({ message: "Appointment deleted and numbering updated" });
+    res.json({ message: "Appointment and related patient deleted successfully (if no visits left)" });
 
   } catch (err) {
     console.error("Delete appointment error:", err);

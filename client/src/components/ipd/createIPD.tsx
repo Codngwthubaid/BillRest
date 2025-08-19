@@ -7,6 +7,7 @@ import { useIPDStore } from "@/store/ipd.store";
 import { useAppointmentStore } from "@/store/appointment.store";
 import { useServiceStore } from "@/store/service.store";
 import type { IPDInput, TreatmentInput } from "@/types/ipd.types";
+import { Loader2 } from "lucide-react";
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -32,6 +33,7 @@ const defaultForm: IPDInput = {
 export default function CreateIPDDialog({ open, onOpenChange }: Props) {
   const [form, setForm] = useState<IPDInput>({ ...defaultForm, treatments: [] });
   const { createIPDRecord } = useIPDStore();
+   const [loading, setLoading] = useState(false);
   const { appointments, fetchAppointments } = useAppointmentStore();
   const { services, fetchServices } = useServiceStore();
 
@@ -101,22 +103,28 @@ export default function CreateIPDDialog({ open, onOpenChange }: Props) {
     setForm({ ...form, otherCharges: updatedOtherCharges });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const submitForm: IPDInput = {
-      ...form,
-      treatments: (form.treatments || []).map((t) => ({
-        service: t.service,
-        quantity: t.quantity,
-        price: t.price,
-        gstRate: t.gstRate,
-        category: t.category,
-      })),
-    };
-    await createIPDRecord(submitForm);
-    onOpenChange(false);
-    setForm({ ...defaultForm, treatments: [] });
+    setLoading(true); // ✅ start loading
+    try {
+      const submitForm: IPDInput = {
+        ...form,
+        treatments: (form.treatments || []).map((t) => ({
+          service: t.service,
+          quantity: t.quantity,
+          price: t.price,
+          gstRate: t.gstRate,
+          category: t.category,
+        })),
+      };
+      await createIPDRecord(submitForm);
+      onOpenChange(false);
+      setForm({ ...defaultForm, treatments: [] });
+    } finally {
+      setLoading(false); // ✅ stop loading
+    }
   };
+
 
   return (
     <>
@@ -307,8 +315,19 @@ export default function CreateIPDDialog({ open, onOpenChange }: Props) {
               </Button>
             </div>
 
-            <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
-              Create
+            <Button
+              type="submit"
+              className="w-full bg-green-600 hover:bg-green-700"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create"
+              )}
             </Button>
           </form>
         </DialogContent>

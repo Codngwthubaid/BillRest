@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import type { CreateServicePayload } from "@/types/service.types";
 
@@ -18,6 +19,7 @@ export default function CreateServiceDialog({ open, onOpenChange }: Props) {
     unit: "",
     gstRate: 0
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -28,9 +30,26 @@ export default function CreateServiceDialog({ open, onOpenChange }: Props) {
   };
 
   const handleSubmit = async () => {
-    const { createService } = await import("@/store/service.store").then(mod => mod.useServiceStore.getState());
-    await createService(form);
-    onOpenChange(false);
+    setIsLoading(true);
+    try {
+      const { createService } = await import("@/store/service.store").then(
+        (mod) => mod.useServiceStore.getState()
+      );
+      await createService(form);
+      onOpenChange(false);
+      setForm({
+        name: "",
+        description: "",
+        price: 0,
+        category: "",
+        unit: "",
+        gstRate: 0
+      }); // reset form if needed
+    } catch (err) {
+      console.error("Create service error:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -48,8 +67,23 @@ export default function CreateServiceDialog({ open, onOpenChange }: Props) {
           <Input name="gstRate" type="number" placeholder="GST Rate %" onChange={handleChange} />
         </div>
         <DialogFooter className="mt-4">
-          <Button variant="destructive" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">Create</Button>
+          <Button variant="destructive" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={isLoading}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              "Create"
+            )}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

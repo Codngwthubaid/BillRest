@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAppointmentStore } from "@/store/appointment.store";
 import type { CreateAppointmentPayload } from "@/types/appointment.types";
+import { Loader2 } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -24,16 +25,26 @@ const defaultForm: CreateAppointmentPayload = {
 
 export default function CreateAppointmentDialog({ open, onOpenChange }: Props) {
   const [form, setForm] = useState<CreateAppointmentPayload>(defaultForm);
+  const [isLoading, setIsLoading] = useState(false)
   const { createAppointment } = useAppointmentStore();
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await createAppointment(form);
-    if (res) {
-      onOpenChange(false);
-      setForm(defaultForm);
+    setIsLoading(true); // start loading before API call
+
+    try {
+      const res = await createAppointment(form);
+      if (res) {
+        setForm(defaultForm);
+        onOpenChange(false);
+      }
+    } catch (error) {
+      console.error("Error creating appointment:", error);
+    } finally {
+      setIsLoading(false); // stop loading after API call
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -133,8 +144,19 @@ export default function CreateAppointmentDialog({ open, onOpenChange }: Props) {
             </div>
           </div>
 
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
-            Create Appointment
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-blue-600 hover:bg-blue-700"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              "Create Appointment"
+            )}
           </Button>
         </form>
       </DialogContent>
