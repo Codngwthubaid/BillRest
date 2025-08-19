@@ -43,7 +43,6 @@ export const useProductStore = create<ProductState>((set, get) => ({
     set({ loading: true });
     try {
       const data = await getAllProducts(); // returns { count, products }
-      console.log("Loaded all products:", data);
       set({ allProducts: data }); // ✅ fix: only store array of products
     } catch (err) {
       console.error("Fetch all products failed:", err);

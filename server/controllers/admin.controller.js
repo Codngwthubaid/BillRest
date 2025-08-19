@@ -144,15 +144,11 @@ export const updateClinicFeatures = async (req, res) => {
     const { id } = req.params;
     const { features } = req.body;
 
-    console.log("Received features to update:", features);
-
     const user = await User.findById(id);
 
     if (!user || user.role !== "clinic") {
       return res.status(404).json({ message: "Clinic not found" });
     }
-
-    console.log("Before update - existing features:", user.features);
 
     user.features = {
       ...user.features,
@@ -160,8 +156,6 @@ export const updateClinicFeatures = async (req, res) => {
     };
 
     await user.save();
-
-    console.log("After update - saved features:", user.features);
 
     res.json({
       message: "Clinic features updated successfully",
@@ -512,3 +506,294 @@ export const getAllClinics = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch clinics" });
   }
 }
+
+export const getReportForGeneral = async (req, res) => {
+    try {
+        const { filterType, startDate, endDate, email } = req.query;
+
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" });
+        }
+
+        // ✅ Find user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const userId = user._id;
+        let start, end;
+        const now = new Date();
+
+        switch (filterType) {
+            case "daily":
+                start = new Date(startDate);
+                start.setHours(0, 0, 0, 0);
+                end = new Date(start);
+                end.setHours(23, 59, 59, 999);
+                break;
+
+            case "weekly":
+                start = new Date(startDate);
+                start.setHours(0, 0, 0, 0);
+                end = new Date(start);
+                end.setDate(end.getDate() + 6);
+                end.setHours(23, 59, 59, 999);
+                break;
+
+            case "monthly":
+                start = new Date(startDate);
+                start.setDate(1);
+                start.setHours(0, 0, 0, 0);
+                end = new Date(start);
+                end.setMonth(end.getMonth() + 1);
+                end.setDate(0);
+                end.setHours(23, 59, 59, 999);
+                break;
+
+            case "quarterly":
+                const quarter = Math.floor((now.getMonth() + 3) / 3);
+                start = new Date(now.getFullYear(), (quarter - 1) * 3, 1);
+                start.setHours(0, 0, 0, 0);
+                end = new Date(start);
+                end.setMonth(end.getMonth() + 3);
+                end.setDate(0);
+                end.setHours(23, 59, 59, 999);
+                break;
+
+            case "yearly":
+                start = new Date(now.getFullYear(), 0, 1);
+                start.setHours(0, 0, 0, 0);
+                end = new Date(now.getFullYear() + 1, 0, 0);
+                end.setHours(23, 59, 59, 999);
+                break;
+
+            case "financial":
+                if (now.getMonth() < 3) {
+                    start = new Date(now.getFullYear() - 1, 3, 1);
+                    end = new Date(now.getFullYear(), 2, 31);
+                } else {
+                    start = new Date(now.getFullYear(), 3, 1);
+                    end = new Date(now.getFullYear() + 1, 2, 31);
+                }
+                start.setHours(0, 0, 0, 0);
+                end.setHours(23, 59, 59, 999);
+                break;
+
+            case "custom":
+                start = new Date(startDate);
+                start.setHours(0, 0, 0, 0);
+                end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                break;
+
+            default:
+                return res.status(400).json({ message: "Invalid filter type" });
+        }
+
+        // ✅ Fetch invoices for that specific user
+        const invoices = await Invoice.find({
+            user: userId,
+            createdAt: { $gte: start, $lte: end }
+        });
+
+        const totalSales = invoices.reduce((sum, inv) => sum + (inv.totalAmount || 0), 0);
+
+        // 🔍 Compute Top 5 Products
+        const productMap = {};
+        invoices.forEach((invoice) => {
+            invoice.products.forEach((item) => {
+                const name = item.name;
+                if (!productMap[name]) {
+                    productMap[name] = { name, quantity: 0, totalSales: 0 };
+                }
+                productMap[name].quantity += item.quantity;
+                productMap[name].totalSales += item.quantity * item.price;
+            });
+        });
+
+        const topProducts = Object.values(productMap)
+            .sort((a, b) => b.quantity - a.quantity)
+            .slice(0, 5);
+
+        res.json({
+            user: { id: user._id, email: user.email, name: user.name },
+            totalSales,
+            count: invoices.length,
+            topProducts,
+            invoices,
+        });
+
+    } catch (err) {
+        console.error("❌ Error generating admin report:", err);
+        res.status(500).json({ message: "Error generating admin report" });
+    }
+};
+
+export const getReportForHealth = async (req, res) => {
+    try {
+        const { filterType, startDate, endDate, email } = req.query;
+
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" });
+        }
+
+        // ✅ Find user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const userId = user._id;
+
+        let start, end;
+        const now = new Date();
+
+        switch (filterType) {
+            case "daily":
+                start = new Date(startDate);
+                start.setHours(0, 0, 0, 0);
+                end = new Date(start);
+                end.setHours(23, 59, 59, 999);
+                break;
+            case "weekly":
+                start = new Date(startDate);
+                start.setHours(0, 0, 0, 0);
+                end = new Date(start);
+                end.setDate(end.getDate() + 6);
+                end.setHours(23, 59, 59, 999);
+                break;
+            case "monthly":
+                start = new Date(startDate);
+                start.setDate(1);
+                start.setHours(0, 0, 0, 0);
+                end = new Date(start);
+                end.setMonth(end.getMonth() + 1);
+                end.setDate(0);
+                end.setHours(23, 59, 59, 999);
+                break;
+            case "quarterly":
+                const quarter = Math.floor((now.getMonth() + 3) / 3);
+                start = new Date(now.getFullYear(), (quarter - 1) * 3, 1);
+                start.setHours(0, 0, 0, 0);
+                end = new Date(start);
+                end.setMonth(end.getMonth() + 3);
+                end.setDate(0);
+                end.setHours(23, 59, 59, 999);
+                break;
+            case "yearly":
+                start = new Date(now.getFullYear(), 0, 1);
+                start.setHours(0, 0, 0, 0);
+                end = new Date(now.getFullYear() + 1, 0, 0);
+                end.setHours(23, 59, 59, 999);
+                break;
+            case "financial":
+                if (now.getMonth() < 3) {
+                    start = new Date(now.getFullYear() - 1, 3, 1);
+                    end = new Date(now.getFullYear(), 2, 31);
+                } else {
+                    start = new Date(now.getFullYear(), 3, 1);
+                    end = new Date(now.getFullYear() + 1, 2, 31);
+                }
+                start.setHours(0, 0, 0, 0);
+                end.setHours(23, 59, 59, 999);
+                break;
+            case "custom":
+                start = new Date(startDate);
+                start.setHours(0, 0, 0, 0);
+                end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                break;
+            default:
+                return res.status(400).json({ message: "Invalid filter type" });
+        }
+
+        // ✅ Fetch counts independently
+        const [appointments, patients, services, ipds] = await Promise.all([
+            Appointment.find({ clinic: userId }).populate("patient"),
+            Patient.find({ clinic: userId }),
+            Service.find({ clinic: userId }),
+            IPD.find({ clinic: userId })
+                .populate("clinic", "-password")
+                .populate("patient")
+                .populate("appointment")
+                .populate("treatments.service")
+        ]);
+
+        // 💰 Total revenue
+        const totalRevenue = ipds.reduce((sum, ipd) => sum + (ipd.billing.total || 0), 0);
+
+        // 📊 Top services from IPD
+        const serviceMap = {};
+        ipds.forEach(ipd => {
+            ipd.treatments.forEach(treatment => {
+                if (treatment.service && treatment.service.name) {
+                    const key = treatment.service.name;
+                    if (!serviceMap[key]) {
+                        serviceMap[key] = { name: key, quantity: 0, totalSales: 0 };
+                    }
+                    serviceMap[key].quantity += treatment.quantity;
+                    serviceMap[key].totalSales += (treatment.totalCharges || 0);
+                }
+            });
+        });
+        const topServices = Object.values(serviceMap)
+            .sort((a, b) => b.quantity - a.quantity)
+            .slice(0, 5);
+
+        // 🧑‍⚕️ Top patients by number of appointments
+        const patientMap = {};
+        appointments.forEach(app => {
+            if (app.patient && app.patient._id) {
+                const key = app.patient._id.toString();
+                if (!patientMap[key]) {
+                    patientMap[key] = {
+                        _id: app.patient._id,
+                        name: app.patient.name,
+                        phoneNumber: app.patient.phoneNumber,
+                        visits: 0
+                    };
+                }
+                patientMap[key].visits += 1;
+            }
+        });
+        const topPatients = Object.values(patientMap)
+            .sort((a, b) => b.visits - a.visits)
+            .slice(0, 5);
+
+        // 📅 Top appointments by type
+        const appointmentMap = {};
+        appointments.forEach(app => {
+            if (app.description) {  // or any other field like app.type
+                const key = app.description;
+                if (!appointmentMap[key]) {
+                    appointmentMap[key] = { description: key, count: 0 };
+                }
+                appointmentMap[key].count += 1;
+            }
+        });
+        const topAppointments = Object.values(appointmentMap)
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 5);
+
+        res.json({
+            user: { id: user._id, email: user.email, name: user.name },
+            totalRevenue,
+            count: ipds.length,
+            topServices,
+            ipds,
+            appointments,
+            patients,
+            services,
+            totalAppointments: appointments.length,
+            totalPatients: patients.length,
+            totalServices: services.length,
+            topPatients,
+            topAppointments
+        });
+
+    } catch (err) {
+        console.error("❌ Error generating admin health report:", err);
+        res.status(500).json({ message: "Error generating admin health report" });
+    }
+};

@@ -406,7 +406,7 @@ export const downloadInvoicePDF = async (req, res) => {
           productName = productDoc.name;
         }
       } catch (err) {
-        console.log(`Error fetching product ${item.product}:`, err.message);
+        console.error(`Error fetching product ${item.product}:`, err.message);
       }
       return {
         ...item.toObject(),
@@ -453,7 +453,7 @@ export const printInvoicePDF = async (req, res) => {
           productName = productDoc.name;
         }
       } catch (err) {
-        console.log(`Error fetching product ${item.product}:`, err.message);
+        console.error(`Error fetching product ${item.product}:`, err.message);
       }
       return {
         ...item.toObject(),

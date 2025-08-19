@@ -26,8 +26,6 @@ export default function InvoicesPage() {
     const { invoices, setInvoices, allInvoices, fetchAllInvoices } = useInvoiceStore();
     const { user } = useAuthStore();
 
-    console.log("InvoicesPage rendered", allInvoices);
-
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
     const [showDialog, setShowDialog] = useState(false);
@@ -53,9 +51,6 @@ export default function InvoicesPage() {
 
     const data = user?.role === "customer" ? invoices : allInvoices?.invoices ?? [];
     const uniqueEmails = Array.from(new Set(data.map(inv => inv.user?.email).filter(Boolean)));
-
-
-    console.log("Invoices data", allInvoices);
 
     const summary = {
         total: data.length,

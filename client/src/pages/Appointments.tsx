@@ -31,9 +31,6 @@ export default function Appointments() {
         deleteAppointment,
     } = useAppointmentStore();
 
-    console.log("All Appointments:", allAppointments);
-    console.log("Appointments:", appointments);
-
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
     const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);

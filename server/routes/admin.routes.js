@@ -14,7 +14,9 @@ import {
   updateTicketStatusForGeneral,
   getAllSupportTicketsForHealth,
   updateTicketStatusForHealth,
-  updateClinicFeatures
+  updateClinicFeatures,
+  getReportForGeneral,
+  getReportForHealth
 } from "../controllers/admin.controller.js";
 
 import { verifyToken, checkRole } from "../middlewares/auth.middleware.js";
@@ -38,9 +40,12 @@ router.get("/products", getAllProducts);
 router.get("/reports/sales", getGlobalSalesReport);
 router.get("/businesses/:id/overview", getBusinessOverview);
 router.get("/customers", getAllCutomers)
-
+router.get("/reports/general", getReportForGeneral)
+router.get("/reports/health", getReportForHealth)
 
 // not used
 router.put("/customers/:customerId/features", updateCustomerFeatures);
 
 export default router;
+
+

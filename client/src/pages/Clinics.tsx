@@ -23,8 +23,6 @@ export default function ClinicsPage() {
     fetchClinic,
   } = useClinicStore();
 
-  console.log("allClinics", allClinics);
-
   const { updateClinicFeaturesInStore } = useClinicStore()
   const [search, setSearch] = useState("");
   const [selectedEmail, setSelectedEmail] = useState("");

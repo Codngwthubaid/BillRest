@@ -30,8 +30,6 @@ export default function Plans() {
   const packagePlans = isCustomer ? packageGeneralPlans : isClinic ? packageHealthPlans : [];
   const individualPlans = isCustomer ? individualGeneralPlans : isClinic ? individualHealthPlans : [];
 
-  console.log("Package Plans:", packagePlans);
-
   useEffect(() => {
     if (isCustomer) {
       fetchPackageGeneralPlans();

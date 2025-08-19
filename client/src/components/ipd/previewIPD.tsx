@@ -14,8 +14,6 @@ export default function IPDPreview({ IPD }: IPDPreviewProps) {
   const { user } = useAuthStore();
   const { business } = useBusinessStore();
 
-  console.log(IPD)
-
   return (
     <div className="mx-auto bg-white rounded-lg text-sm font-sans">
       {/* Header */}

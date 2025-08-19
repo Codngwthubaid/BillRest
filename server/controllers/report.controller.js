@@ -81,7 +81,6 @@ export const getSalesReportForGeneral = async (req, res) => {
 
         const invoices = await Invoice.find({
             user: userId,
-            // createdAt: { $gte: start, $lte: end },
         });
         const totalSales = invoices.reduce((sum, inv) => sum + (inv.totalAmount || 0), 0);
 
@@ -190,19 +189,15 @@ export const getSalesReportForHealth = async (req, res) => {
         const [appointments, patients, services, ipds] = await Promise.all([
             Appointment.find({
                 clinic: userId,
-                // createdAt: { $gte: start, $lte: end }
             }).populate("patient"),
             Patient.find({
                 clinic: userId,
-                // createdAt: { $gte: start, $lte: end }
             }),
             Service.find({
                 clinic: userId,
-                // createdAt: { $gte: start, $lte: end }
             }),
             IPD.find({
                 clinic: userId,
-                // createdAt: { $gte: start, $lte: end }
             })
                 .populate("clinic", "-password")
                 .populate("patient")
@@ -265,21 +260,6 @@ export const getSalesReportForHealth = async (req, res) => {
         const topAppointments = Object.values(appointmentMap)
             .sort((a, b) => b.count - a.count)
             .slice(0, 5);
-
-        console.log({
-            totalRevenue,
-            count: ipds.length,
-            topServices,
-            ipds,
-            appointments,
-            patients,
-            services,
-            totalAppointments: appointments.length,
-            totalPatients: patients.length,
-            totalServices: services.length,
-            topPatients,
-            topAppointments
-        })
 
         res.json({
             totalRevenue,

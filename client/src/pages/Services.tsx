@@ -19,9 +19,6 @@ export default function Services() {
     allServices, fetchAllServices
   } = useServiceStore();
 
-
-  console.log("Services component rendered", allServices);
-
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedEmail, setSelectedEmail] = useState("");

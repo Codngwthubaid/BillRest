@@ -19,8 +19,6 @@ export default function ProductsPage() {
         allProducts, fetchAllProducts
     } = useProductStore();
 
-    console.log("All Products", allProducts)
-
     const [search, setSearch] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
     const [showCreateDialog, setShowCreateDialog] = useState(false);

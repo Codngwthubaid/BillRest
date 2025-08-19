@@ -5,8 +5,8 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import type { Business } from "@/types/business.types";
 import { useAuthStore } from "@/store/auth.store";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
-import ReportsForGeneral from "@/components/reports/ReportsForGeneral";
+// import { Button } from "@/components/ui/button";
+import ReportsForGeneralAdmin from "@/components/reports/ReportForGeneralAdmin";
 
 type BusinessWithUser = Business & {
   user: {
@@ -33,18 +33,16 @@ export default function Businesses() {
   const [selectedReportEmail, setSelectedReportEmail] = useState<string | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
 
-
-
-  console.log("Businesses component rendered", businesses);
-
   useEffect(() => {
     fetchAllBusinesses();
   }, [fetchAllBusinesses]);
 
-  const uniqueBusinessEmails = Array.from(new Set((businesses as BusinessWithUser[]).map(b => b.user?.email)));
+  const uniqueBusinessEmails = Array.from(
+    new Set((businesses as BusinessWithUser[]).map((b) => b.user?.email))
+  );
 
-  const filteredBusinesses = (businesses as BusinessWithUser[])
-    .filter((b) =>
+  const filteredBusinesses = (businesses as BusinessWithUser[]).filter(
+    (b) =>
       b.businessName.toLowerCase().includes(search.toLowerCase()) &&
       (selectedBusiness ? b.businessName === selectedBusiness : true) &&
       (selectedWAIStatus
@@ -52,7 +50,7 @@ export default function Businesses() {
           ? b.user?.features?.whatsappInvoice === true
           : b.user?.features?.whatsappInvoice === false
         : true)
-    );
+  );
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -60,7 +58,7 @@ export default function Businesses() {
       <p className="mb-6">Manage your business database</p>
 
       {/* Filters */}
-      <div className="flex  gap-4 mb-6">
+      <div className="flex gap-4 mb-6">
         <Input
           className="w-full"
           placeholder="Search by business name..."
@@ -75,7 +73,9 @@ export default function Businesses() {
         >
           <option value="">All Business Emails</option>
           {uniqueBusinessEmails.map((email) => (
-            <option key={email} value={email}>{email}</option>
+            <option key={email} value={email}>
+              {email}
+            </option>
           ))}
         </select>
 
@@ -109,7 +109,9 @@ export default function Businesses() {
           <TableBody>
             {filteredBusinesses.map((b, index) => (
               <TableRow key={b._id}>
-                <TableCell className="text-blue-600 font-semibold">{index + 1}</TableCell>
+                <TableCell className="text-blue-600 font-semibold">
+                  {index + 1}
+                </TableCell>
                 <TableCell>{b.user?.email}</TableCell>
                 <TableCell>{b.businessName}</TableCell>
                 <TableCell>{b.user?.name || "N/A"}</TableCell>
@@ -127,7 +129,9 @@ export default function Businesses() {
                     <Switch
                       checked={b.user?.features?.whatsappInvoice}
                       onCheckedChange={(checked) => {
-                        updateBusinessFeaturesInStore(b.user._id, { whatsappInvoice: checked });
+                        updateBusinessFeaturesInStore(b.user._id, {
+                          whatsappInvoice: checked,
+                        });
                       }}
                     />
                   </TableCell>
@@ -149,6 +153,7 @@ export default function Businesses() {
         </Table>
       </div>
 
+      {/* Report Modal */}
       {showReportModal && selectedReportEmail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white dark:bg-gray-900 p-6 rounded-md max-h-[90vh] w-[95vw] overflow-y-auto relative">
@@ -159,11 +164,12 @@ export default function Businesses() {
               ✖
             </button>
 
-            <ReportsForGeneral />
+            {user?.role === "master" && (
+              <ReportsForGeneralAdmin />
+            )}
           </div>
         </div>
       )}
-
     </div>
   );
 }

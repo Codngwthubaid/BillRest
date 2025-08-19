@@ -17,8 +17,6 @@ export default function PatientDetailsDialog({
     return null;
   }
 
-console.log(patient);
-
   return (
     <Dialog open={!!(patient && patient._id)}>
       <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose} />

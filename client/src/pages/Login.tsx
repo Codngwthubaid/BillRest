@@ -44,7 +44,6 @@ export default function Login() {
       login(res.user, res.token);
 
       const subscription = await getUserSubscription();
-      console.log("Fetched subscription:", subscription);
       setSubscription(subscription);
       toast.success("Logged in successfully");
 

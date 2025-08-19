@@ -150,7 +150,6 @@ export const useIPDStore = create<IPDState>((set) => ({
     set({ loading: true, error: null });
     try {
       const ipds = await getAllIPDs();
-      console.log("Fetched all IPDs:", ipds);
       set({ allIPDs: ipds });
     } catch (err: any) {
       set({ error: err.message || "Failed to fetch all IPDs" });

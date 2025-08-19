@@ -47,9 +47,9 @@ import { StatusChartForRevenue } from '@/components/reports/StatusChartForRevenu
 import { RevenueChart } from '@/components/reports/RevenueChart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
 
-export default function ReportsForGeneral() {
+export default function ReportsForGeneralAdmin() {
     const [isLoading, setIsLoading] = useState(true)
-    const { generalReport: data, loading, fetchGeneralReport: fetchReport } = useReportStore();
+    const { generalReport: data, loading, fetchAdminGeneralReport: fetchReport } = useReportStore();
     const [filterType, setFilterType] = useState<ReportFilterType>('monthly');
     const [startDate, setStartDate] = useState<string>(
         new Date().toISOString().split('T')[0]

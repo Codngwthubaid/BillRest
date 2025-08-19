@@ -25,8 +25,6 @@ export default function Patients() {
 
   const { user } = useAuthStore();
 
-  console.log("Patients component rendered with user:", allPatients);
-
   const [search, setSearch] = useState("");
   const [showPinDialog, setShowPinDialog] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);

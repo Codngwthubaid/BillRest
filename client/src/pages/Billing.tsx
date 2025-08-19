@@ -32,9 +32,6 @@ export default function Billing() {
 
   const previewRef = useRef<HTMLDivElement>(null);
 
-
-  console.log("Billing page rendered", allIPDs);
-
   const isClinic = user?.role === "clinic";
   const isSupportOrMaster = user?.role === "support" || user?.role === "master";
 

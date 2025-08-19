@@ -29,8 +29,6 @@ export default function CustomerPage() {
         submitTicket,
     } = useSupportStore();
 
-    console.log(tickets)
-
     useEffect(() => {
         fetchTickets();
         const timer = setTimeout(() => {

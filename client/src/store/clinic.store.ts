@@ -25,7 +25,6 @@ export const useClinicStore = create<ClinicStore>((set, get) => {
     set({ loading: true, error: null });
     try {
       const clinic = await getClinic();
-      console.log("Loaded clinic:", clinic);
       set({ clinic, loading: false });
     } catch (err: any) {
       console.error("Failed to load clinic:", err);
@@ -59,7 +58,6 @@ export const useClinicStore = create<ClinicStore>((set, get) => {
       set({ loading: true, error: null });
       try {
         const { clinic } = await upsertClinic(data);
-        console.log("Saved clinic profile:", clinic);
         set({ clinic, loading: false });
       } catch (err: any) {
         console.error("Failed to save clinic profile:", err);
@@ -78,48 +76,6 @@ export const useClinicStore = create<ClinicStore>((set, get) => {
       }
     },
 
-    // updateClinicFeaturesInStore: async (userId: string, features: any) => {
-    //   set({ loading: true, error: null });
-    //   try {
-    //     const data = await updateClinicFeatures(userId, features);
-
-    //     const updatedClinics = get().allClinics?.clinics.map((c: any) =>
-    //       c.user?._id === userId
-    //         ? {
-    //           ...c,
-    //           user: {
-    //             ...c.user,
-    //             features: data.features,
-    //           },
-    //         }
-    //         : c
-    //     ) || [];
-
-    //     const currentClinic = get().clinic;
-    //     const updatedClinic =
-    //       currentClinic?.user?._id === userId
-    //         ? {
-    //           ...currentClinic,
-    //           user: {
-    //             ...currentClinic.user,
-    //             features: data.features,
-    //           },
-    //         }
-    //         : currentClinic;
-
-    //     set({
-    //       allClinics: { clinics: updatedClinics },
-    //       clinic: updatedClinic,
-    //       loading: false,
-    //     });
-    //   } catch (err: any) {
-    //     console.error("Failed to update clinic features:", err);
-    //     set({
-    //       error: err.message || "Failed to update clinic features",
-    //       loading: false,
-    //     });
-    //   }
-    // }
     updateClinicFeaturesInStore: async (userId: string, newFeatures: any) => {
       set({ loading: true, error: null });
 

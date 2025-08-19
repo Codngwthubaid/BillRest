@@ -12,7 +12,7 @@ import UserProfileDetailsForHealth from "@/components/profile/UserProfileDetails
 export default function ProfilePage() {
     const [isLoading, setIsLoading] = useState(true)
     const { user } = useAuthStore()
-    console.log(user)
+
     useEffect(() => {
         const timer = setTimeout(() => {
             setIsLoading(false);

@@ -374,7 +374,7 @@ export const printIPDPDF = async (req, res) => {
           serviceName = item.service.name;
         }
       } catch (err) {
-        console.log(`Error fetching service name:`, err.message);
+        console.error(`Error fetching service name:`, err.message);
       }
       return {
         ...item.toObject(),

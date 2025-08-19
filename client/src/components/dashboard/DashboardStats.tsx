@@ -35,8 +35,6 @@ export default function DashboardStats() {
   const { allServices, fetchAllServices } = useServiceStore();
   const { allAppointments, fetchAllAppointments } = useAppointmentStore();
 
-  console.log("Health Report", generalReport);
-
   useEffect(() => {
     fetchGeneralReport("monthly", new Date().toISOString().split("T")[0]);
     fetchHealthReport("monthly", new Date().toISOString().split("T")[0]);

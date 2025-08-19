@@ -26,7 +26,6 @@ import ClinicsPage from "./pages/Clinics";
 
 export default function App() {
   const { user } = useAuthStore();
-  console.log(user);
 
   return (
     <Router>

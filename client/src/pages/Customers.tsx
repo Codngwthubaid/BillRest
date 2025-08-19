@@ -15,9 +15,6 @@ import { useAuthStore } from "@/store/auth.store";
 export default function CustomerPage() {
     const { customers, allCustomers, loading, fetchCustomers, fetchAllCustomers, deleteCustomer } = useCustomerStore();
 
-    console.log("All customers:", allCustomers);
-
-
     const { user } = useAuthStore();
     const [search, setSearch] = useState("");
     const [showPinDialog, setShowPinDialog] = useState(false);
@@ -32,9 +29,6 @@ export default function CustomerPage() {
     const customerList = user?.role === "customer" ? customers : allCustomers;
     const uniqueEmails = Array.from(new Set((customerList ?? []).map(c => c.user?.email).filter(Boolean)));
     const uniqueStates = Array.from(new Set((customerList ?? []).map(c => c.state).filter(Boolean)));
-
-    console.log("All customers:", allCustomers);
-    console.log("customers:", customers);
 
     // handle fetching by role
     useEffect(() => {

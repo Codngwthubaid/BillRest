@@ -8,7 +8,6 @@ export const createIPD = async (data: IPDInput): Promise<IPDResponse> => {
 
 export const getIPDs = async (): Promise<IPDResponse[]> => {
   const res = await axiosInstance.get("/ipd");
-  console.log("Loaded IPDs:", res.data);
   return res.data;
 };
 
@@ -48,6 +47,5 @@ export const printIPDPDF = async (id: string): Promise<Blob> => {
 
 export const getAllIPDs = async (): Promise<IPDResponse[]> => {
   const res = await axiosInstance.get("/ipd/all");
-  console.log("Loaded All IPDs:", res.data);
   return res.data;
 }
