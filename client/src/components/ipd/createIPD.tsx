@@ -116,72 +116,7 @@ export default function CreateIPDDialog({ open, onOpenChange }: Props) {
     await createIPDRecord(submitForm);
     onOpenChange(false);
     setForm({ ...defaultForm, treatments: [] });
-    // setActionDialogOpen(true);
   };
-
-  // const safePrint = () => {
-  //   requestAnimationFrame(() => {
-  //     requestAnimationFrame(() => handlePrint());
-  //   });
-  // };
-
-  // const handlePrintA4 = () => {
-  //   setPreviewType("A4");
-  //   safePrint();
-  // };
-
-  // const previewIPD: IPDResponse = {
-  //   _id: "",
-  //   ipdNumber: "PREVIEW",
-  //   patient: {
-  //     _id: form.patientId,
-  //     name: appointments.find((appt) => appt._id === form.appointmentId)?.patient.name || "",
-  //     phoneNumber: appointments.find((appt) => appt._id === form.appointmentId)?.patient.phoneNumber || "",
-  //     age: appointments.find((appt) => appt._id === form.appointmentId)?.patient.age || 0,
-  //     gender: appointments.find((appt) => appt._id === form.appointmentId)?.patient.gender || "",
-  //     address: appointments.find((appt) => appt._id === form.appointmentId)?.patient.address || "",
-  //   },
-  //   clinic: "",
-  //   appointment: form.appointmentId,
-  //   isNewPatient: form.isNewPatient || false,
-  //   admissionDate: form.admissionDate || new Date().toISOString(),
-  //   bedNumber: form.bedNumber,
-  //   treatments: (form.treatments || []).map((t: FormTreatmentInput) => ({
-  //     service: {
-  //       _id: t.service,
-  //       name: services.find((s) => s._id === t.service)?.name || "",
-  //       price: t.price,
-  //       gstRate: t.gstRate,
-  //       category: t.category,
-  //     },
-  //     quantity: t.quantity,
-  //     totalCharges: t.price * t.quantity,
-  //   })),
-  //   billing: {
-  //     bedCharges: form.bedCharges || 0,
-  //     serviceCharges: (form.treatments || []).reduce(
-  //       (sum, t: FormTreatmentInput) => sum + t.price * t.quantity,
-  //       0
-  //     ),
-  //     otherCharges: form.otherCharges || [],
-  //     grantsOrDiscounts: form.grantsOrDiscounts || 0,
-  //     totalBeforeDiscount:
-  //       (form.bedCharges || 0) +
-  //       (form.treatments || []).reduce((sum, t: FormTreatmentInput) => sum + t.price * t.quantity, 0) +
-  //       (form.otherCharges || []).reduce((sum, oc) => sum + oc.amount, 0),
-  //     finalAmount:
-  //       (form.bedCharges || 0) +
-  //       (form.treatments || []).reduce((sum, t: FormTreatmentInput) => sum + t.price * t.quantity, 0) +
-  //       (form.otherCharges || []).reduce((sum, oc) => sum + oc.amount, 0) -
-  //       (form.grantsOrDiscounts || 0),
-  //     paidAmount: 0,
-  //     paymentStatus: "pending",
-  //   },
-  //   paymentStatus: "pending",
-  //   status: "Admitted",
-  //   createdAt: new Date().toISOString(),
-  //   updatedAt: new Date().toISOString(),
-  // };
 
   return (
     <>
@@ -203,9 +138,9 @@ export default function CreateIPDDialog({ open, onOpenChange }: Props) {
                       <SelectValue placeholder="Select appointment by patient name" />
                     </SelectTrigger>
                     <SelectContent>
-                      {appointments.map((appt) => (
+                      {appointments.length > 0 && appointments.map((appt) => (
                         <SelectItem key={appt._id} value={appt._id}>
-                          {appt.patient.name} / {appt.appointmentNumber}
+                          {(appt.patient?.name || "Unknown Patient")} / {appt.appointmentNumber}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -268,7 +203,7 @@ export default function CreateIPDDialog({ open, onOpenChange }: Props) {
                           <SelectValue placeholder="Select service" />
                         </SelectTrigger>
                         <SelectContent>
-                          {services.map((svc) => (
+                          {services.length > 0 && services.map((svc) => (
                             <SelectItem key={svc._id} value={svc._id}>
                               {svc.name} / {svc.category || "N/A"}
                             </SelectItem>

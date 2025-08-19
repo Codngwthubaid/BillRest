@@ -177,7 +177,7 @@ export default function UpdateIPD({ open, onOpenChange, ipd, onUpdate }: Props) 
                     <SelectContent>
                       {appointments.map((appt) => (
                         <SelectItem key={appt._id} value={appt._id}>
-                          {appt.patient.name} / {appt.appointmentNumber}
+                          {(appt.patient?.name || "Unknown")} / {appt.appointmentNumber}
                         </SelectItem>
                       ))}
                     </SelectContent>
