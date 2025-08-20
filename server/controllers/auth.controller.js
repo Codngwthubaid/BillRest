@@ -6,6 +6,19 @@ const generateToken = (user) =>
         expiresIn: "7d",
     });
 
+export const getUserSubscription = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).populate("subscription.plan");
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json({ subscription: user.subscription });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
 export const register = async (req, res) => {
     try {
         const { name, email, phone, password, type } = req.body;
@@ -23,16 +36,19 @@ export const register = async (req, res) => {
         }
 
         let role = "customer";
+        let finalType = type;
 
         if (isMaster) {
             role = "master";
+            finalType = "billrest_master";
         } else if (isSupport) {
             role = "support";
+            finalType = "billrest_support";
         } else if (type === "billrest_health") {
             role = "clinic";
         }
 
-        const user = new User({ name, email, phone, password, role, type });
+        const user = new User({ name, email, phone, password, role, type: finalType });
         await user.save();
 
         res.status(201).json({
@@ -51,8 +67,6 @@ export const register = async (req, res) => {
     }
 };
 
-
-
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -65,8 +79,10 @@ export const login = async (req, res) => {
         // Admin role override
         if (email === process.env.MASTER_ADMIN_EMAIL) {
             user.role = "master";
+            user.type = "billrest_master";
         } else if (email === process.env.SUPPORT_ADMIN_EMAIL) {
             user.role = "support";
+            user.type = "billrest_support";
         } else {
             // Only for non-admins: ensure a valid type is present
             if (!["billrest_general", "billrest_health"].includes(user.type)) {
@@ -87,20 +103,6 @@ export const login = async (req, res) => {
                 type: user.type,
             },
         });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-};
-
-
-export const getUserSubscription = async (req, res) => {
-    try {
-        const user = await User.findById(req.user.id).populate("subscription.plan");
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        res.json({ subscription: user.subscription });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
