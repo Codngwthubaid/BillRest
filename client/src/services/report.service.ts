@@ -46,15 +46,17 @@ export const getSalesReportForHealth = async (
 export const getAdminSalesReportForGeneral = async (
   filterType: ReportFilterType,
   startDate: string,
-  endDate?: string
+  endDate?: string,
+  email?: string   // <-- add email param
 ): Promise<SalesReportResponse> => {
   const queryParams = new URLSearchParams({
     filterType,
     startDate,
     ...(endDate ? { endDate } : {}),
+    ...(email ? { email } : {}),  // <-- include only if provided
   });
 
-  const res = await axiosInstance.get(`/admin/reports/general/?${queryParams}`);
+  const res = await axiosInstance.get(`/admin/reports/general?${queryParams.toString()}`);
   return res.data;
 };
 
@@ -62,14 +64,16 @@ export const getAdminSalesReportForGeneral = async (
 export const getAdminSalesReportForHealth = async (
   filterType: ReportFilterType,
   startDate: string,
-  endDate?: string
+  endDate?: string,
+  email?: string   // <-- add email param
 ): Promise<HealthSalesReport> => {
   const queryParams = new URLSearchParams({
     filterType,
     startDate,
     ...(endDate ? { endDate } : {}),
+    ...(email ? { email } : {}),  // <-- include only if provided
   });
 
-  const res = await axiosInstance.get(`/admin/reports/health/?${queryParams}`);
+  const res = await axiosInstance.get(`/admin/reports/health?${queryParams.toString()}`);
   return res.data;
 };

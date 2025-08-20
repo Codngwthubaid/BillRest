@@ -99,7 +99,7 @@ export default function Register() {
                 </p>
               )}
             </div>
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+            <Button type="submit" className="cursor-pointer w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
               {isSubmitting ? "Registering..." : "Register"}
             </Button>
             <p className="text-center text-sm text-muted-foreground">

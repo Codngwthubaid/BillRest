@@ -24,10 +24,10 @@ export function DeleteAppointmentDialog({
           Are you sure you want to delete appointment for <strong>{patientName}</strong>?
         </p>
         <DialogFooter className="mt-4">
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} className="cursor-pointer">
             Cancel
           </Button>
-          <Button variant="destructive" onClick={onConfirmDelete}>
+          <Button variant="destructive" onClick={onConfirmDelete} className="cursor-pointer">
             Delete
           </Button>
         </DialogFooter>

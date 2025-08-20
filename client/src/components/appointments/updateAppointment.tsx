@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAppointmentStore } from "@/store/appointment.store";
 import type { Appointment, UpdateAppointmentPayload } from "@/types/appointment.types";
+import { Loader2 } from "lucide-react"; // 👈 spinner icon
 
 interface Props {
   open: boolean;
@@ -18,6 +19,7 @@ export default function UpdateAppointmentDialog({
   onClose,
 }: Props) {
   const [form, setForm] = useState<UpdateAppointmentPayload>({});
+  const [loading, setLoading] = useState(false); // 👈 loader state
   const { updateAppointment, fetchAppointments } = useAppointmentStore();
 
   useEffect(() => {
@@ -38,13 +40,17 @@ export default function UpdateAppointmentDialog({
     }
   }, [appointment]);
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!appointment?._id) return;
-    await updateAppointment(appointment._id, form);
-    await fetchAppointments();
-    onClose();
+    setLoading(true);
+    try {
+      await updateAppointment(appointment._id, form);
+      await fetchAppointments();
+      onClose();
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -55,6 +61,7 @@ export default function UpdateAppointmentDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Patient Details */}
           <div className="bg-gray-50 p-4 rounded-xl shadow space-y-4">
             <h3 className="text-lg font-medium mb-2">Patient Details</h3>
             <div className="grid grid-cols-2 gap-4">
@@ -95,6 +102,7 @@ export default function UpdateAppointmentDialog({
             </div>
           </div>
 
+          {/* Appointment Details */}
           <div className="bg-gray-50 p-4 rounded-xl shadow space-y-4">
             <h3 className="text-lg font-medium mb-2">Appointment Details</h3>
             <Input
@@ -141,8 +149,20 @@ export default function UpdateAppointmentDialog({
             </div>
           </div>
 
-          <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
-            Update Appointment
+          {/* Submit Button with Loader */}
+          <Button
+            type="submit"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 cursor-pointer"
+            disabled={loading}
+          >
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Updating...
+              </div>
+            ) : (
+              "Update Appointment"
+            )}
           </Button>
         </form>
       </DialogContent>

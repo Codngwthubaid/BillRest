@@ -104,7 +104,7 @@ export default function Login() {
                 </p>
               )}
             </div>
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 cursor-pointer" disabled={isSubmitting}>
               {isSubmitting ? "Logging in..." : "Login"}
             </Button>
             <p className="text-center text-sm text-muted-foreground">

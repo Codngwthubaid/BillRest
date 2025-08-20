@@ -5,7 +5,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import type { Business } from "@/types/business.types";
 import { useAuthStore } from "@/store/auth.store";
 import { Switch } from "@/components/ui/switch";
-// import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import ReportsForGeneralAdmin from "@/components/reports/ReportForGeneralAdmin";
 
 type BusinessWithUser = Business & {
@@ -32,6 +32,7 @@ export default function Businesses() {
   const [selectedWAIStatus, setSelectedWAIStatus] = useState("");
   const [selectedReportEmail, setSelectedReportEmail] = useState<string | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
+
 
   useEffect(() => {
     fetchAllBusinesses();

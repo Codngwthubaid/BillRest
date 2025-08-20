@@ -147,7 +147,7 @@ export default function CreateAppointmentDialog({ open, onOpenChange }: Props) {
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700"
+            className="cursor-pointer w-full bg-blue-600 hover:bg-blue-700"
           >
             {isLoading ? (
               <>

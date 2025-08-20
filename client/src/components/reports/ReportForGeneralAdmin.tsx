@@ -39,7 +39,7 @@ import {
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatsCard } from '@/components/reports/StatsCard';
-import { TopProductCard } from '@/components/reports/TopProductCard';
+import { TopProductCardAdmin } from '@/components/reports/TopProductCardAdmin';
 import { InvoiceStatusBadge } from '@/components/reports/InvoiceStatusBadge';
 import { SalesChart } from '@/components/reports/SalesChart';
 import { ProductsChart } from '@/components/reports/ProductsChart';
@@ -57,9 +57,30 @@ export default function ReportsForGeneralAdmin() {
     const [endDate, setEndDate] = useState<string>('');
     const [isRefreshing, setIsRefreshing] = useState(false);
 
+    console.log("Report Data:", data)
+
+    // useEffect(() => {
+    //     fetchReport(filterType, startDate, endDate || undefined);
+    // }, [filterType, startDate, endDate, fetchReport]);
+
     useEffect(() => {
-        fetchReport(filterType, startDate, endDate || undefined);
+        // compute date range if not custom
+        let start = startDate;
+        let end = endDate;
+
+        if (filterType === 'monthly') {
+            const d = new Date(startDate);
+            const firstDay = new Date(d.getFullYear(), d.getMonth(), 1);
+            const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+
+            start = firstDay.toISOString().split('T')[0];
+            end = lastDay.toISOString().split('T')[0];
+        }
+
+        // you can later replace hardcoded email with logged-in admin's email
+        fetchReport(filterType, start, end, "c1@billmint.com");
     }, [filterType, startDate, endDate, fetchReport]);
+
 
     const handleRefresh = async () => {
         setIsRefreshing(true);
@@ -314,11 +335,12 @@ export default function ReportsForGeneralAdmin() {
                             {data.topProducts.length > 0 ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {data.topProducts.map((product, index) => (
-                                        <TopProductCard
-                                            key={index}
-                                            product={product}
-                                            rank={index + 1}
-                                            currency={data.invoices[0]?.currency || 'USD'}
+                                        <TopProductCardAdmin
+                                            product={p}
+                                            rank={i + 1}
+                                            currency="USD"
+                                            userEmail={adminGeneralReport.user.email}
+                                            userName={adminGeneralReport.user.name}
                                         />
                                     ))}
                                 </div>

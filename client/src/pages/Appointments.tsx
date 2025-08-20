@@ -123,7 +123,7 @@ export default function Appointments() {
                     <>
                         <Button
                             onClick={() => setShowCreateDialog(true)}
-                            className="bg-blue-600 hover:bg-blue-700"
+                            className="bg-blue-600 hover:bg-blue-700 cursor-pointer"
                         >
                             + Create Appointment
                         </Button>
@@ -220,6 +220,7 @@ export default function Appointments() {
                             )}
                             <th className="p-4">Appointment ID</th>
                             <th className="p-4">Patient</th>
+                            <th className="p-4">Age</th>
                             <th className="p-4">Status</th>
                             <th className="p-4">Created At</th>
                             {role === "clinic" && <th className="p-4">Actions</th>}
@@ -249,6 +250,9 @@ export default function Appointments() {
                                         {app.patient?.phoneNumber}
                                     </div>
                                 </td>
+                                <td className="p-4">
+                                    <div>{app.patient?.age}</div>
+                                </td>
                                 <td className="p-4">{getStatusBadge(app.status)}</td>
                                 <td className="p-4">{app.createdAt?.slice(0, 10)}</td>
                                 {role === "clinic" && (
@@ -259,7 +263,7 @@ export default function Appointments() {
                                                 setShowUpdateDialog(true);
                                             }}
                                         >
-                                            <PenLine className="w-4 h-4 text-emerald-600 hover:scale-110" />
+                                            <PenLine className="w-4 h-4 text-emerald-600 hover:scale-110 cursor-pointer" />
                                         </button>
                                         <button
                                             onClick={() => {
@@ -267,7 +271,7 @@ export default function Appointments() {
                                                 setShowDeleteDialog(true);
                                             }}
                                         >
-                                            <Trash className="w-4 h-4 text-red-600 hover:scale-110" />
+                                            <Trash className="w-4 h-4 text-red-600 hover:scale-110 cursor-pointer" />
                                         </button>
                                     </td>
                                 )}
