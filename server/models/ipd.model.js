@@ -21,7 +21,6 @@ const treatmentSchema = new mongoose.Schema({
 });
 
 const billingSchema = new mongoose.Schema({
-  bedCharges: { type: Number, default: 0 },
   serviceCharges: { type: Number, default: 0 },
   otherCharges: [
     {
@@ -61,8 +60,9 @@ const ipdSchema = new mongoose.Schema(
       default: Date.now,
     },
     dischargeDate: Date,
-    bedNumber: {
-      type: String,
+    bed: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Bed",
       required: true,
     },
     treatments: [treatmentSchema],
