@@ -13,7 +13,8 @@ import {
     SquareUserRound,
     ListOrdered,
     Receipt,
-    Hospital
+    Hospital,
+    Bed
 } from "lucide-react";
 
 export const items = {
@@ -79,6 +80,11 @@ export const items = {
             title: "Patients",
             href: "/patients",
             icon: SquareUserRound
+        },
+        {
+            title: "Beds",
+            href: "/beds",
+            icon: Bed
         },
         {
             title: "Services",

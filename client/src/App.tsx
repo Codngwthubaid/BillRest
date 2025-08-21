@@ -16,6 +16,8 @@ import ProtectedPinRoute from "./routes/ProtectedPinRoute";
 import CustomerPage from "./pages/Customers";
 import BusinessPage from "./pages/Businesses";
 import NotFoundPage from "./pages/NotFound404";
+import Bed from "./pages/Bed";
+
 
 import { useAuthStore } from "./store/auth.store";
 import Appointments from "./pages/Appointments";
@@ -23,9 +25,11 @@ import Billing from "./pages/Billing";
 import Services from "./pages/Services";
 import Patients from "./pages/Patients";
 import ClinicsPage from "./pages/Clinics";
+import { useSubscriptionStore } from "./store/subscription.store";
 
 export default function App() {
   const { user } = useAuthStore();
+  const { currentSubscription } = useSubscriptionStore();
 
   return (
     <Router>
@@ -61,6 +65,7 @@ export default function App() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/appointments" element={<Appointments />} />
                 <Route path="/" element={<Dashboard />} />
+                {currentSubscription?.plan?.role === "Hospital" && <Route path="/beds" element={<Bed />} />}
                 <Route path="/billings" element={<Billing />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/patients" element={<Patients />} />

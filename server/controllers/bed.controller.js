@@ -1,6 +1,5 @@
 import { Bed } from "../models/bed.model.js";
 
-// ✅ Add a new bed
 export const addBed = async (req, res) => {
   try {
     const { clinic, roomNumber, bedNumber, bedCharges } = req.body;
@@ -24,7 +23,6 @@ export const addBed = async (req, res) => {
   }
 };
 
-// ✅ Update a bed
 export const updateBed = async (req, res) => {
   try {
     const { id } = req.params;
@@ -46,7 +44,6 @@ export const updateBed = async (req, res) => {
   }
 };
 
-// ✅ Delete a bed
 export const deleteBed = async (req, res) => {
   try {
     const { id } = req.params;
@@ -61,4 +58,29 @@ export const deleteBed = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Error deleting bed", error: error.message });
   }
+};
+
+
+export const getAllBeds = async (req, res) => {
+    try {
+        const beds = await Bed.find().sort({ createdAt: -1 });
+        res.status(200).json(beds);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching beds", error: error.message });
+    }
+};
+
+export const getBedById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const bed = await Bed.findById(id);
+
+        if (!bed) {
+            return res.status(404).json({ message: "Bed not found" });
+        }
+
+        res.status(200).json(bed);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching bed", error: error.message });
+    }
 };
