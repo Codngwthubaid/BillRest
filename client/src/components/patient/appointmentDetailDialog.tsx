@@ -1,19 +1,23 @@
 import { X } from 'lucide-react';
 import { Dialog } from '../ui/dialog';
-import type { PatientVisitSummary } from '../../types/patient.types';
+import type { PatientVisitSummary, Patient } from '../../types/patient.types';
 
 interface AppointmentDetailDialogProps {
   appointment: PatientVisitSummary | null;
+  patient: Patient | null; // ✅ added
   onClose: () => void;
 }
 
 export default function AppointmentDetailDialog({
   appointment,
+  patient,
   onClose,
 }: AppointmentDetailDialogProps) {
   if (!appointment || !appointment._id) {
     return null;
   }
+
+  console.log(patient);
 
   return (
     <Dialog open={true}>
@@ -41,29 +45,47 @@ export default function AppointmentDetailDialog({
 
           {/* Content */}
           <div className="p-6 space-y-4">
-            <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-600">Status:</span>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  appointment.status === 'Admitted'
-                    ? 'bg-green-100 text-green-800'
-                    : appointment.status === 'Pending'
-                    ? 'bg-orange-100 text-orange-800'
-                    : 'bg-gray-100 text-gray-800'
-                }`}
-              >
-                {appointment.status}
-              </span>
-            </div>
+            {/* Patient Info */}
+            {patient && (
+              <div className="p-4 bg-gray-100 rounded-lg space-y-2">
+                <p className="text-sm text-gray-700">
+                  <strong>Patient:</strong> {patient.name}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <strong>Phone:</strong> {patient.phoneNumber}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <strong>Address:</strong> {patient.address}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <strong>Age:</strong> {patient.age}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <strong>Gender:</strong> {patient.gender}
+                </p>
 
-            <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-600">Created At:</span>
-              <span className="text-lg font-semibold text-gray-900">
-                {appointment.createdAt.slice(0, 10)}
-              </span>
-            </div>
+                {/* Appointment-specific history */}
+                <div className='space-y-2'>
+                  {patient.history && patient.history.length > 0 ? (
+                    patient.history
+                      .filter((h) => h.appointmentId === appointment._id)
+                      .map((h, index) => (
+                        <div key={index}>
+                          <p className="text-sm text-gray-700">
+                            <strong>Status:</strong> {h.status}
+                          </p>
+                          <p className="text-sm text-gray-700">
+                            <strong>Description:</strong> {h.description}
+                          </p>
+                        </div>
+                      ))
+                  ) : (
+                    <p className="text-sm text-gray-500">No history available for this appointment.</p>
+                  )}
+                </div>
+              </div>
+            )}
 
-            {/* You can add more appointment-related details here if available */}
           </div>
 
           {/* Footer */}
@@ -80,3 +102,5 @@ export default function AppointmentDetailDialog({
     </Dialog>
   );
 }
+
+

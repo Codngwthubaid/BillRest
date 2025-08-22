@@ -5,7 +5,7 @@ import type { Patient, PatientVisitSummary } from '@/types/patient.types';
 interface PatientDetailsDialogProps {
   patient: Patient | null;
   onClose: () => void;
-  onSelectVisit: (visit: PatientVisitSummary) => void;
+  onSelectVisit: (data: { visit: PatientVisitSummary; patient: Patient }) => void; // ✅ updated
 }
 
 export default function PatientDetailsDialog({
@@ -46,7 +46,7 @@ export default function PatientDetailsDialog({
                 {patient.visits.map((visit, index) => (
                   <div
                     key={visit._id || index}
-                    onClick={() => onSelectVisit(visit)}
+                    onClick={() => onSelectVisit({ visit, patient })} // ✅ passing patient & visit
                     className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                   >
                     <div className="flex items-center justify-between">
@@ -60,7 +60,7 @@ export default function PatientDetailsDialog({
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-500">
-                          {typeof visit.createdAt === "string" ? visit.createdAt.slice(0, 10) : ""}
+                          {typeof visit.createdAt === 'string' ? visit.createdAt.slice(0, 10) : ''}
                         </p>
                       </div>
                     </div>
@@ -88,3 +88,5 @@ export default function PatientDetailsDialog({
     </Dialog>
   );
 }
+
+

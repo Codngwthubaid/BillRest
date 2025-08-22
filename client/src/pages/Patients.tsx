@@ -3,6 +3,7 @@ import { usePatientStore } from "@/store/patient.store";
 import { exportToCSV } from "@/lib/exportCsv";
 import type { Patient } from "@/types/patient.types";
 import type { Appointment } from "@/types/appointment.types";
+import type { PatientVisitSummary } from "@/types/patient.types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { parseISO, isSameMonth } from "date-fns";
@@ -31,8 +32,14 @@ export default function Patients() {
   const [selectedEmail, setSelectedEmail] = useState("");
   const [selectedPhone, setSelectedPhone] = useState("");
   const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
+
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<PatientVisitSummary | null>(null);
+
+  const handleSelectVisit = ({ visit, patient }: { visit: PatientVisitSummary; patient: Patient }) => {
+    setSelectedAppointment(visit);
+    setSelectedPatient(patient);
+  };
 
   const isClinic = user?.role === "clinic";
   const isAdmin = user?.role === "support" || user?.role === "master";
@@ -43,15 +50,8 @@ export default function Patients() {
       ? patients
       : [];
 
-
-  const uniqueEmails = Array.from(
-    new Set(patientList.map((p) => p.clinic?.email).filter(Boolean))
-  );
-
-  const uniquePhones = Array.from(
-    new Set(patientList.map((p) => p.phoneNumber).filter(Boolean))
-  );
-
+  const uniqueEmails = Array.from(new Set(patientList.map((p) => p.clinic?.email).filter(Boolean)));
+  const uniquePhones = Array.from(new Set(patientList.map((p) => p.phoneNumber).filter(Boolean)));
 
   useEffect(() => {
     if (isAdmin) {
@@ -87,9 +87,7 @@ export default function Patients() {
   const activeThisMonth = patientList.filter(
     (patient) =>
       Array.isArray(patient.appointments) &&
-      patient.appointments.some((a: any) =>
-        isSameMonth(parseISO(a.createdAt), currentMonth)
-      )
+      patient.appointments.some((a: any) => isSameMonth(parseISO(a.createdAt), currentMonth))
   ).length;
 
   return (
@@ -105,15 +103,11 @@ export default function Patients() {
           </div>
           <div className="rounded-xl p-4 border-2 w-full">
             <p className="text-sm">Active This Month</p>
-            <p className="text-2xl font-semibold text-green-600">
-              {activeThisMonth}
-            </p>
+            <p className="text-2xl font-semibold text-green-600">{activeThisMonth}</p>
           </div>
           <div className="rounded-xl p-4 border-2 w-full">
             <p className="text-sm">New This Month</p>
-            <p className="text-2xl font-semibold text-purple-600">
-              {newThisMonth}
-            </p>
+            <p className="text-2xl font-semibold text-purple-600">{newThisMonth}</p>
           </div>
         </div>
       )}
@@ -164,7 +158,6 @@ export default function Patients() {
         )}
       </div>
 
-
       {/* Patient cards */}
       {loading && <p>Loading...</p>}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -180,7 +173,6 @@ export default function Patients() {
 
             return matchesSearch && matchesEmail && matchesPhone;
           })
-
           .map((patient: Patient) => (
             <PatientCard
               key={patient._id}
@@ -191,22 +183,28 @@ export default function Patients() {
           ))}
       </div>
 
-      {/* Modals */}
-      <PatientDetailsDialog
-        patient={selectedPatient && selectedPatient._id ? selectedPatient : null}
-        onClose={() => setSelectedPatient(null)}
-        onSelectVisit={(visit) => setSelectedAppointment(visit)}
-      />
+      {/* Patient Details Dialog */}
+      {selectedPatient && (
+        <PatientDetailsDialog
+          patient={selectedPatient}
+          onClose={() => setSelectedPatient(null)}
+          onSelectVisit={handleSelectVisit}
+        />
+      )}
 
-      <AppointmentDetailDialog
-        appointment={
-          selectedAppointment && selectedAppointment._id
-            ? selectedAppointment
-            : null
-        }
-        onClose={() => setSelectedAppointment(null)}
-      />
+      {/* Appointment Details Dialog */}
+      {selectedAppointment && (
+        <AppointmentDetailDialog
+          appointment={selectedAppointment}
+          patient={selectedPatient}
+          onClose={() => {
+            setSelectedAppointment(null);
+            setSelectedPatient(null);
+          }}
+        />
+      )}
 
+      {/* PIN and Delete Confirmation */}
       <ProtectedPinDialog
         open={showPinDialog}
         onClose={() => setShowPinDialog(false)}
@@ -236,3 +234,5 @@ export default function Patients() {
     </div>
   );
 }
+
+
