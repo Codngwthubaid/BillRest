@@ -33,6 +33,84 @@ const getNextIPDNumber = async () => {
   return `IPD${String(nextNumber).padStart(4, "0")}`;
 };
 
+// export const createIPD = async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+//     const {
+//       patientId,
+//       appointmentId,
+//       isNewPatient,
+//       admissionDate,
+//       dischargeDate,
+//       bedNumber,
+//       bedCharges = 0,
+//       otherCharges = [],
+//       grantsOrDiscounts = 0,
+//       treatments = [],
+//     } = req.body;
+
+//     const patient = await Patient.findOne({ _id: patientId, clinic: userId });
+//     if (!patient) return res.status(404).json({ message: "Patient not found" });
+
+//     let serviceCharges = 0;
+//     let treatmentDetails = [];
+
+//     for (const t of treatments) {
+//       const service = await Service.findOne({ _id: t.service, clinic: userId });
+//       if (!service) {
+//         return res.status(404).json({ message: `Service not found for ID ${t.service}` });
+//       }
+
+//       const totalCharges = (service.price * (t.quantity || 1));
+//       serviceCharges += totalCharges;
+
+//       treatmentDetails.push({
+//         service: service._id,
+//         quantity: t.quantity || 1,
+//         totalCharges,
+//       });
+//     }
+
+//     const admitDate = new Date(admissionDate || new Date());
+//     const discharge = dischargeDate ? new Date(dischargeDate) : new Date();
+//     const daysStayed = Math.max(1, Math.ceil((discharge - admitDate) / (1000 * 60 * 60 * 24)));
+
+//     const totalBedCharges = bedCharges * daysStayed;
+//     const otherTotal = otherCharges.reduce((sum, item) => sum + (item.amount || 0), 0);
+
+//     const totalBeforeDiscount = totalBedCharges + serviceCharges + otherTotal;
+//     const finalAmount = totalBeforeDiscount - grantsOrDiscounts;
+
+//     const ipd = await IPD.create({
+//       clinic: userId,
+//       patient: patient._id,
+//       appointment: appointmentId,
+//       isNewPatient,
+//       ipdNumber: await getNextIPDNumber(),
+//       admissionDate: admitDate,
+//       dischargeDate,
+//       bedNumber,
+//       treatments: treatmentDetails,
+//       billing: {
+//         bedCharges: totalBedCharges,
+//         serviceCharges,
+//         otherCharges,
+//         grantsOrDiscounts,
+//         totalBeforeDiscount,
+//         finalAmount,
+//       },
+//     });
+
+//     res.status(201).json({
+//       message: "IPD record created successfully",
+//       ipd,
+//     });
+//   } catch (err) {
+//     console.error("Create IPD error:", err);
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
 export const createIPD = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -42,28 +120,28 @@ export const createIPD = async (req, res) => {
       isNewPatient,
       admissionDate,
       dischargeDate,
-      bedNumber,
-      bedCharges = 0,
-      otherCharges = [],
+      bedId, // ✅ changed from bedNumber to bedId
       grantsOrDiscounts = 0,
       treatments = [],
+      note = "",
     } = req.body;
 
     const patient = await Patient.findOne({ _id: patientId, clinic: userId });
     if (!patient) return res.status(404).json({ message: "Patient not found" });
 
+    const bed = await Bed.findOne({ _id: bedId, clinic: userId });
+    if (!bed) return res.status(404).json({ message: "Bed not found" });
+
+    // ✅ Calculate service charges
     let serviceCharges = 0;
     let treatmentDetails = [];
-
     for (const t of treatments) {
       const service = await Service.findOne({ _id: t.service, clinic: userId });
       if (!service) {
         return res.status(404).json({ message: `Service not found for ID ${t.service}` });
       }
-
-      const totalCharges = (service.price * (t.quantity || 1));
+      const totalCharges = service.price * (t.quantity || 1);
       serviceCharges += totalCharges;
-
       treatmentDetails.push({
         service: service._id,
         quantity: t.quantity || 1,
@@ -71,14 +149,14 @@ export const createIPD = async (req, res) => {
       });
     }
 
+    // ✅ Calculate bed charges
     const admitDate = new Date(admissionDate || new Date());
     const discharge = dischargeDate ? new Date(dischargeDate) : new Date();
     const daysStayed = Math.max(1, Math.ceil((discharge - admitDate) / (1000 * 60 * 60 * 24)));
 
-    const totalBedCharges = bedCharges * daysStayed;
-    const otherTotal = otherCharges.reduce((sum, item) => sum + (item.amount || 0), 0);
+    const totalBedCharges = bed.bedCharges * daysStayed; // ✅ use bedCharges from Bed model
 
-    const totalBeforeDiscount = totalBedCharges + serviceCharges + otherTotal;
+    const totalBeforeDiscount = totalBedCharges + serviceCharges;
     const finalAmount = totalBeforeDiscount - grantsOrDiscounts;
 
     const ipd = await IPD.create({
@@ -89,17 +167,22 @@ export const createIPD = async (req, res) => {
       ipdNumber: await getNextIPDNumber(),
       admissionDate: admitDate,
       dischargeDate,
-      bedNumber,
+      bed: bed._id, // ✅ store reference
       treatments: treatmentDetails,
       billing: {
         bedCharges: totalBedCharges,
         serviceCharges,
-        otherCharges,
         grantsOrDiscounts,
         totalBeforeDiscount,
         finalAmount,
       },
+      note, // ✅ save note
     });
+
+    // ✅ Update bed status to occupied
+    bed.status = "Occupied";
+    bed.patient = patient._id;
+    await bed.save();
 
     res.status(201).json({
       message: "IPD record created successfully",
@@ -110,6 +193,7 @@ export const createIPD = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 export const updateIPD = async (req, res) => {
   try {

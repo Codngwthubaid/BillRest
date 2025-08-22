@@ -72,9 +72,6 @@ export default function AppointmentDetailDialog({
                       .map((h, index) => (
                         <div key={index}>
                           <p className="text-sm text-gray-700">
-                            <strong>Status:</strong> {h.status}
-                          </p>
-                          <p className="text-sm text-gray-700">
                             <strong>Description:</strong> {h.description}
                           </p>
                         </div>
