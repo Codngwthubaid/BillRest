@@ -144,17 +144,17 @@ export default function UpdateIPD({ open, onOpenChange, ipd, onUpdate }: Props) 
                     setForm({
                       ...form,
                       bedId,
-                      bedCharges: selectedBed?.bedCharges || 0,
+                      bedCharges: selectedBed ? selectedBed.bedCharges : form.bedCharges, // ✅ preserve old if not found
                     });
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select available bed" />
+                    <SelectValue placeholder="Select bed" />
                   </SelectTrigger>
                   <SelectContent>
                     {beds.length > 0 &&
                       beds
-                        .filter((b) => b.status === "Available")
+                        .filter((b) => b.status === "Available" || b._id === form.bedId) // Include current bed even if not available
                         .map((b) => (
                           <SelectItem key={b._id} value={b._id}>
                             Room {b.roomNumber} - Bed {b.bedNumber} (₹{b.bedCharges}/night)
@@ -162,11 +162,13 @@ export default function UpdateIPD({ open, onOpenChange, ipd, onUpdate }: Props) 
                         ))}
                   </SelectContent>
                 </Select>
+
                 {form.bedCharges > 0 && (
                   <p className="text-sm text-gray-600 mt-1">
                     Selected Bed Charges: ₹{form.bedCharges}/night
                   </p>
                 )}
+
 
               </div>
 

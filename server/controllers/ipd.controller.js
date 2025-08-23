@@ -117,7 +117,6 @@ export const createIPD = async (req, res) => {
   }
 };
 
-
 export const updateIPD = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -176,14 +175,24 @@ export const updateIPD = async (req, res) => {
     }
 
     const admitDate = new Date(admissionDate || ipd.admissionDate);
-    const discharge = dischargeDate ? new Date(dischargeDate) : (ipd.dischargeDate || new Date());
+    const discharge = dischargeDate
+      ? new Date(dischargeDate)
+      : ipd.dischargeDate || (status === "Discharged" ? new Date() : null);
 
-    const daysStayed = Math.max(1, Math.ceil((discharge - admitDate) / (1000 * 60 * 60 * 24)));
-    const totalBedCharges = (ipd.bed.bedCharges || 0) * daysStayed;
+    const daysStayed = discharge
+      ? Math.max(1, Math.ceil((discharge - admitDate) / (1000 * 60 * 60 * 24)))
+      : Math.max(1, Math.ceil((new Date() - admitDate) / (1000 * 60 * 60 * 24)));
 
+    const bedCharges = bedId && bedId !== String(ipd.bed._id)
+      ? newBed.bedCharges
+      : ipd.bed.bedCharges;
+
+    const totalBedCharges = (bedCharges || 0) * daysStayed;
     const otherTotal = otherCharges.reduce((sum, item) => sum + (item.amount || 0), 0);
+    const validDiscount = Math.max(0, grantsOrDiscounts || 0);
     const totalBeforeDiscount = totalBedCharges + serviceCharges + otherTotal;
-    const finalAmount = totalBeforeDiscount - grantsOrDiscounts;
+    const finalAmount = totalBeforeDiscount - validDiscount;
+
 
     // ✅ Update IPD record
     ipd.admissionDate = admitDate;

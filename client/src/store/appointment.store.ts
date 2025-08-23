@@ -75,7 +75,7 @@ export const useAppointmentStore = create<AppointmentState>((set) => ({
         try {
             const appointment = await apiCreateAppointment(payload);
             set((state) => ({
-                appointments: [appointment, ...state.appointments],
+                appointments: [...state.appointments, appointment],
                 loading: false,
             }));
             return appointment;
