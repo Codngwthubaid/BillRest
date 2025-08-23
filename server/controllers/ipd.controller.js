@@ -4,6 +4,7 @@ import { Patient } from "../models/patient.model.js"
 import { Service } from "../models/service.model.js"
 import { User } from "../models/user.model.js"
 import { generateIPDPDF } from "../utils/generateIPDPDF.js"
+import { Bed } from "../models/bed.model.js"
 
 const getNextIPDNumber = async () => {
   // 1️⃣ Find latest IPD from DB (highest created)
@@ -32,84 +33,6 @@ const getNextIPDNumber = async () => {
   // 5️⃣ Return formatted
   return `IPD${String(nextNumber).padStart(4, "0")}`;
 };
-
-// export const createIPD = async (req, res) => {
-//   try {
-//     const userId = req.user.id;
-//     const {
-//       patientId,
-//       appointmentId,
-//       isNewPatient,
-//       admissionDate,
-//       dischargeDate,
-//       bedNumber,
-//       bedCharges = 0,
-//       otherCharges = [],
-//       grantsOrDiscounts = 0,
-//       treatments = [],
-//     } = req.body;
-
-//     const patient = await Patient.findOne({ _id: patientId, clinic: userId });
-//     if (!patient) return res.status(404).json({ message: "Patient not found" });
-
-//     let serviceCharges = 0;
-//     let treatmentDetails = [];
-
-//     for (const t of treatments) {
-//       const service = await Service.findOne({ _id: t.service, clinic: userId });
-//       if (!service) {
-//         return res.status(404).json({ message: `Service not found for ID ${t.service}` });
-//       }
-
-//       const totalCharges = (service.price * (t.quantity || 1));
-//       serviceCharges += totalCharges;
-
-//       treatmentDetails.push({
-//         service: service._id,
-//         quantity: t.quantity || 1,
-//         totalCharges,
-//       });
-//     }
-
-//     const admitDate = new Date(admissionDate || new Date());
-//     const discharge = dischargeDate ? new Date(dischargeDate) : new Date();
-//     const daysStayed = Math.max(1, Math.ceil((discharge - admitDate) / (1000 * 60 * 60 * 24)));
-
-//     const totalBedCharges = bedCharges * daysStayed;
-//     const otherTotal = otherCharges.reduce((sum, item) => sum + (item.amount || 0), 0);
-
-//     const totalBeforeDiscount = totalBedCharges + serviceCharges + otherTotal;
-//     const finalAmount = totalBeforeDiscount - grantsOrDiscounts;
-
-//     const ipd = await IPD.create({
-//       clinic: userId,
-//       patient: patient._id,
-//       appointment: appointmentId,
-//       isNewPatient,
-//       ipdNumber: await getNextIPDNumber(),
-//       admissionDate: admitDate,
-//       dischargeDate,
-//       bedNumber,
-//       treatments: treatmentDetails,
-//       billing: {
-//         bedCharges: totalBedCharges,
-//         serviceCharges,
-//         otherCharges,
-//         grantsOrDiscounts,
-//         totalBeforeDiscount,
-//         finalAmount,
-//       },
-//     });
-
-//     res.status(201).json({
-//       message: "IPD record created successfully",
-//       ipd,
-//     });
-//   } catch (err) {
-//     console.error("Create IPD error:", err);
-//     res.status(500).json({ message: err.message });
-//   }
-// };
 
 export const createIPD = async (req, res) => {
   try {
@@ -203,17 +126,36 @@ export const updateIPD = async (req, res) => {
     const {
       admissionDate,
       dischargeDate,
-      bedNumber,
-      bedCharges = 0,
+      bedId, // ✅ change from bedNumber to bedId
       otherCharges = [],
       grantsOrDiscounts = 0,
       treatments = [],
+      status, // ✅ added
     } = req.body;
 
-    const ipd = await IPD.findOne({ _id: id, clinic: userId });
+    const ipd = await IPD.findOne({ _id: id, clinic: userId }).populate("bed");
     if (!ipd) return res.status(404).json({ message: "IPD record not found" });
 
-    // Prepare treatment details
+    // ✅ If bed changed, free old bed and occupy new one
+    if (bedId && bedId !== String(ipd.bed._id)) {
+      const oldBed = await Bed.findById(ipd.bed._id);
+      if (oldBed) {
+        oldBed.status = "Available";
+        oldBed.patient = null;
+        await oldBed.save();
+      }
+
+      const newBed = await Bed.findOne({ _id: bedId, clinic: userId });
+      if (!newBed) return res.status(404).json({ message: "New bed not found" });
+
+      newBed.status = "Occupied";
+      newBed.patient = ipd.patient;
+      await newBed.save();
+
+      ipd.bed = newBed._id;
+    }
+
+    // ✅ Prepare treatments
     let serviceCharges = 0;
     let treatmentDetails = [];
 
@@ -223,7 +165,7 @@ export const updateIPD = async (req, res) => {
         return res.status(404).json({ message: `Service not found for ID ${t.service}` });
       }
 
-      const totalCharges = (service.price * (t.quantity || 1));
+      const totalCharges = service.price * (t.quantity || 1);
       serviceCharges += totalCharges;
 
       treatmentDetails.push({
@@ -233,20 +175,20 @@ export const updateIPD = async (req, res) => {
       });
     }
 
-    const admitDate = new Date(admissionDate || ipd.admissionDate || new Date());
+    const admitDate = new Date(admissionDate || ipd.admissionDate);
     const discharge = dischargeDate ? new Date(dischargeDate) : (ipd.dischargeDate || new Date());
 
     const daysStayed = Math.max(1, Math.ceil((discharge - admitDate) / (1000 * 60 * 60 * 24)));
-    const totalBedCharges = bedCharges * daysStayed;
+    const totalBedCharges = (ipd.bed.bedCharges || 0) * daysStayed;
 
     const otherTotal = otherCharges.reduce((sum, item) => sum + (item.amount || 0), 0);
     const totalBeforeDiscount = totalBedCharges + serviceCharges + otherTotal;
     const finalAmount = totalBeforeDiscount - grantsOrDiscounts;
 
-    // Update IPD record
+    // ✅ Update IPD record
     ipd.admissionDate = admitDate;
     ipd.dischargeDate = dischargeDate || ipd.dischargeDate;
-    ipd.bedNumber = bedNumber ?? ipd.bedNumber;
+    ipd.status = status || ipd.status;
     ipd.treatments = treatmentDetails;
     ipd.billing = {
       bedCharges: totalBedCharges,
@@ -258,6 +200,16 @@ export const updateIPD = async (req, res) => {
     };
 
     await ipd.save();
+
+    // ✅ If discharged, free the bed
+    if (status === "Discharged" || dischargeDate) {
+      const currentBed = await Bed.findById(ipd.bed);
+      if (currentBed) {
+        currentBed.status = "Available";
+        currentBed.patient = null;
+        await currentBed.save();
+      }
+    }
 
     res.json({
       message: "IPD record updated successfully",

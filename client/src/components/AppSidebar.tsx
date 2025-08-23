@@ -30,8 +30,10 @@ export function AppSidebar() {
   let menuItems = [];
   if (user?.role === "customer") {
     menuItems = items.sidebarOfCustomer;
-  } else if (user?.role === "clinic") {
-    menuItems = items.sidebarOfHealth;
+  } else if (user?.role === "clinic" && currentSubscription?.plan?.role === "Hospital") {
+    menuItems = items.sidebarOfHealthForHospital;
+  } else if (user?.role === "clinic" && currentSubscription?.plan?.role === "Clinic") {
+    menuItems = items.sidebarOfHealthForClinic;
   } else if (user?.role === "support") {
     menuItems = items.sidebarOfSupport;
   } else if (user?.role === "master") {

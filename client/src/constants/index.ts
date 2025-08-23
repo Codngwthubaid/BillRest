@@ -65,7 +65,7 @@ export const items = {
             icon: HelpCircle,
         },
     ],
-    sidebarOfHealth: [
+    sidebarOfHealthForHospital: [
         {
             title: "Dashboard",
             href: "/",
@@ -83,8 +83,60 @@ export const items = {
         },
         {
             title: "Beds",
-            href: "/beds",
+            href: "/bed",
             icon: Bed
+        },
+        {
+            title: "Services",
+            href: "/services",
+            icon: ListOrdered
+        },
+        {
+            title: "Billing",
+            href: "/billings",
+            icon: Receipt
+        },
+        {
+            title: "Reports",
+            href: "/reports",
+            icon: ChartColumn,
+        },
+        {
+            title: "Profile",
+            href: "/profile",
+            icon: User,
+        },
+        {
+            title: "Contact",
+            href: "/contact",
+            icon: Mail,
+        },
+        {
+            title: "Plans",
+            href: "/plans",
+            icon: IndianRupee,
+        },
+        {
+            title: "Help",
+            href: "/help",
+            icon: HelpCircle,
+        },
+    ],
+    sidebarOfHealthForClinic: [
+        {
+            title: "Dashboard",
+            href: "/",
+            icon: Home,
+        },
+        {
+            title: "Appointments",
+            href: "/appointments",
+            icon: FileTerminal
+        },
+        {
+            title: "Patients",
+            href: "/patients",
+            icon: SquareUserRound
         },
         {
             title: "Services",

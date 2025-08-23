@@ -33,7 +33,7 @@ export default function Bed() {
   // 🔍 Filtered bed list
   const filteredBeds = useMemo(() => {
     return beds.filter((bed) => {
-      const matchesSearch = bed.bedNumber.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = (bed.bedNumber ?? "").toString().toLowerCase().includes(search.toLowerCase());
       const matchesStatus = !selectedStatus || bed.status === selectedStatus;
       return matchesSearch && matchesStatus;
     });

@@ -14,6 +14,8 @@ export default function IPDPreview({ IPD }: IPDPreviewProps) {
   const { user } = useAuthStore();
   const { business } = useBusinessStore();
 
+  console.log("Rendering IPDPreview with IPD:", IPD);
+
   return (
     <div className="mx-auto bg-white rounded-lg text-sm font-sans">
       {/* Header */}
@@ -79,7 +81,7 @@ export default function IPDPreview({ IPD }: IPDPreviewProps) {
       </div>
 
       {/* Other Charges Table */}
-      {IPD.billing.otherCharges.length > 0 && (
+      {IPD.billing?.otherCharges?.length > 0 && (
         <div className="overflow-x-auto mt-4">
           <table className="w-full border border-gray-300 text-xs">
             <thead className="bg-emerald-100">
@@ -89,7 +91,7 @@ export default function IPDPreview({ IPD }: IPDPreviewProps) {
               </tr>
             </thead>
             <tbody>
-              {IPD.billing.otherCharges.map((charge, idx) => (
+              {IPD.billing?.otherCharges?.map((charge, idx) => (
                 <tr key={idx}>
                   <td className="border px-2 py-1">{charge.itemName}</td>
                   <td className="border px-2 py-1 text-right">₹{charge.amount.toFixed(2)}</td>
@@ -121,7 +123,7 @@ export default function IPDPreview({ IPD }: IPDPreviewProps) {
               <tr>
                 <td className="pr-2">Other Charges:</td>
                 <td>
-                  ₹{(IPD.billing.otherCharges.reduce((sum, oc) => sum + oc.amount, 0)).toFixed(2)}
+                  ₹{((IPD.billing.otherCharges ?? []).reduce((sum, oc) => sum + oc.amount, 0)).toFixed(2)}
                 </td>
               </tr>
               <tr>
@@ -140,7 +142,7 @@ export default function IPDPreview({ IPD }: IPDPreviewProps) {
       {/* Custom Note */}
       <div className="mt-6">
         <p className="text-sm font-semibold mb-2">Custom Note:</p>
-        <div className="border border-dashed border-gray-400 h-20 p-2"></div>
+        <div className="border border-dashed border-gray-400 h-20 p-2">{IPD.note || "N/A"}</div>
       </div>
     </div>
   );

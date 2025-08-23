@@ -2,7 +2,8 @@ import { Bed } from "../models/bed.model.js";
 
 export const addBed = async (req, res) => {
   try {
-    const { clinic, roomNumber, bedNumber, bedCharges } = req.body;
+    const clinic = req.user.id;
+    const { roomNumber, bedNumber, bedCharges } = req.body;
 
     if (!clinic || !roomNumber || !bedNumber || !bedCharges) {
       return res.status(400).json({ message: "All fields are required" });

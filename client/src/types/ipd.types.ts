@@ -47,6 +47,17 @@ export interface Patient {
   updatedAt: string;
 }
 
+export interface Bed {
+  _id: string;
+  roomNumber: string;
+  bedNumber: string;
+  bedCharges: number;
+  status: "Available" | "Occupied" | "Maintenance";
+  patient?: string | null;
+  clinic: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface IPDResponse {
   _id: string;
@@ -57,9 +68,10 @@ export interface IPDResponse {
   isNewPatient: boolean;
   admissionDate: string;
   dischargeDate?: string;
-  bedNumber: string;
+  bed: Bed; // ✅ replaced bedNumber with full Bed object
   treatments: Treatment[];
   billing: Billing;
+  note?: string; // ✅ added note field
   paymentStatus: "pending" | "paid" | "partial";
   status: "Admitted" | "Discharged";
   createdAt: string;
@@ -72,9 +84,8 @@ export interface IPDInput {
   isNewPatient?: boolean;
   admissionDate?: string;
   dischargeDate?: string;
-  bedNumber: string;
-  bedCharges?: number;
-  otherCharges?: OtherCharge[];
+  bedId: string; // ✅ changed from bedNumber to bedId
   grantsOrDiscounts?: number;
   treatments?: TreatmentInput[];
+  note?: string; // ✅ added note
 }

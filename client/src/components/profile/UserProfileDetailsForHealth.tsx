@@ -16,6 +16,7 @@ export default function UserProfileDetailsForHealth() {
   const { user } = useAuthStore();
   const { clinic, loading, error, fetchClinic, saveClinicProfile } = useClinicStore();
   const { currentSubscription, fetchUserSubscription } = useSubscriptionStore();
+  console.log("Current Subscription :", currentSubscription);
 
   const [open, setOpen] = useState(false);
   const [localPin, setLocalPin] = useState("");
@@ -225,6 +226,10 @@ export default function UserProfileDetailsForHealth() {
                 <span className={`text-sm ${currentSubscription.status === "active" ? "text-green-600" : "text-red-600"}`}>
                   {currentSubscription.status}
                 </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Role</span>
+                <span className="text-sm text-muted-foreground">{currentSubscription.plan?.role}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Start Date</span>
