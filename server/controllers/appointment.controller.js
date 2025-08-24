@@ -1,6 +1,7 @@
 import { Appointment } from "../models/appointment.model.js";
 import { Patient } from "../models/patient.model.js";
 import { Counter } from "../models/counter.model.js";
+import crypto from "crypto"
 
 const generateAppointmentId = () => {
   const randomString = crypto.randomBytes(6).toString("base64").replace(/[^a-zA-Z0-9]/g, "").slice(0, 10);

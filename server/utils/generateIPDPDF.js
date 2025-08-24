@@ -128,9 +128,8 @@ export const generateIPDPDF = async (ipd, clinic, patient) => {
             table: {
               widths: ["auto", "auto"],
               body: [
-                ["Bed Charges:", `₹${ipd.billing.bedCharges.toFixed(2)}`],
                 ["Service Charges:", `₹${ipd.billing.serviceCharges.toFixed(2)}`],
-                ["Other Charges:", `₹${(ipd.billing.otherCharges || []).reduce((sum, item) => sum + item.amount, 0).toFixed(2)}`],
+                ["Bed Charges:", `₹${ipd.billing.bedCharges.toFixed(2)}`],
                 ["Subtotal:", `₹${ipd.billing.totalBeforeDiscount.toFixed(2)}`],
                 ["Grants/Discounts:", `₹${ipd.billing.grantsOrDiscounts.toFixed(2)}`],
                 [{ text: "Final Amount:", bold: true }, { text: `₹${ipd.billing.finalAmount.toFixed(2)}`, bold: true }],

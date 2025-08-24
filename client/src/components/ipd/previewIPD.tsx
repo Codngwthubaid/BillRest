@@ -113,18 +113,12 @@ export default function IPDPreview({ IPD }: IPDPreviewProps) {
           <table className="text-xs text-right">
             <tbody>
               <tr>
-                <td className="pr-2">Bed Charges:</td>
-                <td>₹{IPD.billing.bedCharges.toFixed(2)}</td>
-              </tr>
-              <tr>
                 <td className="pr-2">Service Charges:</td>
                 <td>₹{IPD.billing.serviceCharges.toFixed(2)}</td>
               </tr>
               <tr>
-                <td className="pr-2">Other Charges:</td>
-                <td>
-                  ₹{((IPD.billing.otherCharges ?? []).reduce((sum, oc) => sum + oc.amount, 0)).toFixed(2)}
-                </td>
+                <td className="pr-2">Bed Charges:</td>
+                <td>₹{IPD.billing.bedCharges.toFixed(2)}</td>
               </tr>
               <tr>
                 <td className="pr-2">Grants/Discounts:</td>
