@@ -184,7 +184,7 @@ export default function Billing() {
           <thead className="bg-muted text-gray-600 text-left">
             <tr>
               {!isClinic && <th className="p-4">Clinic Email</th>}
-              <th className="p-4">IPD Record</th>
+              <th className="p-4">Billing ID</th>
               <th className="p-4">Patient</th>
               <th className="p-4">Amount</th>
               <th className="p-4">Status</th>

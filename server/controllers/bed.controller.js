@@ -61,7 +61,6 @@ export const deleteBed = async (req, res) => {
   }
 };
 
-
 export const getAllBeds = async (req, res) => {
     try {
         const beds = await Bed.find().sort({ createdAt: -1 });

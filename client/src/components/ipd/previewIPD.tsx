@@ -141,7 +141,7 @@ export default function IPDPreview({ IPD }: IPDPreviewProps) {
 
       {/* Custom Note */}
       <div className="mt-6">
-        <p className="text-sm font-semibold mb-2">Custom Note:</p>
+        <p className="text-sm font-semibold mb-2">Note:</p>
         <div className="border border-dashed border-gray-400 h-20 p-2">{IPD.note || "N/A"}</div>
       </div>
     </div>

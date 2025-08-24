@@ -78,14 +78,19 @@ export const useIPDStore = create<IPDState>((set) => ({
   updateIPDRecord: async (id, data) => {
     set({ loading: true, error: null });
     try {
-      await updateIPD(id, data);
-      await useIPDStore.getState().fetchIPDs();
+      const updatedIPD = await updateIPD(id, data); // API call returns updated record
+      set((state) => ({
+        ipds: state.ipds.map((ipd) =>
+          ipd._id === id ? { ...ipd, ...updatedIPD } : ipd
+        ),
+      }));
     } catch (err: any) {
       set({ error: err.message || "Failed to update IPD" });
     } finally {
       set({ loading: false });
     }
   },
+
 
   dischargeIPDRecord: async (id, dischargeDate) => {
     set({ loading: true, error: null });

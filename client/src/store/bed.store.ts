@@ -45,16 +45,16 @@ export const useBedStore = create<BedStore>((set, get) => ({
     updateBed: async (id, data) => {
         set({ loading: true, error: null });
         try {
-            const updatedBed = await bedService.update(id, data);
-            set({
-                beds: get().beds.map((bed) => (bed._id === id ? updatedBed : bed)),
-            });
+            await bedService.update(id, data);
+            const beds = await bedService.getAll(); // ✅ Fetch latest data
+            set({ beds });
         } catch (error: any) {
             set({ error: error.response?.data?.message || 'Failed to update bed' });
         } finally {
             set({ loading: false });
         }
     },
+
 
     deleteBed: async (id) => {
         set({ loading: true, error: null });

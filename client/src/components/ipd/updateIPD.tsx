@@ -101,7 +101,11 @@ export default function UpdateIPD({ open, onOpenChange, ipd, onUpdate }: Props) 
     if (!ipd?._id) return;
     setLoading(true);
     try {
-      await onUpdate(ipd._id, { dischargeDate: new Date().toISOString(), status: "Discharged" });
+      await onUpdate(ipd._id, {
+        dischargeDate: new Date().toISOString(),
+        status: "Discharged",
+        treatments: form.treatments
+      });
       await fetchIPDs();
       onOpenChange(false);
     } finally {

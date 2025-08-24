@@ -1,37 +1,15 @@
-import { Counter } from "../models/counter.model.js"
 import { IPD } from "../models/ipd.model.js"
 import { Patient } from "../models/patient.model.js"
 import { Service } from "../models/service.model.js"
 import { User } from "../models/user.model.js"
 import { generateIPDPDF } from "../utils/generateIPDPDF.js"
 import { Bed } from "../models/bed.model.js"
+import { Clinic } from "../models/clinic.model.js"
+import crypto from "crypto";
 
-const getNextIPDNumber = async () => {
-  // 1️⃣ Find latest IPD from DB (highest created)
-  const latestIPD = await IPD.findOne({}).sort({ createdAt: -1 }).lean();
-  let lastNumber = 0;
-
-  if (latestIPD?.ipdNumber) {
-    const match = latestIPD.ipdNumber.match(/IPD(\d+)/);
-    if (match) lastNumber = parseInt(match[1], 10);
-  }
-
-  // 2️⃣ Check Counter
-  const counterDoc = await Counter.findOne({ _id: "ipdNumber" });
-  let currentCounter = counterDoc ? counterDoc.sequence_value : 0;
-
-  // 3️⃣ Calculate next
-  let nextNumber = Math.max(lastNumber, currentCounter) + 1;
-
-  // 4️⃣ Update Counter to keep in sync
-  await Counter.findOneAndUpdate(
-    { _id: "ipdNumber" },
-    { sequence_value: nextNumber },
-    { upsert: true, new: true }
-  );
-
-  // 5️⃣ Return formatted
-  return `IPD${String(nextNumber).padStart(4, "0")}`;
+const generateRandomBillId = () => {
+  const randomString = crypto.randomBytes(6).toString("base64").replace(/[^a-zA-Z0-9]/g, "").slice(0, 10);
+  return `Bill-${randomString}`;
 };
 
 export const createIPD = async (req, res) => {
@@ -87,7 +65,7 @@ export const createIPD = async (req, res) => {
       patient: patient._id,
       appointment: appointmentId,
       isNewPatient,
-      ipdNumber: await getNextIPDNumber(),
+      ipdNumber: await generateRandomBillId(),
       admissionDate: admitDate,
       dischargeDate,
       bed: bed._id, // ✅ store reference
@@ -125,18 +103,23 @@ export const updateIPD = async (req, res) => {
     const {
       admissionDate,
       dischargeDate,
-      bedId, // ✅ change from bedNumber to bedId
+      bedId, // ✅ new bed ID
       otherCharges = [],
       grantsOrDiscounts = 0,
       treatments = [],
-      status, // ✅ added
+      status,
+      note // ✅ added note
     } = req.body;
 
     const ipd = await IPD.findOne({ _id: id, clinic: userId }).populate("bed");
     if (!ipd) return res.status(404).json({ message: "IPD record not found" });
 
-    // ✅ If bed changed, free old bed and occupy new one
+    let currentBedCharges = ipd.bed.bedCharges; // old bed charges by default
+    let newBed; // placeholder for new bed
+
+    // ✅ If bed changed, update beds and set correct bed charges
     if (bedId && bedId !== String(ipd.bed._id)) {
+      // Free old bed
       const oldBed = await Bed.findById(ipd.bed._id);
       if (oldBed) {
         oldBed.status = "Available";
@@ -144,7 +127,8 @@ export const updateIPD = async (req, res) => {
         await oldBed.save();
       }
 
-      const newBed = await Bed.findOne({ _id: bedId, clinic: userId });
+      // Occupy new bed
+      newBed = await Bed.findOne({ _id: bedId, clinic: userId });
       if (!newBed) return res.status(404).json({ message: "New bed not found" });
 
       newBed.status = "Occupied";
@@ -152,12 +136,12 @@ export const updateIPD = async (req, res) => {
       await newBed.save();
 
       ipd.bed = newBed._id;
+      currentBedCharges = newBed.bedCharges; // ✅ use new bed charges
     }
 
     // ✅ Prepare treatments
     let serviceCharges = 0;
     let treatmentDetails = [];
-
     for (const t of treatments) {
       const service = await Service.findOne({ _id: t.service, clinic: userId });
       if (!service) {
@@ -174,6 +158,7 @@ export const updateIPD = async (req, res) => {
       });
     }
 
+    // ✅ Calculate stay duration and charges
     const admitDate = new Date(admissionDate || ipd.admissionDate);
     const discharge = dischargeDate
       ? new Date(dischargeDate)
@@ -183,22 +168,19 @@ export const updateIPD = async (req, res) => {
       ? Math.max(1, Math.ceil((discharge - admitDate) / (1000 * 60 * 60 * 24)))
       : Math.max(1, Math.ceil((new Date() - admitDate) / (1000 * 60 * 60 * 24)));
 
-    const bedCharges = bedId && bedId !== String(ipd.bed._id)
-      ? newBed.bedCharges
-      : ipd.bed.bedCharges;
-
-    const totalBedCharges = (bedCharges || 0) * daysStayed;
+    const totalBedCharges = (currentBedCharges || 0) * daysStayed;
     const otherTotal = otherCharges.reduce((sum, item) => sum + (item.amount || 0), 0);
     const validDiscount = Math.max(0, grantsOrDiscounts || 0);
     const totalBeforeDiscount = totalBedCharges + serviceCharges + otherTotal;
     const finalAmount = totalBeforeDiscount - validDiscount;
-
 
     // ✅ Update IPD record
     ipd.admissionDate = admitDate;
     ipd.dischargeDate = dischargeDate || ipd.dischargeDate;
     ipd.status = status || ipd.status;
     ipd.treatments = treatmentDetails;
+    ipd.note = note || ipd.note; // ✅ update note if provided
+
     ipd.billing = {
       bedCharges: totalBedCharges,
       serviceCharges,
@@ -208,10 +190,9 @@ export const updateIPD = async (req, res) => {
       finalAmount,
     };
 
-    await ipd.save();
-
     // ✅ If discharged, free the bed
     if (status === "Discharged" || dischargeDate) {
+      ipd.paymentStatus = "paid";
       const currentBed = await Bed.findById(ipd.bed);
       if (currentBed) {
         currentBed.status = "Available";
@@ -219,6 +200,8 @@ export const updateIPD = async (req, res) => {
         await currentBed.save();
       }
     }
+
+    await ipd.save();
 
     res.json({
       message: "IPD record updated successfully",
@@ -365,38 +348,45 @@ export const downloadIPDPDF = async (req, res) => {
       clinic: req.user.id,
     })
       .populate("patient", "name phoneNumber age gender address")
-      .populate("treatments.service", "name price");
+      .populate("treatments.service", "name price gstRate category")
+      .populate("bed", "bedNumber bedCharges");
 
     if (!ipd) return res.status(404).json({ message: "IPD record not found" });
 
-    // Enrich treatments with service names (already populated, but ensure consistency)
-    const enrichedTreatments = ipd.treatments.map((treatment) => ({
-      ...treatment.toObject(),
-      service: {
-        ...treatment.service.toObject(),
-        name: treatment.service?.name || "Unknown",
-      },
+    // Ensure treatments have service name and handle missing date
+    const enrichedTreatments = (ipd.treatments || []).map((t) => ({
+      ...t.toObject(),
+      service: t.service
+        ? {
+          name: t.service.name || "Unknown",
+          price: t.service.price || 0,
+          gstRate: t.service.gstRate || 0,
+          category: t.service.category || "N/A",
+        }
+        : { name: "Unknown", price: 0 },
+      date: t.date || ipd.admissionDate, // fallback to admission date if missing
     }));
 
     ipd.treatments = enrichedTreatments;
 
-    // Fetch clinic details (assuming User model contains business details)
-    const clinic = await User.findById(req.user.id).select("businessName address gstNumber phone email");
-    const patient = await Patient.findById(ipd.patient).select("name phoneNumber age gender address");
+    // Fetch clinic details
+    const clinic = await Clinic.findOne({ user: req.user.id });
+    console.log("Clinic data:", clinic);
 
-    // Generate the PDF
-    const pdfBuffer = await generateIPDPDF(ipd, clinic, patient);
+    if (!clinic) return res.status(404).json({ message: "Clinic not found" });
+
+    const pdfBuffer = await generateIPDPDF(ipd, clinic, ipd.patient);
 
     res.set({
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename=${ipd.ipdNumber}.pdf`,
+      "Content-Disposition": `attachment; filename=${ipd.ipdNumber || "IPD"}.pdf`,
       "Content-Length": pdfBuffer.length,
     });
 
     res.send(pdfBuffer);
   } catch (err) {
     console.error("Download IPD PDF error:", err);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: "Internal Server Error", error: err.message });
   }
 };
 
@@ -407,38 +397,29 @@ export const printIPDPDF = async (req, res) => {
       clinic: req.user.id,
     })
       .populate("patient", "name phoneNumber age gender address")
-      .populate("treatments.service", "name price");
+      .populate("treatments.service", "name price gstRate category")
+      .populate("bed", "bedNumber bedCharges");
 
     if (!ipd) return res.status(404).json({ message: "IPD record not found" });
 
-    // Enrich treatments (similar to enrichedProducts)
-    const enrichedTreatments = ipd.treatments.map((item) => {
-      let serviceName = "Unknown";
-      try {
-        if (item.service && item.service.name) {
-          serviceName = item.service.name;
-        }
-      } catch (err) {
-        console.error(`Error fetching service name:`, err.message);
-      }
-      return {
-        ...item.toObject(),
-        serviceName,
-      };
-    });
+    const enrichedTreatments = (ipd.treatments || []).map((t) => ({
+      ...t.toObject(),
+      serviceName: t.service?.name || "Unknown",
+      date: t.date || ipd.admissionDate,
+    }));
 
     ipd.treatments = enrichedTreatments;
 
-    // Get clinic details
-    const clinic = await User.findById(req.user.id).select("businessName address gstNumber phone email");
-    const patient = await Patient.findById(ipd.patient).select("name phoneNumber age gender address");
+    const clinic = await Clinic.findOne({ user: req.user.id });
+    console.log("Clinic data:", clinic);
 
-    // Generate PDF
-    const pdfBuffer = await generateIPDPDF(ipd, clinic, patient);
+    if (!clinic) return res.status(404).json({ message: "Clinic not found" });
+
+    const pdfBuffer = await generateIPDPDF(ipd, clinic, ipd.patient);
 
     res.set({
       "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename=${ipd.ipdNumber}.pdf`,
+      "Content-Disposition": `inline; filename=${ipd.ipdNumber || "IPD"}.pdf`,
       "Content-Length": pdfBuffer.length,
     });
 

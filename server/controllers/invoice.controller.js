@@ -5,33 +5,9 @@ import { Customer } from "../models/customer.model.js";
 import { Business } from "../models/business.model.js";
 import { generateInvoicePDF } from "../utils/pdfGeneratorForGeneral.js";
 
-const getNextInvoiceNumber = async () => {
-  // 1. Find latest invoice from DB
-  const latestInvoice = await Invoice.findOne({}).sort({ createdAt: -1 }).lean();
-  let lastNumber = 0;
-  if (latestInvoice?.invoiceNumber) {
-    const match = latestInvoice.invoiceNumber.match(/INV(\d+)/);
-    if (match) {
-      lastNumber = parseInt(match[1], 10);
-    }
-  }
-
-  // 2. Check Counter
-  const counterDoc = await Counter.findOne({ _id: "invoiceNumber" });
-  let currentCounter = counterDoc ? counterDoc.sequence_value : 0;
-
-  // 3. Calculate next
-  let nextNumber = Math.max(lastNumber, currentCounter) + 1;
-
-  // 4. Update Counter so it stays in sync
-  await Counter.findOneAndUpdate(
-    { _id: "invoiceNumber" },
-    { sequence_value: nextNumber },
-    { upsert: true, new: true }
-  );
-
-  // 5. Return formatted
-  return `INV${String(nextNumber).padStart(4, "0")}`;
+const generateInvoiceId = () => {
+  const randomString = crypto.randomBytes(6).toString("base64").replace(/[^a-zA-Z0-9]/g, "").slice(0, 10);
+  return `INV-${randomString}`;
 };
 
 export const createInvoice = async (req, res) => {
@@ -105,7 +81,7 @@ export const createInvoice = async (req, res) => {
 
     const invoice = await Invoice.create({
       user: userId,
-      invoiceNumber: await getNextInvoiceNumber(),
+      invoiceNumber: await generateInvoiceId(),
       products: invoiceProducts,
       subTotal,
       gstAmount,

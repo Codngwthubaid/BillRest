@@ -2,99 +2,10 @@ import { Appointment } from "../models/appointment.model.js";
 import { Patient } from "../models/patient.model.js";
 import { Counter } from "../models/counter.model.js";
 
-
-const getNextAppointmentNumber = async () => {
-  const latestAppointment = await Appointment.findOne({})
-    .sort({ createdAt: -1 })
-    .lean();
-
-  let lastNumber = 0;
-  if (latestAppointment?.appointmentNumber) {
-    const match = latestAppointment.appointmentNumber.match(/APT(\d+)/);
-    if (match) {
-      lastNumber = parseInt(match[1], 10);
-    }
-  }
-
-  const counterDoc = await Counter.findOne({ _id: "appointmentNumber" });
-  const currentCounter = counterDoc ? counterDoc.sequence_value : 0;
-
-  const nextNumber = Math.max(lastNumber, currentCounter) + 1;
-
-  await Counter.findOneAndUpdate(
-    { _id: "appointmentNumber" },
-    { sequence_value: nextNumber },
-    { upsert: true, new: true }
-  );
-
-  return `APT${String(nextNumber).padStart(4, "0")}`;
+const generateAppointmentId = () => {
+  const randomString = crypto.randomBytes(6).toString("base64").replace(/[^a-zA-Z0-9]/g, "").slice(0, 10);
+  return `APT-${randomString}`;
 };
-
-// export const createAppointment = async (req, res) => {
-//   try {
-//     const userId = req.user.id;
-//     const {
-//       name, phoneNumber, address, age, gender,
-//       description, status, admitted, appointmentNumber
-//     } = req.body;
-
-//     if (!name || !phoneNumber) {
-//       return res.status(400).json({ message: "Patient name and phone number are required." });
-//     }
-
-//     let patient = await Patient.findOne({ clinic: userId, phoneNumber });
-//     if (!patient) {
-//       patient = await Patient.create({
-//         clinic: userId,
-//         name, phoneNumber, address, age, gender, visits: [],
-//       });
-//     } else {
-//       patient.name = name;
-//       patient.address = address;
-//       patient.age = age;
-//       patient.gender = gender;
-//       await patient.save();
-//     }
-
-//     let finalAppointmentNumber = appointmentNumber || await getNextAppointmentNumber();
-
-//     if (appointmentNumber) {
-//       const match = appointmentNumber.match(/APT(\d+)/);
-//       if (match) {
-//         const num = parseInt(match[1], 10);
-//         const counterDoc = await Counter.findOne({ _id: "appointmentNumber" });
-//         const currentCounter = counterDoc ? counterDoc.sequence_value : 0;
-//         if (num >= currentCounter) {
-//           await Counter.findOneAndUpdate(
-//             { _id: "appointmentNumber" },
-//             { sequence_value: num },
-//             { upsert: true }
-//           );
-//         }
-//       }
-//     }
-
-
-//     const appointment = await Appointment.create({
-//       clinic: userId,
-//       appointmentNumber: finalAppointmentNumber,
-//       patient: patient?._id,
-//       description,
-//       status,
-//       admitted
-//     });
-
-//     patient.visits.push(appointment._id);
-//     await patient.save();
-
-//     res.status(201).json({ message: "Appointment created successfully", appointment });
-
-//   } catch (err) {
-//     console.error("Create appointment error:", err);
-//     res.status(500).json({ message: err.message });
-//   }
-// };
-
 
 export const createAppointment = async (req, res) => {
   try {
@@ -138,7 +49,7 @@ export const createAppointment = async (req, res) => {
     }
 
     // 2. Generate appointment number
-    let finalAppointmentNumber = appointmentNumber || await getNextAppointmentNumber();
+    let finalAppointmentNumber = appointmentNumber || await generateAppointmentId();
 
     if (appointmentNumber) {
       const match = appointmentNumber.match(/APT(\d+)/);
@@ -190,7 +101,6 @@ export const createAppointment = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
 
 export const updateAppointment = async (req, res) => {
   try {
