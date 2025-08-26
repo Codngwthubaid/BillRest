@@ -1,36 +1,41 @@
 import mongoose from "mongoose";
 
-const bedSchema = new mongoose.Schema(
-  {
-    clinic: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    roomNumber: {
-      type: String,
-      required: true,
-    },
-    bedNumber: {
-      type: String,
-      required: true,
-    },
-    bedCharges: {
-      type: Number,
-      required: true,
-    },
-    patient: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Patient",
-      default: null, 
-    },
-    status: {
-      type: String,
-      enum: ["Available", "Occupied", "Maintenance"],
-      default: "Available",
-    },
+const bedSchema = new mongoose.Schema({
+  roomNumber: String,
+  bedNumber: String,
+  bedCharges: Number,
+  status: {
+    type: String,
+    enum: ["Available", "Occupied", "Maintenance"],
+    default: "Available"
   },
-  { timestamps: true }
+  patient: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Patient"
+  },
+  services: [
+    {
+      service: { type: mongoose.Schema.Types.ObjectId, ref: "Service" },
+      quantity: { type: Number, default: 1 },
+      price: { type: Number, required: true }
+    }
+  ],
+  treatments: [
+    {
+      name: String,
+      description: String,
+      price: Number
+    }
+  ],
+  medicines: [
+    {
+      name: String,
+      dosage: String,
+      frequency: String,
+      price: Number
+    }
+  ]
+}, { timestamps: true }
 );
 
 export const Bed = mongoose.model("Bed", bedSchema);

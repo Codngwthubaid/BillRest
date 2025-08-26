@@ -1,4 +1,5 @@
 import { axiosInstance } from '@/lib/axiosInstance';
+import type { Patient } from '@/types/patient.types';
 import type { Bed, AddBedPayload, UpdateBedPayload } from '@/types/bed.types';
 
 export const bedService = {
@@ -26,4 +27,9 @@ export const bedService = {
         const response = await axiosInstance.delete(`/bed/delete/${id}`);
         return response.data;
     },
+
+    getAllPatients: async (): Promise<Patient[]> => {
+        const response = await axiosInstance.get('/bed/patients/all');
+        return response.data;
+    }
 };

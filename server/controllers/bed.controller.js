@@ -1,4 +1,5 @@
 import { Bed } from "../models/bed.model.js";
+import { Patient } from "../models/patient.model.js";
 
 export const addBed = async (req, res) => {
   try {
@@ -27,13 +28,32 @@ export const addBed = async (req, res) => {
 export const updateBed = async (req, res) => {
   try {
     const { id } = req.params;
-    const { roomNumber, bedNumber, bedCharges, status, patient } = req.body;
+    const {
+      roomNumber,
+      bedNumber,
+      bedCharges,
+      patient,
+      services,
+      treatments,
+      medicines
+    } = req.body;
 
-    const updatedBed = await Bed.findByIdAndUpdate(
-      id,
-      { roomNumber, bedNumber, bedCharges, status, patient },
-      { new: true }
-    );
+    const updateData = { roomNumber, bedNumber, bedCharges };
+
+    // ✅ If patient is provided, assign them and set status to "Occupied"
+    if (patient) {
+      updateData.patient = patient;
+      updateData.status = "Occupied";
+    }
+
+    // ✅ Add services, treatments, and medicines if provided
+    if (services) updateData.services = services;
+    if (treatments) updateData.treatments = treatments;
+    if (medicines) updateData.medicines = medicines;
+
+    const updatedBed = await Bed.findByIdAndUpdate(id, updateData, { new: true })
+      .populate("patient")
+      .populate("services.service");
 
     if (!updatedBed) {
       return res.status(404).json({ message: "Bed not found" });
@@ -62,25 +82,34 @@ export const deleteBed = async (req, res) => {
 };
 
 export const getAllBeds = async (req, res) => {
-    try {
-        const beds = await Bed.find().sort({ createdAt: -1 });
-        res.status(200).json(beds);
-    } catch (error) {
-        res.status(500).json({ message: "Error fetching beds", error: error.message });
-    }
+  try {
+    const beds = await Bed.find().populate("patient").sort({ createdAt: -1 });
+    res.status(200).json(beds);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching beds", error: error.message });
+  }
 };
 
 export const getBedById = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const bed = await Bed.findById(id);
+  try {
+    const { id } = req.params;
+    const bed = await Bed.findById(id).populate("patient");
 
-        if (!bed) {
-            return res.status(404).json({ message: "Bed not found" });
-        }
-
-        res.status(200).json(bed);
-    } catch (error) {
-        res.status(500).json({ message: "Error fetching bed", error: error.message });
+    if (!bed) {
+      return res.status(404).json({ message: "Bed not found" });
     }
+
+    res.status(200).json(bed);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching bed", error: error.message });
+  }
+};
+
+export const getAllPatients = async (req, res) => {
+  try {
+    const patients = await Patient.find({ clinic: req.user.id });
+    res.status(200).json(patients);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching patients", error: error.message });
+  }
 };

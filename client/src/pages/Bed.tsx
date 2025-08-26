@@ -9,6 +9,8 @@ import type { Bed } from "@/types/bed.types";
 import CreateBedDialog from "@/components/bed/CreateBedDialog";
 import UpdateBedDialog from "@/components/bed/UpdateBedDialog";
 import DeleteBedDialog from "@/components/bed/DeleteBedDialog";
+import { AdminPatientDialog } from "@/components/bed/AdmitPatientDialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function Bed() {
   const { user } = useAuthStore();
@@ -19,18 +21,19 @@ export default function Bed() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showAdmitDialog, setShowAdmitDialog] = useState(false);
   const [selectedBed, setSelectedBed] = useState<Bed | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔁 Fetch beds on mount
+  const [showPatientDetails, setShowPatientDetails] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<any>(null);
+
   useEffect(() => {
     fetchBeds().finally(() => setLoading(false));
   }, []);
 
-  // 🧠 Status filter options
   const statuses = ["Available", "Occupied", "Maintenance"];
 
-  // 🔍 Filtered bed list
   const filteredBeds = useMemo(() => {
     return beds.filter((bed) => {
       const matchesSearch = (bed.bedNumber ?? "").toString().toLowerCase().includes(search.toLowerCase());
@@ -46,6 +49,7 @@ export default function Bed() {
       </div>
     );
   }
+
 
   return (
     <div className="space-y-6 p-6">
@@ -135,15 +139,42 @@ export default function Bed() {
                 </div>
                 <div className="flex justify-between">
                   <span>Status:</span>
-                  <span className={`font-semibold ${
-                    bed.status === "Available" ? "text-green-600" :
+                  <span className={`font-semibold ${bed.status === "Available" ? "text-green-600" :
                     bed.status === "Occupied" ? "text-red-600" :
-                    "text-yellow-600"
-                  }`}>
+                      "text-yellow-600"
+                    }`}>
                     {bed.status}
                   </span>
                 </div>
               </div>
+
+              {/* ✅ Admit Patient Button */}
+              {bed.status === "Available" && user?.role === "clinic" && (
+                <div className="mt-4">
+                  <Button
+                    className="w-full bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => { setSelectedBed(bed); setShowAdmitDialog(true); }}
+                  >
+                    Admit Patient
+                  </Button>
+                </div>
+              )}
+
+              {bed.status === "Occupied" && bed.patient && (
+                <div className="mt-4 space-y-2">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      setSelectedPatient(bed.patient);
+                      setShowPatientDetails(true);
+                    }}
+                  >
+                    View Patient Details
+                  </Button>
+                </div>
+              )}
+
             </CardContent>
           </Card>
         ))}
@@ -178,6 +209,33 @@ export default function Bed() {
           setShowDeleteDialog(false);
         }}
       />
+
+      <AdminPatientDialog
+        open={showAdmitDialog}
+        onClose={() => setShowAdmitDialog(false)}
+        bedId={selectedBed?._id}
+        onAdmitSuccess={fetchBeds}
+      />
+
+      {/* ✅ Patient Details Dialog */}
+      <Dialog open={showPatientDetails} onOpenChange={setShowPatientDetails}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Patient Details</DialogTitle>
+          </DialogHeader>
+          {selectedPatient ? (
+            <div className="space-y-2">
+              <p><strong>Name:</strong> {selectedPatient.name}</p>
+              <p><strong>Age:</strong> {selectedPatient.age}</p>
+              <p><strong>Gender:</strong> {selectedPatient.gender}</p>
+              <p><strong>Phone:</strong> {selectedPatient.phoneNumber}</p>
+              <p><strong>Address:</strong> {selectedPatient.address}</p>
+            </div>
+          ) : (
+            <p>No patient details available.</p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
