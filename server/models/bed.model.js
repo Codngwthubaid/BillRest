@@ -16,8 +16,12 @@ const bedSchema = new mongoose.Schema({
   services: [
     {
       service: { type: mongoose.Schema.Types.ObjectId, ref: "Service" },
-      quantity: { type: Number, default: 1 },
-      price: { type: Number, required: true }
+      name: String,
+      category: String,
+      unit: String,
+      gstRate: Number,
+      price: Number,
+      quantity: Number
     }
   ],
   treatments: [
@@ -35,7 +39,7 @@ const bedSchema = new mongoose.Schema({
       price: Number
     }
   ]
-}, { timestamps: true }
-);
+}, { timestamps: true });
+
 
 export const Bed = mongoose.model("Bed", bedSchema);

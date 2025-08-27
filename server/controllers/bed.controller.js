@@ -1,5 +1,6 @@
 import { Bed } from "../models/bed.model.js";
 import { Patient } from "../models/patient.model.js";
+import { Service } from "../models/service.model.js";
 
 export const addBed = async (req, res) => {
   try {
@@ -25,45 +26,95 @@ export const addBed = async (req, res) => {
   }
 };
 
+// export const updateBed = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const {
+//       roomNumber,
+//       bedNumber,
+//       bedCharges,
+//       patient,
+//       services,
+//       treatments,
+//       medicines
+//     } = req.body;
+
+//     const updateData = { roomNumber, bedNumber, bedCharges };
+
+//     // ✅ If patient is provided, assign them and set status to "Occupied"
+//     if (patient) {
+//       updateData.patient = patient;
+//       updateData.status = "Occupied";
+//     }
+
+//     // ✅ Add services, treatments, and medicines if provided
+//     if (services) updateData.services = services;
+//     if (treatments) updateData.treatments = treatments;
+//     if (medicines) updateData.medicines = medicines;
+
+//     await Bed.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+
+//     const updatedBed = await Bed.findById(id)
+//       .populate("patient")
+//       .populate({
+//         path: "services.service",
+//         select: "name price category unit"
+//       });
+
+//     res.status(200).json({ message: "Bed updated successfully", bed: updatedBed });
+
+//   } catch (error) {
+//     res.status(500).json({ message: "Error updating bed", error: error.message });
+//   }
+// };
+
+
 export const updateBed = async (req, res) => {
   try {
     const { id } = req.params;
-    const {
-      roomNumber,
-      bedNumber,
-      bedCharges,
-      patient,
-      services,
-      treatments,
-      medicines
-    } = req.body;
+    const { roomNumber, bedNumber, bedCharges, patient, services, treatments, medicines } = req.body;
 
-    const updateData = { roomNumber, bedNumber, bedCharges };
+    const updateData = {};
+    if (roomNumber) updateData.roomNumber = roomNumber;
+    if (bedNumber) updateData.bedNumber = bedNumber;
+    if (bedCharges) updateData.bedCharges = bedCharges;
 
-    // ✅ If patient is provided, assign them and set status to "Occupied"
+    // ✅ Assign patient and set status
     if (patient) {
       updateData.patient = patient;
       updateData.status = "Occupied";
     }
 
-    // ✅ Add services, treatments, and medicines if provided
-    if (services) updateData.services = services;
+    // ✅ Directly save services from frontend (includes details)
+    if (services && Array.isArray(services)) {
+      updateData.services = services.map(s => ({
+        service: s.service,
+        name: s.name,
+        category: s.category,
+        unit: s.unit,
+        gstRate: s.gstRate,
+        price: s.price,
+        quantity: s.quantity || 1
+      }));
+    }
+
     if (treatments) updateData.treatments = treatments;
     if (medicines) updateData.medicines = medicines;
 
-    const updatedBed = await Bed.findByIdAndUpdate(id, updateData, { new: true })
-      .populate("patient")
-      .populate("services.service");
-
-    if (!updatedBed) {
-      return res.status(404).json({ message: "Bed not found" });
-    }
+    const updatedBed = await Bed.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true
+    }).populate("patient");
 
     res.status(200).json({ message: "Bed updated successfully", bed: updatedBed });
+
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Error updating bed", error: error.message });
   }
 };
+
+
 
 export const deleteBed = async (req, res) => {
   try {
