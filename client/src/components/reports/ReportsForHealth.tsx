@@ -33,7 +33,6 @@ import {
     Loader2,
     Activity,
     LineChart,
-    PieChart
 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -44,12 +43,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
 import { AppointmentChart } from './AppointmentChart';
 import { AppointmentStatsChart } from './AppointmentStatsChart';
 import { ServicesChart } from './ServicesChart';
-import { AppointmentStatusChart } from './AppointmentStatusChart';
 
 export default function ReportsForHealth() {
     const [isLoading, setIsLoading] = useState(true);
     const { healthReport: data, loading, fetchHealthReport: fetchReport } = useReportStore();
-    const [filterType, setFilterType] = useState<ReportFilterType>('monthly');
+    const [filterType, setFilterType] = useState<ReportFilterType>('daily');
     const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [endDate, setEndDate] = useState<string>('');
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -223,22 +221,18 @@ export default function ReportsForHealth() {
                         </CardHeader>
                         <CardContent className='px-0'>
                             <Tabs defaultValue="sales" className="w-full">
-                                <TabsList className="grid w-full grid-cols-4 mb-6">
-                                    <TabsTrigger value="sales" className="flex items-center gap-2">
+                                <TabsList className="grid w-full grid-cols-3 mb-6 gap-x-3">
+                                    <TabsTrigger value="sales" className="flex items-center gap-2 justify-center border-2 p-3 rounded-2xl cursor-pointer">
                                         <LineChart className="h-4 w-4" />
                                         Appointment Trend
                                     </TabsTrigger>
-                                    <TabsTrigger value="revenue" className="flex items-center gap-2">
+                                    <TabsTrigger value="revenue" className="flex items-center gap-2 justify-center border-2 p-3 rounded-2xl cursor-pointer">
                                         <BarChart3 className="h-4 w-4" />
                                         Appointment Distribution
                                     </TabsTrigger>
-                                    <TabsTrigger value="products" className="flex items-center gap-2">
+                                    <TabsTrigger value="products" className="flex items-center gap-2 justify-center border-2 p-3 rounded-2xl cursor-pointer">
                                         <Package className="h-4 w-4" />
                                         Services
-                                    </TabsTrigger>
-                                    <TabsTrigger value="status" className="flex items-center gap-2">
-                                        <PieChart className="h-4 w-4" />
-                                        Appointment Status
                                     </TabsTrigger>
                                 </TabsList>
 
@@ -254,9 +248,6 @@ export default function ReportsForHealth() {
                                     <ServicesChart data={data} filterType={filterType} />
                                 </TabsContent>
 
-                                <TabsContent value="status" className="space-y-4">
-                                    <AppointmentStatusChart data={data} filterType={filterType} />
-                                </TabsContent>
                             </Tabs>
                         </CardContent>
 
@@ -310,7 +301,8 @@ export default function ReportsForHealth() {
                                             <TableHead>Gender</TableHead>
                                             <TableHead>Phone Number</TableHead>
                                             <TableHead>Address</TableHead>
-                                            <TableHead>Status</TableHead>
+                                            <TableHead>Date</TableHead>
+                                            <TableHead>Time</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -322,7 +314,8 @@ export default function ReportsForHealth() {
                                                 <TableCell>{appointment.patient?.gender}</TableCell>
                                                 <TableCell>{appointment.patient?.phoneNumber}</TableCell>
                                                 <TableCell>{appointment.patient?.address}</TableCell>
-                                                <TableCell><Badge variant="outline">{appointment.status}</Badge></TableCell>
+                                                <TableCell>{appointment.date ? new Date(appointment.date).toLocaleDateString() : ""}</TableCell>
+                                                <TableCell>{appointment.time}</TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>

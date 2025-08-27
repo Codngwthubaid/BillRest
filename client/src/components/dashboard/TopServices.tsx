@@ -24,6 +24,8 @@ export default function TopServices() {
       ? allServices?.services?.slice(0, 4) || []
       : healthReport?.topServices?.slice(0, 4) || [];
 
+  console.log("Services to Show:", servicesToShow);
+
   return (
     <Card className="rounded-lg shadow-sm border">
       <CardHeader className="border-b pt-6">
@@ -40,7 +42,7 @@ export default function TopServices() {
       <CardContent className="pb-6">
         <div className="space-y-4">
           {servicesToShow?.length > 0 ? (
-            servicesToShow.map((service, index) => (
+            servicesToShow.map((service , index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -58,7 +60,7 @@ export default function TopServices() {
                 {user?.role === "clinic" && (
                   <div className="text-right">
                     <p className="font-semibold">
-                      Amount : {"₹" + Number(service?.price || 0)}
+                      Amount : {"₹" + Number(service?.totalSales || 0)}
                     </p>
                   </div>
                 )}

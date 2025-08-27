@@ -1,6 +1,7 @@
-import { Edit3, Trash2, User, Phone, MapPin, CalendarCheck, Clock } from 'lucide-react';
+import { Edit3, Trash2, User, Phone, MapPin } from 'lucide-react';
 import type { Patient } from '@/types/patient.types';
 import { useAuthStore } from '@/store/auth.store';
+import { Button } from '../ui/button';
 
 interface PatientCardProps {
   patient: Patient;
@@ -18,7 +19,8 @@ export default function PatientCard({
 
   const { user } = useAuthStore();
   const totalVisits = patient.visits.length;
-  const completedVisits = patient.visits.filter(v => v.status === "Admitted").length;
+
+  console.log(patient)
 
   return (
     <div className="rounded-xl p-6 border transition-all flex flex-col justify-between duration-200 dark:bg-[#171717]">
@@ -71,33 +73,22 @@ export default function PatientCard({
         </div>
       </div>
 
-      <div>
-        {/* Stats */}
-        <div className="flex items-center justify-between mb-6 p-4 border rounded-lg">
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-1 text-blue-600 mb-1">
-              <CalendarCheck className="w-4 h-4" />
-              <span className="text-lg font-semibold">{totalVisits}</span>
-            </div>
-            <p className="text-xs">Visits</p>
-          </div>
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-1 text-green-600 mb-1">
-              <Clock className="w-4 h-4" />
-              <span className="text-lg font-semibold">{completedVisits}</span>
-            </div>
-            <p className="text-xs">Admitted</p>
+      <div className='flex justify-between items-center'>
+        <div className="flex">
+            <p className="text-lg font-semibold">No of Visits : </p>
+            <div className="text-blue-600">
+              <span className="text-lg font-bold">{totalVisits}</span>
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex space-x-3">
-          <button
+          <Button
+            variant="default"
             onClick={onViewDetails}
-            className="flex-1 px-4 py-2 dark:text-white border rounded-lg transition-colors text-sm font-medium"
+            className="flex-1 bg-blue-500 hover:bg-blue-600 px-4 py-2 dark:text-white border rounded-lg transition-colors text-sm font-medium"
           >
             View Details
-          </button>
+          </Button>
         </div>
       </div>
     </div>

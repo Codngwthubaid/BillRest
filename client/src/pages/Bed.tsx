@@ -32,7 +32,7 @@ export default function Bed() {
     fetchBeds().finally(() => setLoading(false));
   }, []);
 
-  const statuses = ["Available", "Occupied", "Maintenance"];
+  const statuses = ["Available", "Occupied"];
 
   const filteredBeds = useMemo(() => {
     return beds.filter((bed) => {

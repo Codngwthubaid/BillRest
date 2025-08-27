@@ -305,12 +305,6 @@
 // }
 
 
-
-
-
-
-
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -320,18 +314,28 @@ import { format } from "date-fns";
 import { usePatientStore } from "@/store/patient.store";
 import { useAppointmentStore } from "@/store/appointment.store";
 import { toast } from "sonner";
+import AppointmentListDialog from "@/components/appointments/AppointmentListDialog";
 
 export default function AppointmentsPage() {
-    const { patients, fetchPatients, setPatients } = usePatientStore();
+    const { patients, fetchPatients } = usePatientStore();
     const { createAppointment } = useAppointmentStore();
 
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
-    const [description, setDescription] = useState(""); // New field
+    const [description, setDescription] = useState("");
 
     const [showNewPatientForm, setShowNewPatientForm] = useState(false);
-    const [newPatient, setNewPatient] = useState({ name: "", phoneNumber: "", age: "", gender: "" });
+    const [newPatient, setNewPatient] = useState({
+        name: "",
+        phoneNumber: "",
+        address: "",
+        age: "",
+        gender: ""
+    });
+
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         fetchPatients();
@@ -355,184 +359,228 @@ export default function AppointmentsPage() {
         return slots;
     }
 
-    const handleAddPatient = () => {
-        if (!newPatient.name || !newPatient.phoneNumber) {
-            toast.error("Please enter patient name and phone number");
-            return;
-        }
+    const handleCreateAppointment = async () => {
+        try {
+            setIsSubmitting(true);
 
-        const addedPatient = { ...newPatient, _id: Date.now().toString() };
-        setPatients([...patients, addedPatient]);
-        toast.success("Patient added successfully!");
-        setNewPatient({ name: "", phoneNumber: "", age: "", gender: "" });
-        setShowNewPatientForm(false);
-        setSelectedPatientId(addedPatient._id);
+            if (!selectedDate) return toast.error("Please select an appointment date.");
+            if (!selectedTime) return toast.error("Please select an appointment time.");
+            if (!selectedPatientId && !newPatient.name) return toast.error("Please select a patient or add a new patient.");
+            if (!description.trim()) return toast.error("Please provide a description.");
+
+            const payload: any = {
+                date: format(selectedDate, "yyyy-MM-dd"),
+                time: selectedTime,
+                description
+            };
+
+            if (selectedPatientId && selectedPatientId.length === 24) {
+                payload.patientId = selectedPatientId;
+            } else {
+                // Validate new patient fields
+                const { name, phoneNumber, address, age, gender } = newPatient;
+                if (!name || !phoneNumber || !address || !age || !gender) {
+                    toast.error("All patient fields are required.");
+                    setIsSubmitting(false);
+                    return;
+                }
+
+                payload.newPatient = {
+                    name,
+                    phoneNumber,
+                    address,
+                    age: Number(age),
+                    gender
+                };
+            }
+
+            const appointment = await createAppointment(payload);
+
+            if (appointment) {
+                toast.success("Appointment created successfully!");
+                resetForm();
+            } else {
+                toast.error("Failed to create appointment");
+            }
+        } catch (error: any) {
+            console.error("Error creating appointment:", error);
+            toast.error("An error occurred while creating the appointment.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handleCreateAppointment = async () => {
-        if (!selectedDate || !selectedTime || !selectedPatientId) {
-            toast.error("Please select date, time, and patient");
-            return;
-        }
-
-        const payload = {
-            patientId: selectedPatientId,
-            date: format(selectedDate, "yyyy-MM-dd"),
-            time: selectedTime,
-            description // include description
-        };
-
-        const appointment = await createAppointment(payload);
-        if (appointment) {
-            toast.success("Appointment created successfully!");
-            setSelectedDate(null);
-            setSelectedTime(null);
-            setSelectedPatientId(null);
-            setDescription(""); // reset description
-        } else {
-            toast.error("Failed to create appointment");
-        }
+    const resetForm = () => {
+        setSelectedDate(null);
+        setSelectedTime(null);
+        setSelectedPatientId(null);
+        setDescription("");
+        setShowNewPatientForm(false);
+        setNewPatient({ name: "", phoneNumber: "", address: "", age: "", gender: "" });
     };
 
     const selectedPatient = patients.find(p => p._id === selectedPatientId);
 
     return (
-        <div className="flex gap-6 p-6">
-            {/* LEFT SIDE: Calendar + Time Slots */}
-            <div className="w-1/2 flex gap-6 justify-center items-start">
-                <Calendar
-                    mode="single"
-                    required={true}
-                    selected={selectedDate || undefined}
-                    onSelect={setSelectedDate}
-                    className="rounded-md border"
-                />
-
-                {selectedDate && (
-                    <div>
-                        <h3 className="font-semibold mb-2">Available Time Slots</h3>
-                        <div className="grid grid-cols-3 gap-2">
-                            {timeSlots.map((time) => (
-                                <Button
-                                    key={time}
-                                    variant={selectedTime === time ? "default" : "outline"}
-                                    onClick={() => setSelectedTime(time)}
-                                >
-                                    {time}
-                                </Button>
-                            ))}
-                        </div>
-                    </div>
-                )}
+        <div className="max-w-7xl mx-auto p-6">
+            <div className="mb-5 flex justify-between items-center">
+                <div className="mb-5">
+                    <h1 className="text-2xl font-bold">Appointments</h1>
+                    <p className="text-gray-500">Manage your appointments and admissions</p>
+                </div>
+                <Button
+                    className="bg-blue-500 hover:bg-blue-600 cursor-pointer"
+                    variant="default"
+                    onClick={() => setIsDialogOpen(true)}
+                >
+                    View Appointment List
+                </Button>
             </div>
 
-            {/* RIGHT SIDE: Appointment Form */}
-            <div className="w-1/2 border rounded-lg p-6 flex flex-col gap-4">
-                <h2 className="text-xl font-bold">Create Appointment</h2>
+            <div className="flex justify-start items-start">
+                {/* LEFT SIDE: Calendar + Time Slots */}
+                <div className="w-1/2 flex gap-6 justify-center items-start">
+                    <Calendar
+                        mode="single"
+                        required={true}
+                        selected={selectedDate || undefined}
+                        onSelect={setSelectedDate}
+                        className="rounded-md border"
+                    />
 
-                {/* Patient Selection Dropdown */}
-                <div>
-                    <label className="block mb-1 text-sm font-medium">Select Patient</label>
-                    <Select onValueChange={setSelectedPatientId}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select a patient" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {patients.length > 0 ? (
-                                patients.map((patient) => (
-                                    <SelectItem key={patient._id} value={patient._id}>
-                                        {patient.name} ({patient.phoneNumber})
-                                    </SelectItem>
-                                ))
-                            ) : (
-                                <p className="p-2 text-gray-500 text-sm">No patients found</p>
-                            )}
-                        </SelectContent>
-                    </Select>
-
-                    {/* Patient details */}
-                    {selectedPatient && (
-                        <div className="border p-4 rounded-lg mt-2 bg-gray-50">
-                            <h3 className="font-semibold mb-2">Patient Details</h3>
-                            <p><strong>Name:</strong> {selectedPatient.name}</p>
-                            <p><strong>Phone:</strong> {selectedPatient.phoneNumber}</p>
-                            <p><strong>Age:</strong> {selectedPatient.age || "N/A"}</p>
-                            <p><strong>Gender:</strong> {selectedPatient.gender || "N/A"}</p>
+                    {selectedDate && (
+                        <div>
+                            <h3 className="font-semibold mb-2">Available Time Slots</h3>
+                            <div className="grid grid-cols-3 gap-2">
+                                {timeSlots.map((time) => (
+                                    <Button
+                                        key={time}
+                                        variant={selectedTime === time ? "default" : "outline"}
+                                        onClick={() => setSelectedTime(time)}
+                                    >
+                                        {time}
+                                    </Button>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>
 
-                {/* Toggle Add New Patient (hide if patient selected) */}
-                {!selectedPatientId && (
-                    <>
-                        <Button
-                            variant="link"
-                            className="p-0 text-blue-600"
-                            onClick={() => setShowNewPatientForm(!showNewPatientForm)}
-                        >
-                            {showNewPatientForm ? "Cancel" : "Add New Patient"}
-                        </Button>
+                {/* RIGHT SIDE: Appointment Form */}
+                <div className="w-1/2 border rounded-lg p-6 flex flex-col gap-4">
+                    <h2 className="text-xl font-bold">Create Appointment</h2>
 
-                        {showNewPatientForm && (
-                            <div className="border p-4 rounded-lg flex flex-col gap-3">
-                                <Input
-                                    placeholder="Name"
-                                    value={newPatient.name}
-                                    onChange={(e) => setNewPatient({ ...newPatient, name: e.target.value })}
-                                />
-                                <Input
-                                    placeholder="Phone Number"
-                                    value={newPatient.phoneNumber}
-                                    onChange={(e) => setNewPatient({ ...newPatient, phoneNumber: e.target.value })}
-                                />
-                                <Input
-                                    placeholder="Age"
-                                    value={newPatient.age}
-                                    onChange={(e) => setNewPatient({ ...newPatient, age: e.target.value })}
-                                />
-                                <Select onValueChange={(value) => setNewPatient({ ...newPatient, gender: value })}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select Gender" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Male">Male</SelectItem>
-                                        <SelectItem value="Female">Female</SelectItem>
-                                        <SelectItem value="Other">Other</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <Button onClick={handleAddPatient}>Save Patient</Button>
+                    {/* Patient Selection Dropdown */}
+                    <div>
+                        <label className="block mb-1 text-sm font-medium">Select Patient</label>
+                        <Select onValueChange={setSelectedPatientId}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a patient" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {patients.length > 0 ? (
+                                    patients.map((patient) => (
+                                        <SelectItem key={patient._id} value={patient._id}>
+                                            {patient.name} ({patient.phoneNumber})
+                                        </SelectItem>
+                                    ))
+                                ) : (
+                                    <p className="p-2 text-gray-500 text-sm">No patients found</p>
+                                )}
+                            </SelectContent>
+                        </Select>
+
+                        {/* Patient details */}
+                        {selectedPatient && (
+                            <div className="border p-4 rounded-lg mt-2 bg-gray-50">
+                                <p><strong>Name:</strong> {selectedPatient.name}</p>
+                                <p><strong>Phone:</strong> {selectedPatient.phoneNumber}</p>
+                                <p><strong>Address:</strong> {selectedPatient.address}</p>
+                                <p><strong>Age:</strong> {selectedPatient.age}</p>
+                                <p><strong>Gender:</strong> {selectedPatient.gender}</p>
                             </div>
                         )}
-                    </>
-                )}
+                    </div>
 
-                {/* Description field */}
-                <div className="flex flex-col gap-1">
-                    <label className="text-sm font-medium">Description</label>
-                    <Input
-                        placeholder="Enter appointment description"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                    />
+                    {/* Toggle Add New Patient (hide if patient selected) */}
+                    {!selectedPatientId && (
+                        <>
+                            <Button
+                                variant="link"
+                                className="p-0 text-blue-600"
+                                onClick={() => setShowNewPatientForm(!showNewPatientForm)}
+                            >
+                                {showNewPatientForm ? "Cancel" : "Add New Patient"}
+                            </Button>
+
+                            {showNewPatientForm && (
+                                <div className="border p-4 rounded-lg flex flex-col gap-3">
+                                    <Input
+                                        placeholder="Name"
+                                        value={newPatient.name}
+                                        onChange={(e) => setNewPatient({ ...newPatient, name: e.target.value })}
+                                    />
+                                    <Input
+                                        placeholder="Phone Number"
+                                        value={newPatient.phoneNumber}
+                                        onChange={(e) => setNewPatient({ ...newPatient, phoneNumber: e.target.value })}
+                                    />
+                                    <Input
+                                        placeholder="Age"
+                                        value={newPatient.age}
+                                        onChange={(e) => setNewPatient({ ...newPatient, age: e.target.value })}
+                                    />
+                                    <Input
+                                        placeholder="Address"
+                                        value={newPatient.address}
+                                        onChange={(e) => setNewPatient({ ...newPatient, address: e.target.value })}
+                                    />
+                                    <Select onValueChange={(value) => setNewPatient({ ...newPatient, gender: value })}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select Gender" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Male">Male</SelectItem>
+                                            <SelectItem value="Female">Female</SelectItem>
+                                            <SelectItem value="Other">Other</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {/* Description field */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-medium">Description</label>
+                        <Input
+                            placeholder="Enter appointment description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Appointment Info */}
+                    <div>
+                        <p className="text-sm text-black">
+                            Selected Date: {selectedDate ? format(selectedDate, "PPP") : "None"}
+                        </p>
+                        <p className="text-sm text-black">Selected Time: {selectedTime || "None"}</p>
+                    </div>
+
+                    {/* Create Appointment Button */}
+                    <Button
+                        className="mt-4 bg-blue-500 hover:bg-blue-600 cursor-pointer"
+                        onClick={handleCreateAppointment}
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? "Creating..." : "Create Appointment"}
+                    </Button>
                 </div>
-
-                {/* Appointment Info */}
-                <div>
-                    <p className="text-sm text-black">
-                        Selected Date: {selectedDate ? format(selectedDate, "PPP") : "None"}
-                    </p>
-                    <p className="text-sm text-black">Selected Time: {selectedTime || "None"}</p>
-                </div>
-
-                {/* Create Appointment Button */}
-                <Button
-                    className="mt-4 bg-blue-500 hover:bg-blue-600 cursor-pointer"
-                    onClick={handleCreateAppointment}
-                    disabled={!selectedDate || !selectedTime || !selectedPatientId}
-                >
-                    Create Appointment
-                </Button>
             </div>
+
+            {/* Dialog for Appointment List */}
+            <AppointmentListDialog open={isDialogOpen} onClose={setIsDialogOpen} />
         </div>
     );
 }

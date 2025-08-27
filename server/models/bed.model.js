@@ -6,7 +6,7 @@ const bedSchema = new mongoose.Schema({
   bedCharges: Number,
   status: {
     type: String,
-    enum: ["Available", "Occupied", "Maintenance"],
+    enum: ["Available", "Occupied"],
     default: "Available"
   },
   patient: {

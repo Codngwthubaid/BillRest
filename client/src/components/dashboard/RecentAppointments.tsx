@@ -27,6 +27,7 @@ export default function RecentAppointments() {
       ? (Array.isArray(allAppointments?.appointments) ? allAppointments.appointments.slice(0, 4) : [])
       : (Array.isArray(healthReport?.topAppointments) ? healthReport.topAppointments.slice(0, 4) : []);
 
+
   return (
     <Card className="rounded-lg shadow-sm border">
       <CardHeader className="border-b pt-6">

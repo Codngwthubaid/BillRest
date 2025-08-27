@@ -26,9 +26,11 @@ export const ServicesChart: React.FC<ServicesChartProps> = ({ data, filterType }
     rank: index + 1,
   }));
 
-  const totalAppointments = enhancedServiceData.reduce((sum: number, service: any) => sum + service.quantity, 0);
+  console.log(data)
+
   const totalRevenue = enhancedServiceData.reduce((sum: number, service: any) => sum + service.totalSales, 0);
   const topService = enhancedServiceData[0];
+  const totalServices = data.services?.length;
 
   return (
     <div className="space-y-4">
@@ -37,9 +39,9 @@ export const ServicesChart: React.FC<ServicesChartProps> = ({ data, filterType }
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Total Appointments</p>
+                <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Total Services</p>
                 <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                  {totalAppointments.toLocaleString()}
+                  {totalServices}
                 </p>
               </div>
               <Wrench className="h-8 w-8 text-blue-500" />

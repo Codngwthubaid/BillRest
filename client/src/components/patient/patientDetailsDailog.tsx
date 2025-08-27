@@ -54,12 +54,10 @@ export default function PatientDetailsDialog({
                         <h4 className="font-medium text-gray-900">
                           #{visit.appointmentNumber}
                         </h4>
-                        <p className="text-sm text-gray-500">
-                          Status: {visit.status}
-                        </p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-500">
+                          Date of appointment creation :
                           {typeof visit.createdAt === 'string' ? visit.createdAt.slice(0, 10) : ''}
                         </p>
                       </div>
