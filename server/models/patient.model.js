@@ -13,8 +13,6 @@ const patientSchema = new mongoose.Schema({
       appointmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Appointment' },
       appointmentNumber: { type: String, required: true },
       description: { type: String, default: "" },
-      status: { type: String, required: true },
-      admitted: { type: Boolean, required: true },
       date: { type: Date }, // optional, if needed
       time: { type: String }
     }

@@ -175,7 +175,7 @@ export default function UpdateBedDialog({ open, bed, onClose, onUpdate }: Props)
               <p><strong>Name:</strong> {service.name}</p>
               <p><strong>Category:</strong> {service.category}</p>
               <p><strong>Unit:</strong> {service.unit}</p>
-              <p><strong>GST:</strong> {service.gst}%</p>
+              <p><strong>GST:</strong> {service.gstRate}%</p>
               <div className="flex gap-2 mt-2">
                 <Input type="number" placeholder="Quantity" value={service.quantity} onChange={(e) => updateServiceField(index, "quantity", Number(e.target.value))} />
                 <Input type="number" placeholder="Price" value={service.price} onChange={(e) => updateServiceField(index, "price", Number(e.target.value))} />
