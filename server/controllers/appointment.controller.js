@@ -71,7 +71,6 @@ export const createAppointment = async (req, res) => {
   }
 };
 
-
 export const getAppointments = async (req, res) => {
   try {
     const { date, patient } = req.query;
@@ -95,14 +94,14 @@ export const updateAppointment = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
-    const { patientId, name, phoneNumber, age, gender, description, status, admitted, date, time } = req.body;
+    const { patientId, name, phoneNumber, age, gender, description, date, time } = req.body;
 
     if (!id) return res.status(400).json({ message: "Invalid appointment ID" });
 
     // 1. Update appointment
     const appointment = await Appointment.findOneAndUpdate(
       { _id: id, clinic: userId },
-      { description, status, admitted, date, time },
+      { description, date, time },
       { new: true }
     );
 
@@ -138,8 +137,6 @@ export const updateAppointment = async (req, res) => {
       appointmentId: appointment._id,
       appointmentNumber: appointment.appointmentNumber,
       description: description || "",
-      status: status || "Pending",
-      admitted: admitted || false,
       date,
       time,
       updatedAt: new Date()

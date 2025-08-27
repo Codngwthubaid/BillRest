@@ -16,29 +16,26 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Edit, Trash2, Search } from "lucide-react";
+import { Edit, Trash2, Search, Loader2 } from "lucide-react";
 import { useAppointmentStore } from "@/store/appointment.store";
-import { Loader2 } from "lucide-react";
+import UpdateAppointmentDialog from "./updateAppointment";
+import { DeleteAppointmentDialog } from "./deleteAppointment"; // ✅ Import Delete Dialog
 
 interface AppointmentListDialogProps {
   open: boolean;
   onClose: () => void;
-  onView: (id: string) => void;
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
 }
 
-export default function AppointmentListDialog({
-  open,
-  onClose,
-  onEdit,
-  onDelete,
-}: AppointmentListDialogProps) {
-  const { appointments, fetchAppointments, loading } = useAppointmentStore();
+export default function AppointmentListDialog({ open, onClose }: AppointmentListDialogProps) {
+  const { appointments, fetchAppointments, deleteAppointment, loading } = useAppointmentStore();
+
   const [searchTerm, setSearchTerm] = useState("");
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
 
-
-    console.log("Appointments in Dialog:", appointments);
+  // ✅ Delete dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [appointmentToDelete, setAppointmentToDelete] = useState<any>(null);
 
   useEffect(() => {
     if (open) {
@@ -46,7 +43,7 @@ export default function AppointmentListDialog({
     }
   }, [open, fetchAppointments]);
 
-  // Filter & Search Logic
+  // ✅ Filter appointments by search term
   const filteredAppointments = useMemo(() => {
     return appointments.filter((appt) => {
       const matchesSearch =
@@ -58,13 +55,37 @@ export default function AppointmentListDialog({
     });
   }, [appointments, searchTerm]);
 
+  // ✅ Handle edit click
+  const handleEdit = (id: string) => {
+    const appointment = appointments.find((appt) => appt._id === id);
+    if (appointment) {
+      setSelectedAppointment(appointment);
+      setUpdateDialogOpen(true);
+    }
+  };
+
+  // ✅ Handle delete click (opens confirmation dialog)
+  const handleDeleteClick = (id: string) => {
+    const appointment = appointments.find((appt) => appt._id === id);
+    if (appointment) {
+      setAppointmentToDelete(appointment);
+      setDeleteDialogOpen(true);
+    }
+  };
+
+  // ✅ Handle confirm delete
+  const handleConfirmDelete = async () => {
+    if (appointmentToDelete?._id) {
+      await deleteAppointment(appointmentToDelete._id);
+      setDeleteDialogOpen(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
-            Appointments List
-          </DialogTitle>
+          <DialogTitle className="text-xl font-semibold">Appointments List</DialogTitle>
         </DialogHeader>
 
         {/* Search Bar */}
@@ -111,21 +132,17 @@ export default function AppointmentListDialog({
                       <TableCell>{appt?.patient?.age}</TableCell>
                       <TableCell>
                         {appt?.date ? new Date(appt.date).toLocaleDateString() : ""}
-                        </TableCell>
+                      </TableCell>
                       <TableCell>{appt?.time}</TableCell>
                       <TableCell className="flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => onEdit(appt._id)}
-                        >
+                        <Button size="sm" variant="ghost" onClick={() => handleEdit(appt._id)}>
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
                           size="sm"
                           variant="ghost"
                           className="text-red-500"
-                          onClick={() => onDelete(appt._id)}
+                          onClick={() => handleDeleteClick(appt._id)}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -134,7 +151,7 @@ export default function AppointmentListDialog({
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-gray-500">
+                    <TableCell colSpan={8} className="text-center text-gray-500">
                       No appointments found.
                     </TableCell>
                   </TableRow>
@@ -143,6 +160,21 @@ export default function AppointmentListDialog({
             </Table>
           </ScrollArea>
         )}
+
+        {/* ✅ Update Appointment Dialog */}
+        <UpdateAppointmentDialog
+          open={updateDialogOpen}
+          appointment={selectedAppointment}
+          onClose={() => setUpdateDialogOpen(false)}
+        />
+
+        {/* ✅ Delete Appointment Dialog */}
+        <DeleteAppointmentDialog
+          open={deleteDialogOpen}
+          patientName={appointmentToDelete?.patient?.name || ""}
+          onClose={() => setDeleteDialogOpen(false)}
+          onConfirmDelete={handleConfirmDelete}
+        />
       </DialogContent>
     </Dialog>
   );

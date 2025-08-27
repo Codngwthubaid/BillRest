@@ -130,6 +130,8 @@ export default function UpdateBedDialog({ open, bed, onClose, onUpdate }: Props)
     setForm({ ...form, medicines: updated });
   };
 
+  console.log("Rendering UpdateBedDialog with form:", form);
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
