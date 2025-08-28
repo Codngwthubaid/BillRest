@@ -26,49 +26,6 @@ export const addBed = async (req, res) => {
   }
 };
 
-// export const updateBed = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const {
-//       roomNumber,
-//       bedNumber,
-//       bedCharges,
-//       patient,
-//       services,
-//       treatments,
-//       medicines
-//     } = req.body;
-
-//     const updateData = { roomNumber, bedNumber, bedCharges };
-
-//     // ✅ If patient is provided, assign them and set status to "Occupied"
-//     if (patient) {
-//       updateData.patient = patient;
-//       updateData.status = "Occupied";
-//     }
-
-//     // ✅ Add services, treatments, and medicines if provided
-//     if (services) updateData.services = services;
-//     if (treatments) updateData.treatments = treatments;
-//     if (medicines) updateData.medicines = medicines;
-
-//     await Bed.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
-
-//     const updatedBed = await Bed.findById(id)
-//       .populate("patient")
-//       .populate({
-//         path: "services.service",
-//         select: "name price category unit"
-//       });
-
-//     res.status(200).json({ message: "Bed updated successfully", bed: updatedBed });
-
-//   } catch (error) {
-//     res.status(500).json({ message: "Error updating bed", error: error.message });
-//   }
-// };
-
-
 export const updateBed = async (req, res) => {
   try {
     const { id } = req.params;
@@ -113,8 +70,6 @@ export const updateBed = async (req, res) => {
     res.status(500).json({ message: "Error updating bed", error: error.message });
   }
 };
-
-
 
 export const deleteBed = async (req, res) => {
   try {

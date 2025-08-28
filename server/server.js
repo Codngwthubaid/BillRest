@@ -56,7 +56,6 @@ app.use("/api/services", serviceRoutes)
 app.use("/api/ipd", ipdRoutes)
 app.use("/api/bed", bedRoutes);
 
-
 app.get("/", (_, res) => res.send("🚀 Billing Software Backend Running"));
 
 const PORT = process.env.PORT || 5000;

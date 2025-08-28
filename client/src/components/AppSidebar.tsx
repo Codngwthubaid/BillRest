@@ -39,7 +39,7 @@ export function AppSidebar() {
   } else if (user?.role === "master") {
     menuItems = items.sidebarOfAdmin;
   } else {
-    menuItems = items.sidebarOfCustomer;
+    menuItems = items.sidebarForLoading;
   }
 
   return (

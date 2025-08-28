@@ -14,7 +14,8 @@ import {
     ListOrdered,
     Receipt,
     Hospital,
-    Bed
+    Bed,
+    Loader2
 } from "lucide-react";
 
 export const items = {
@@ -307,7 +308,53 @@ export const items = {
             href: "/help",
             icon: HelpCircle,
         },
-    ]
+    ],
+    sidebarForLoading: [
+        {
+            title: "Loading...",
+            icon: Loader2
+        },
+        {
+            title: "Loading...",
+            icon: Loader2
+        },
+        {
+            title: "Loading...",
+            icon: Loader2
+        },
+        {
+            title: "Loading...",
+            icon: Loader2
+        },
+        {
+            title: "Loading...",
+            icon: Loader2
+        },
+        {
+            title: "Loading...",
+            icon: Loader2
+        },
+        {
+            title: "Loading...",
+            icon: Loader2
+        },
+        {
+            title: "Loading...",
+            icon: Loader2
+        },
+        {
+            title: "Loading...",
+            icon: Loader2
+        },
+        {
+            title: "Loading...",
+            icon: Loader2
+        },
+        {
+            title: "Loading...",
+            icon: Loader2
+        },
+    ],
 };
 export const shortcuts = [
     {

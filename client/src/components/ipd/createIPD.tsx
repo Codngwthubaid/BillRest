@@ -1,15 +1,33 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useIPDStore } from "@/store/ipd.store";
-import { usePatientStore } from "@/store/patient.store"; // ✅ new
-import { useServiceStore } from "@/store/service.store";
-import { useBedStore } from "@/store/bed.store"; // ✅ new
-import type { IPDInput } from "@/types/ipd.types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
+import { useIPDStore } from "@/store/ipd.store";
+import { useBedStore } from "@/store/bed.store";
+import type { IPDInput } from "@/types/ipd.types";
 
 interface Props {
   open: boolean;
@@ -17,55 +35,34 @@ interface Props {
 }
 
 const defaultForm: IPDInput = {
-  patientId: "",
-  isNewPatient: false,
-  admissionDate: new Date().toISOString().split("T")[0],
   bedId: "",
+  dischargeDate: "",
   grantsOrDiscounts: 0,
-  treatments: [],
   note: "",
+  patientId: ""
 };
 
 export default function CreateIPDDialog({ open, onOpenChange }: Props) {
   const [form, setForm] = useState<IPDInput>({ ...defaultForm });
   const [loading, setLoading] = useState(false);
+  const [selectedBedDetails, setSelectedBedDetails] = useState<any>(null);
 
   const { createIPDRecord } = useIPDStore();
-  const { patients, fetchPatients } = usePatientStore(); // ✅ get patients
-  const { services, fetchServices } = useServiceStore();
-  const { beds, fetchBeds } = useBedStore(); // ✅ get beds
+  const { beds, fetchBeds, fetchBedById } = useBedStore();
 
   useEffect(() => {
     if (open) {
-      fetchPatients();
-      fetchServices();
       fetchBeds();
+      setSelectedBedDetails(null);
     }
-  }, [open, fetchPatients, fetchServices, fetchBeds]);
+  }, [open, fetchBeds]);
 
-  const handleAddTreatment = () => {
-    setForm({
-      ...form,
-      treatments: [...(form.treatments || []), { service: "", quantity: 1, category: "", gstRate: 0, price: 0 }],
-    });
-  };
-
-  // const handleServiceSelect = (idx: number, serviceId: string) => {
-  //   const updatedTreatments = [...(form.treatments || [])];
-  //   updatedTreatments[idx] = {
-  //     ...updatedTreatments[idx],
-  //     service: serviceId,
-  //   };
-  //   setForm({ ...form, treatments: updatedTreatments });
-  // };
-
-  const handleChangeTreatmentField = (idx: number, field: string, value: any) => {
-    const updatedTreatments = [...(form.treatments || [])];
-    updatedTreatments[idx] = {
-      ...updatedTreatments[idx],
-      [field]: field === "quantity" ? Number(value) : value,
-    };
-    setForm({ ...form, treatments: updatedTreatments });
+  const handleBedSelect = async (bedId: string) => {
+    setForm({ ...form, bedId });
+    if (bedId) {
+      const bedData = await fetchBedById(bedId);
+      setSelectedBedDetails(bedData);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,212 +79,200 @@ export default function CreateIPDDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-full sm:max-w-[60vw] p-6 overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-full sm:max-w-[65vw] p-6 overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create IPD Record</DialogTitle>
+          <DialogTitle className="text-xl font-bold">
+            Create IPD Record
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Patient and Admission Details */}
-          <div className="bg-gray-50 p-4 rounded-xl shadow space-y-4">
-            <h3 className="text-lg font-medium mb-2">Patient & Admission Details</h3>
-            <div className="grid grid-cols-2 gap-4">
-              {/* Patient Selection */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">Patient</label>
-                <Select
-                  onValueChange={(patientId) => setForm({ ...form, patientId })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select patient" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {patients.length > 0 &&
-                      patients.map((p) => (
-                        <SelectItem key={p._id} value={p._id}>
-                          {p.name} ({p.phoneNumber})
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
+          {/* Bed Selection */}
+          <Card className="py-4">
+            <CardHeader>
+              <CardTitle className="text-lg">Select Bed</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Select onValueChange={handleBedSelect} value={form.bedId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select an available bed" />
+                </SelectTrigger>
+                <SelectContent>
+                  {beds.map((b) => (
+                    <SelectItem key={b._id} value={b._id}>
+                      {b.roomNumber} - {b.bedNumber} (₹{b.bedCharges}/night) [
+                      {b.status}]
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
 
-              {/* Admission Date */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">Admission Date</label>
-                <Input
-                  placeholder="Admission Date"
-                  type="date"
-                  value={form.admissionDate}
-                  onChange={(e) => setForm({ ...form, admissionDate: e.target.value })}
-                  required
-                />
-              </div>
+          {/* Auto Details */}
+          {selectedBedDetails && (
+            <Card className="py-4">
+              <CardHeader>
+                <CardTitle className="text-lg">Bed & Patient Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Bed Info */}
+                <div>
+                  <h4 className="font-semibold mb-2">Bed Information</h4>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <p><strong>Room:</strong> {selectedBedDetails.roomNumber}</p>
+                    <p><strong>Bed No:</strong> {selectedBedDetails.bedNumber}</p>
+                    <p><strong>Charges:</strong> ₹{selectedBedDetails.bedCharges}/night</p>
+                    <p><strong>Status:</strong> {selectedBedDetails.status}</p>
+                  </div>
+                </div>
 
-              {/* Bed Selection */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">Bed</label>
-                <Select
-                  onValueChange={(bedId) => setForm({ ...form, bedId })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select available bed" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {beds.length > 0 &&
-                      beds
-                        .filter((b) => b.status === "Available")
-                        .map((b) => (
-                          <SelectItem key={b._id} value={b._id}>
-                            Room {b.roomNumber} - Bed {b.bedNumber} (₹{b.bedCharges}/night)
-                          </SelectItem>
-                        ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Discount */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">Discount</label>
-                <Input
-                  placeholder="Grants/Discounts"
-                  type="number"
-                  value={form.grantsOrDiscounts}
-                  onChange={(e) => setForm({ ...form, grantsOrDiscounts: Number(e.target.value) })}
-                />
-              </div>
-            </div>
-          </div>
-          
-          {/* Treatments */}
-          <div className="bg-gray-50 p-4 rounded-xl shadow space-y-4">
-            <h3 className="text-lg font-medium mb-2">Treatments</h3>
-            <div className="space-y-4">
-              {(form.treatments || []).map((t, idx) => {
-                const selectedService = services.find((svc) => svc._id === t.service);
-                return (
-                  <div
-                    key={idx}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start bg-white p-3 rounded-lg shadow-sm"
-                  >
-                    {/* Service Selection */}
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 mb-1 block">
-                        Service
-                      </label>
-                      <Select
-                        value={t.service}
-                        onValueChange={(value) => {
-                          const svc = services.find((s) => s._id === value);
-                          const updatedTreatments = [...(form.treatments || [])];
-                          updatedTreatments[idx] = {
-                            ...updatedTreatments[idx],
-                            service: value,
-                            price: svc?.price || 0,
-                            gstRate: svc?.gstRate || 0,
-                            category: svc?.category || "",
-                          };
-                          setForm({ ...form, treatments: updatedTreatments });
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select service" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {services.map((svc) => (
-                            <SelectItem key={svc._id} value={svc._id}>
-                              {svc.name} / {svc.category || "N/A"}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Details */}
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* Quantity */}
-                      <div>
-                        <label className="text-xs text-gray-500 mb-1 block">Quantity</label>
-                        <Input
-                          type="number"
-                          min={1}
-                          value={t.quantity}
-                          onChange={(e) =>
-                            handleChangeTreatmentField(idx, "quantity", e.target.value)
-                          }
-                        />
-                      </div>
-                      {/* Price */}
-                      <div>
-                        <label className="text-xs text-gray-500 mb-1 block">Price</label>
-                        <Input
-                          type="number"
-                          value={selectedService?.price || t.price || 0}
-                          readOnly
-                          className="bg-gray-100"
-                        />
-                      </div>
-                      {/* GST */}
-                      <div>
-                        <label className="text-xs text-gray-500 mb-1 block">GST (%)</label>
-                        <Input
-                          type="number"
-                          value={selectedService?.gstRate || t.gstRate || 0}
-                          readOnly
-                          className="bg-gray-100"
-                        />
-                      </div>
-                      {/* Category */}
-                      <div>
-                        <label className="text-xs text-gray-500 mb-1 block">Category</label>
-                        <Input
-                          type="text"
-                          value={selectedService?.category || t.category || ""}
-                          readOnly
-                          className="bg-gray-100"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Remove Button */}
-                    <div className="flex justify-end">
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        onClick={() => {
-                          const updated = [...form.treatments || []];
-                          updated.splice(idx, 1);
-                          setForm({ ...form, treatments: updated });
-                        }}
-                      >
-                        Remove
-                      </Button>
+                {/* Patient Info */}
+                {selectedBedDetails.patient && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Patient Information</h4>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <p><strong>Name:</strong> {selectedBedDetails.patient.name}</p>
+                      <p><strong>Phone:</strong> {selectedBedDetails.patient.phoneNumber}</p>
+                      <p><strong>Age:</strong> {selectedBedDetails.patient.age}</p>
+                      <p><strong>Gender:</strong> {selectedBedDetails.patient.gender}</p>
+                      <p className="col-span-2"><strong>Address:</strong> {selectedBedDetails.patient.address}</p>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                )}
 
-            <Button type="button" variant="outline" onClick={handleAddTreatment}>
-              + Add Treatment
-            </Button>
-          </div>
+                {/* Services */}
+                {selectedBedDetails.services?.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Services</h4>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Price</TableHead>
+                          <TableHead>Qty</TableHead>
+                          <TableHead>Unit</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedBedDetails.services.map((s: any) => (
+                          <TableRow key={s._id}>
+                            <TableCell>{s.name}</TableCell>
+                            <TableCell>₹{s.price}</TableCell>
+                            <TableCell>{s.quantity}</TableCell>
+                            <TableCell>{s.unit || "-"}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
 
+                {/* Treatments */}
+                {selectedBedDetails.treatments?.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Treatments</h4>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead>Price</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedBedDetails.treatments.map((t: any) => (
+                          <TableRow key={t._id}>
+                            <TableCell>{t.name}</TableCell>
+                            <TableCell>{t.description}</TableCell>
+                            <TableCell>₹{t.price}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+
+                {/* Medicines */}
+                {selectedBedDetails.medicines?.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Medicines</h4>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Dosage</TableHead>
+                          <TableHead>Frequency</TableHead>
+                          <TableHead>Price</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedBedDetails.medicines.map((m: any) => (
+                          <TableRow key={m._id}>
+                            <TableCell>{m.name}</TableCell>
+                            <TableCell>{m.dosage}</TableCell>
+                            <TableCell>{m.frequency}</TableCell>
+                            <TableCell>₹{m.price}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Discharge Date */}
+          <Card className="py-4">
+            <CardHeader>
+              <CardTitle>Discharge Date</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Input
+                type="date"
+                value={form.dischargeDate}
+                onChange={(e) => setForm({ ...form, dischargeDate: e.target.value })}
+                required
+              />
+            </CardContent>
+          </Card>
+
+          {/* Discount */}
+          <Card className="py-4">
+            <CardHeader>
+              <CardTitle>Discount</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Input
+                placeholder="Enter Grants/Discounts"
+                type="number"
+                value={form.grantsOrDiscounts}
+                onChange={(e) =>
+                  setForm({ ...form, grantsOrDiscounts: Number(e.target.value) })
+                }
+              />
+            </CardContent>
+          </Card>
 
           {/* Note */}
-          <div className="bg-gray-50 p-4 rounded-xl shadow space-y-4">
-            <h3 className="text-lg font-medium mb-2">Additional Note</h3>
-            <Textarea
-              placeholder="Write any note for this IPD admission..."
-              value={form.note}
-              onChange={(e) => setForm({ ...form, note: e.target.value })}
-            />
-          </div>
+          <Card className="py-4">
+            <CardHeader>
+              <CardTitle>Additional Note</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                placeholder="Write any note for this IPD admission..."
+                value={form.note}
+                onChange={(e) => setForm({ ...form, note: e.target.value })}
+              />
+            </CardContent>
+          </Card>
 
           <Button
             type="submit"
-            className="w-full bg-green-600 hover:bg-green-700"
-            disabled={loading}
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold"
+            disabled={loading || !form.bedId}
           >
             {loading ? (
               <>
@@ -295,7 +280,7 @@ export default function CreateIPDDialog({ open, onOpenChange }: Props) {
                 Creating...
               </>
             ) : (
-              "Create"
+              "Create IPD Record"
             )}
           </Button>
         </form>

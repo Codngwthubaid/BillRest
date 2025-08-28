@@ -21,7 +21,7 @@ const treatmentSchema = new mongoose.Schema({
 });
 
 const billingSchema = new mongoose.Schema({
-  bedCharges: { type: Number, default: 0 }, // ✅ added explicitly
+  bedCharges: { type: Number, default: 0 }, 
   serviceCharges: { type: Number, default: 0 },
   grantsOrDiscounts: { type: Number, default: 0 },
   totalBeforeDiscount: { type: Number, default: 0 },
@@ -44,7 +44,6 @@ const ipdSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Appointment",
     },
-    isNewPatient: { type: Boolean, default: false },
     ipdNumber: {
       type: String,
       required: true,
@@ -66,11 +65,6 @@ const ipdSchema = new mongoose.Schema(
       type: String,
       enum: ["pending", "paid", "partial"],
       default: "pending",
-    },
-    status: {
-      type: String,
-      enum: ["Admitted", "Discharged"],
-      default: "Admitted",
     },
     note: {
       type: String, // ✅ added note field

@@ -10,6 +10,7 @@ interface BedStore {
   error: string | null;
 
   fetchBeds: () => Promise<void>;
+  fetchBedById: (id: string) => Promise<Bed | null>;
   addBed: (data: AddBedPayload) => Promise<void>;
   updateBed: (id: string, data: UpdateBedPayload) => Promise<void>;
   deleteBed: (id: string) => Promise<void>;
@@ -35,6 +36,19 @@ export const useBedStore = create<BedStore>((set, get) => ({
     }
   },
 
+  fetchBedById: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      const bed = await bedService.getById(id); // ✅ This should call API with population
+      return bed;
+    } catch (error: any) {
+      set({ error: error.response?.data?.message || "Failed to fetch bed details" });
+      return null;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
   addBed: async (data) => {
     set({ loading: true, error: null });
     try {
@@ -50,8 +64,8 @@ export const useBedStore = create<BedStore>((set, get) => ({
   updateBed: async (id, data) => {
     set({ loading: true, error: null });
     try {
-      await bedService.update(id, data); // ✅ This will include patient, services, treatments, medicines
-      const beds = await bedService.getAll(); // ✅ Refresh list after update
+      await bedService.update(id, data);
+      const beds = await bedService.getAll();
       set({ beds });
     } catch (error: any) {
       set({ error: error.response?.data?.message || "Failed to update bed" });

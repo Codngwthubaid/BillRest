@@ -55,8 +55,6 @@ export default function Billing() {
 
   const summary = {
     total: Array.isArray(data) ? data.length : 0,
-    admitted: Array.isArray(data) ? data.filter((i) => i.status === "Admitted").length : 0,
-    discharged: Array.isArray(data) ? data.filter((i) => i.status === "Discharged").length : 0,
     pending: Array.isArray(data) ? data.filter((i) => i.paymentStatus === "pending").length : 0,
     paid: Array.isArray(data) ? data.filter((i) => i.paymentStatus === "paid").length : 0,
     totalAmount: Array.isArray(data) ? data.reduce((acc, i) => acc + i.billing.finalAmount, 0) : 0,
@@ -75,27 +73,12 @@ export default function Billing() {
     : [];
 
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "Admitted":
-        return <Badge className="bg-yellow-100 text-yellow-800">Admitted</Badge>;
-      case "Discharged":
-        return <Badge className="bg-green-100 text-green-800">Discharged</Badge>;
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
-    }
-  };
-
   const getPaymentStatusBadge = (status: string) => {
     switch (status) {
       case "paid":
         return <Badge className="bg-green-100 text-green-800">Paid</Badge>;
       case "pending":
         return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
-      case "partial":
-        return <Badge className="bg-blue-100 text-blue-800">Partial</Badge>;
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
     }
   };
 
@@ -126,11 +109,11 @@ export default function Billing() {
       </div>
 
       {isClinic && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           {/* Summary cards */}
           {Object.entries(summary).map(([key, value]) => (
             <Card key={key}>
-              <CardContent className="p-4">
+              <CardContent className="p-4 flex justify-between">
                 <div className="flex items-center gap-2 capitalize text-muted-foreground">
                   {key === "totalAmount" ? <IndianRupee className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
                   <span>{key.replace(/([A-Z])/g, " $1")}</span>
@@ -187,9 +170,9 @@ export default function Billing() {
               <th className="p-4">Billing ID</th>
               <th className="p-4">Patient</th>
               <th className="p-4">Amount</th>
-              <th className="p-4">Status</th>
               <th className="p-4">Payment</th>
               <th className="p-4">Admission Date</th>
+              <th className="p-4">Discharge Date</th>
               <th className="p-4">Actions</th>
             </tr>
           </thead>
@@ -216,9 +199,9 @@ export default function Billing() {
                     Bed: ₹{ipd.billing.bedCharges.toLocaleString()}
                   </span>
                 </td>
-                <td>{getStatusBadge(ipd.status)}</td>
                 <td>{getPaymentStatusBadge(ipd.paymentStatus)}</td>
                 <td>{ipd.admissionDate?.slice(0, 10)}</td>
+                <td>{ipd.dischargeDate?.slice(0, 10)}</td>
                 <td>
                   <button onClick={() => { setSelectedIPD(ipd); setShowPreviewDialog(true); }}>
                     <Eye className="w-4 h-4 mr-2 text-blue-500 hover:scale-110" />
