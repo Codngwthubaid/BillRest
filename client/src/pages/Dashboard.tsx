@@ -59,13 +59,13 @@ export default function Dashboard() {
         {(user?.role === "clinic" || user?.role === "support" || user?.role === "master") && (
           <>
             <RecentAppointments />
-            <TopServices />
+            {/* <TopServices /> */}
           </>
         )}
 
         {user?.role === "clinic" && (
           <>
-            <TopServicesChart />
+            {/* <TopServicesChart /> */}
             <PatientChart />
           </>
         )}

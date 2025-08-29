@@ -207,6 +207,27 @@ export default function UpdateIPD({ open, onOpenChange, ipd, onUpdate }: Props) 
             </Card>
           )}
 
+          {/* Payment Status */}
+          <Card className="py-4">
+            <CardContent className="space-y-2">
+              <Label>Payment Status</Label>
+              <Select
+                value={form.paymentStatus || "pending"}
+                onValueChange={(value) => setForm({ ...form, paymentStatus: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select payment status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+
+
+
           {/* Discount */}
           <Card className="py-4">
             <CardContent className="space-y-2">

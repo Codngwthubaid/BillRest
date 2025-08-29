@@ -223,6 +223,28 @@ export default function CreateIPDDialog({ open, onOpenChange }: Props) {
             </Card>
           )}
 
+          {/* Payment Status */}
+          <Card className="py-4">
+            <CardHeader>
+              <CardTitle>Payment Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Select
+                value={form.paymentStatus || "pending"}
+                onValueChange={(value) => setForm({ ...form, paymentStatus: value })}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Payment Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+
+
           {/* Discharge Date */}
           <Card className="py-4">
             <CardHeader>

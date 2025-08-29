@@ -96,7 +96,7 @@ const generateRandomBillId = () => {
 export const createIPD = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { bedId, note = "", grantsOrDiscounts = 0, dischargeDate } = req.body;
+    const { bedId, note = "", grantsOrDiscounts = 0, dischargeDate, paymentStatus } = req.body;
 
     // ✅ Find the bed and populate related fields
     const bed = await Bed.findOne({ _id: bedId })
@@ -149,6 +149,7 @@ export const createIPD = async (req, res) => {
         totalBeforeDiscount,
         finalAmount,
       },
+      paymentStatus: "pending",
       note,
     });
 
@@ -309,7 +310,7 @@ export const updateIPD = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
-    const { bedId, note, grantsOrDiscounts, dischargeDate, status } = req.body;
+    const { bedId, note, grantsOrDiscounts, dischargeDate, status, paymentStatus } = req.body;
 
     const ipd = await IPD.findOne({ _id: id, clinic: userId }).populate("bed");
     if (!ipd) return res.status(404).json({ message: "IPD record not found" });
@@ -361,6 +362,7 @@ export const updateIPD = async (req, res) => {
     ipd.dischargeDate = dischargeDate || ipd.dischargeDate;
     ipd.status = status || ipd.status;
     ipd.note = note || ipd.note;
+    ipd.paymentStatus = paymentStatus || ipd.paymentStatus;
 
     ipd.billing = {
       bedCharges,
@@ -688,11 +690,11 @@ export const downloadIPDPDF = async (req, res) => {
       ...t.toObject(),
       service: t.service
         ? {
-            name: t.service.name || "Unknown",
-            price: t.service.price || 0,
-            gstRate: t.service.gstRate || 0,
-            category: t.service.category || "N/A",
-          }
+          name: t.service.name || "Unknown",
+          price: t.service.price || 0,
+          gstRate: t.service.gstRate || 0,
+          category: t.service.category || "N/A",
+        }
         : { name: "Unknown", price: 0 },
       date: t.date || ipd.admissionDate,
     }));

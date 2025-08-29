@@ -63,7 +63,7 @@ const ipdSchema = new mongoose.Schema(
     billing: billingSchema,
     paymentStatus: {
       type: String,
-      enum: ["pending", "paid", "partial"],
+      enum: ["pending", "paid"],
       default: "pending",
     },
     note: {

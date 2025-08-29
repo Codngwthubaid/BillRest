@@ -206,7 +206,9 @@ export const getSalesReportForHealth = async (req, res) => {
         ]);
 
         // 💰 Total revenue
-        const totalRevenue = ipds.reduce((sum, ipd) => sum + (ipd.billing.total || 0), 0);
+        // const totalRevenue = ipds.reduce((sum, ipd) => sum + (ipd.billing.total || 0), 0);
+        const totalRevenue = ipds.reduce((sum, ipd) => sum + (ipd.billing.finalAmount || 0), 0);
+
 
         // 📊 Top services from IPD
         const serviceMap = {};
