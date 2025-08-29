@@ -8,7 +8,8 @@ import {
   deleteIPD,
   downloadIPDPDF,
   printIPDPDF,
-  createOPD
+  createOPD,
+  updateOPD
 } from "../controllers/ipd.controller.js";
 
 import { verifyToken, checkRole } from "../middlewares/auth.middleware.js";
@@ -26,7 +27,7 @@ router.post("/", verifyToken, checkRole(["clinic"]), checkSubscription, createIP
 router.get("/", verifyToken, checkRole(["clinic"]), checkSubscription, getIPDs);
 router.get("/:id", verifyToken, checkRole(["clinic"]), checkSubscription, getIPDById);
 router.put("/:id", verifyToken, checkRole(["clinic"]), checkSubscription, updateIPD);
-// router.put("/:id", verifyToken, checkRole(["clinic"]), checkSubscription, updateOPD);
+router.put("/updateOPD/:id", verifyToken, checkRole(["clinic"]), checkSubscription, updateOPD);
 router.patch("/:id/discharge", verifyToken, checkRole(["clinic"]), checkSubscription, dischargeIPD);
 router.delete("/:id", verifyToken, checkRole(["clinic"]), checkSubscription, deleteIPD);
 router.get("/:id/download-pdf", verifyToken, checkRole(["clinic"]), checkSubscription, downloadIPDPDF);

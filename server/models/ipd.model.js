@@ -47,10 +47,7 @@ const ipdSchema = new mongoose.Schema(
     ipdNumber: {
       type: String,
       unique: true,
-    },
-    opdNumber: {
-      type: String,
-      unique: true,
+      required: true,
     },
     admissionDate: {
       type: Date,

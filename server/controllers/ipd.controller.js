@@ -78,7 +78,7 @@ export const createIPD = async (req, res) => {
 
     console.log({
       clinic: userId,
-      patient: bed.patient._id,
+      patient: bed.patient,
       ipdNumber: await generateRandomBillId(),
       admissionDate,
       dischargeDate: discharge,
@@ -303,36 +303,64 @@ export const deleteIPD = async (req, res) => {
 
 export const downloadIPDPDF = async (req, res) => {
   try {
+    // Fetch IPD with all related fields, populate clinic directly
     const ipd = await IPD.findOne({
       _id: req.params.id,
       clinic: req.user.id,
     })
-      .populate("patient", "name phoneNumber age gender address")
-      .populate("treatments.service", "name price gstRate category")
-      .populate("bed", "bedNumber bedCharges");
+      .populate("patient", "name phoneNumber age gender address") // patient details
+      .populate({
+        path: "bed",
+        populate: [
+          { path: "services.service" }, // populate services
+          { path: "treatments" }, // populate treatments in bed
+          { path: "medicines" }, // populate medicines in bed
+        ],
+      })
+      .populate({
+        path: "treatments",
+        populate: { path: "service", select: "name price gstRate category" }, // populate service for treatments
+      })
+      .populate("clinic", "name phone email"); // ✅ populate clinic directly
 
     if (!ipd) return res.status(404).json({ message: "IPD record not found" });
 
-    // Normalize treatments
-    const enrichedTreatments = (ipd.treatments || []).map((t) => ({
+    // Enrich treatments
+    ipd.treatments = (ipd.treatments || []).map((t) => ({
       ...t.toObject(),
       service: t.service
         ? {
-          name: t.service.name || "Unknown",
-          price: t.service.price || 0,
-          gstRate: t.service.gstRate || 0,
-          category: t.service.category || "N/A",
-        }
+            name: t.service.name || "Unknown",
+            price: t.service.price || 0,
+            gstRate: t.service.gstRate || 0,
+            category: t.service.category || "N/A",
+          }
         : { name: "Unknown", price: 0 },
       date: t.date || ipd.admissionDate,
     }));
-    ipd.treatments = enrichedTreatments;
 
-    const clinic = await Clinic.findOne({ user: req.user.id });
+    // Use populated clinic
+    const clinic = ipd.clinic;
     if (!clinic) return res.status(404).json({ message: "Clinic not found" });
 
-    const pdfBuffer = await generateIPDPDF(ipd, clinic, ipd.patient);
+    // Prepare PDF data
+    const pdfData = {
+      ipdNumber: ipd.ipdNumber,
+      admissionDate: ipd.admissionDate,
+      dischargeDate: ipd.dischargeDate,
+      note: ipd.note,
+      patient: ipd.patient,
+      bed: ipd.bed || {},
+      treatments: ipd.treatments,
+      billing: ipd.billing || {},
+      services: ipd.bed?.services || [],
+      medicines: ipd.bed?.medicines || [],
+    };
 
+    // Generate PDF
+    const pdfBuffer = await generateIPDPDF(pdfData, clinic, ipd.patient);
+
+    // Send PDF as attachment
     res.set({
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename=${ipd.ipdNumber || "IPD"}.pdf`,
@@ -348,29 +376,57 @@ export const downloadIPDPDF = async (req, res) => {
 
 export const printIPDPDF = async (req, res) => {
   try {
+    // Fetch IPD record with all related fields, populate clinic from IPD
     const ipd = await IPD.findOne({
       _id: req.params.id,
       clinic: req.user.id,
     })
-      .populate("patient", "name phoneNumber age gender address")
-      .populate("treatments.service", "name price gstRate category")
-      .populate("bed", "bedNumber bedCharges");
+      .populate("patient") // patient details
+      .populate({
+        path: "bed",
+        populate: [
+          { path: "patient" }, // patient assigned to bed (if any)
+          { path: "services.service" }, // services details
+          { path: "treatments" }, // treatment details
+          { path: "medicines" }, // medicine details
+        ],
+      })
+      .populate({
+        path: "treatments",
+        populate: { path: "service" }, // populate service for treatments
+      })
+      .populate("clinic", "name phone email"); // ✅ populate clinic with required fields
 
     if (!ipd) return res.status(404).json({ message: "IPD record not found" });
 
-    // Normalize treatments
-    const enrichedTreatments = (ipd.treatments || []).map((t) => ({
+    // Enrich treatments with date if not present
+    ipd.treatments = (ipd.treatments || []).map((t) => ({
       ...t.toObject(),
-      serviceName: t.service?.name || "Unknown",
       date: t.date || ipd.admissionDate,
     }));
-    ipd.treatments = enrichedTreatments;
 
-    const clinic = await Clinic.findOne({ user: req.user.id });
+    // Now clinic is populated from IPD
+    const clinic = ipd.clinic;
     if (!clinic) return res.status(404).json({ message: "Clinic not found" });
 
-    const pdfBuffer = await generateIPDPDF(ipd, clinic, ipd.patient);
+    // Build complete data object for PDF
+    const pdfData = {
+      ipdNumber: ipd.ipdNumber,
+      admissionDate: ipd.admissionDate,
+      dischargeDate: ipd.dischargeDate,
+      note: ipd.note,
+      patient: ipd.patient,
+      bed: ipd.bed || {},
+      treatments: ipd.treatments,
+      billing: ipd.billing || {},
+      services: ipd.bed?.services || [],
+      medicines: ipd.bed?.medicines || [],
+    };
 
+    // Generate PDF
+    const pdfBuffer = await generateIPDPDF(pdfData, clinic, ipd.patient);
+
+    // Send PDF as response
     res.set({
       "Content-Type": "application/pdf",
       "Content-Disposition": `inline; filename=${ipd.ipdNumber || "IPD"}.pdf`,
@@ -403,7 +459,7 @@ export const createOPD = async (req, res) => {
       clinic: userId,
       patient: appointment.patient._id,
       appointment: appointmentId,
-      opdNumber: await generateRandomBillId(),
+      ipdNumber: await generateRandomBillId(),
       consultationDate: appointment.date,
       billing: {
         consultationCharge,
@@ -428,14 +484,14 @@ export const createOPD = async (req, res) => {
 export const updateOPD = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { id } = req.params; // OPD ID
+    const { id } = req.params; // OPD record ID (stored in IPD collection)
     const { services = [], note, grantsOrDiscounts, paymentStatus } = req.body;
 
-    // ✅ Find OPD Record
-    const opd = await IPD.findOne({ _id: id, clinic: userId }).populate("services.service");
+    // ✅ Find OPD Record in IPD collection
+    const opd = await IPD.findOne({ _id: id, clinic: userId }).populate("treatments.service");
     if (!opd) return res.status(404).json({ message: "OPD record not found" });
 
-    // ✅ Add new services if provided
+    // ✅ Add new treatments (services) if provided
     if (services.length > 0) {
       for (let s of services) {
         const serviceData = await Service.findById(s.serviceId);
@@ -446,7 +502,7 @@ export const updateOPD = async (req, res) => {
         const quantity = s.quantity || 1;
         const totalCharges = serviceData.price * quantity;
 
-        opd.services.push({
+        opd.treatments.push({
           service: serviceData._id,
           quantity,
           date: new Date(),
@@ -456,16 +512,16 @@ export const updateOPD = async (req, res) => {
     }
 
     // ✅ Recalculate charges
-    const consultationCharge = opd.billing.consultationCharge || 0;
-    const serviceCharges = opd.services.reduce((acc, t) => acc + t.totalCharges, 0);
+    const bedCharges = opd.billing.bedCharges || 0; // For OPD, usually 0
+    const serviceCharges = opd.treatments.reduce((acc, t) => acc + t.totalCharges, 0);
     const grants = grantsOrDiscounts ?? opd.billing.grantsOrDiscounts;
 
-    const totalBeforeDiscount = consultationCharge + serviceCharges;
+    const totalBeforeDiscount = bedCharges + serviceCharges;
     const finalAmount = totalBeforeDiscount - grants;
 
-    // ✅ Update fields
+    // ✅ Update billing object
     opd.billing = {
-      consultationCharge,
+      bedCharges,
       serviceCharges,
       grantsOrDiscounts: grants,
       totalBeforeDiscount,
@@ -486,3 +542,4 @@ export const updateOPD = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
