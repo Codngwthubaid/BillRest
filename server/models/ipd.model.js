@@ -46,7 +46,10 @@ const ipdSchema = new mongoose.Schema(
     },
     ipdNumber: {
       type: String,
-      required: true,
+      unique: true,
+    },
+    opdNumber: {
+      type: String,
       unique: true,
     },
     admissionDate: {
@@ -57,7 +60,6 @@ const ipdSchema = new mongoose.Schema(
     bed: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Bed",
-      required: true,
     },
     treatments: [treatmentSchema],
     billing: billingSchema,

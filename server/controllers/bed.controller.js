@@ -1,6 +1,5 @@
 import { Bed } from "../models/bed.model.js";
 import { Patient } from "../models/patient.model.js";
-import { Service } from "../models/service.model.js";
 
 export const addBed = async (req, res) => {
   try {
