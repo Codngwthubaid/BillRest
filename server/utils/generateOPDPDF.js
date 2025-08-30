@@ -23,8 +23,8 @@ export const generatePDFOPD = async (opd, clinic, patient) => {
   const grantsOrDiscounts = billing.grantsOrDiscounts ?? 0;
   const finalAmount = billing.finalAmount ?? 0;
 
-  // ✅ Add Consultation Charge (fixed ₹500)
-  const consultationCharge = 500;
+  // ✅ Add Consultation Charge (fixed ₹0)
+  const consultationCharge = 0;
 
   // Combine all items: Consultation + Treatments + Other Charges
   const allItems = [
