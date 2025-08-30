@@ -24,13 +24,6 @@ const bedSchema = new mongoose.Schema({
       quantity: Number
     }
   ],
-  treatments: [
-    {
-      name: String,
-      description: String,
-      price: Number
-    }
-  ],
   medicines: [
     {
       name: String,

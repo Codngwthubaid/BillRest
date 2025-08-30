@@ -48,4 +48,28 @@ export const printIPDPDF = async (id: string): Promise<Blob> => {
 export const getAllIPDs = async (): Promise<IPDResponse[]> => {
   const res = await axiosInstance.get("/ipd/all");
   return res.data;
-}
+};
+
+export const createOPD = async (data: IPDInput): Promise<IPDResponse> => {
+  const res = await axiosInstance.post("/opd/createOPD", data);
+  return res.data.opd;
+};
+
+export const updateOPD = async (id: string, data: Partial<IPDInput>): Promise<IPDResponse> => {
+  const res = await axiosInstance.put(`/opd/updateOPD/${id}`, data);
+  return res.data.opd;
+};
+
+export const downloadOPDPDF = async (id: string): Promise<Blob> => {
+  const res = await axiosInstance.get(`/opd/${id}/opd/download-pdf`, {
+    responseType: "blob",
+  });
+  return res.data;
+};
+
+export const printOPDPDF = async (id: string): Promise<Blob> => {
+  const res = await axiosInstance.get(`/opd/${id}/opd/print-pdf`, {
+    responseType: "blob",
+  });
+  return res.data;
+};

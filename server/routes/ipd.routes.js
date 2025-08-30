@@ -4,12 +4,14 @@ import {
   updateIPD,
   getIPDs,
   getIPDById,
-  dischargeIPD,
+  // dischargeIPD,
   deleteIPD,
   downloadIPDPDF,
   printIPDPDF,
   createOPD,
-  updateOPD
+  updateOPD,
+  printOPDPDF,
+  downloadOPDPDF
 } from "../controllers/ipd.controller.js";
 
 import { verifyToken, checkRole } from "../middlewares/auth.middleware.js";
@@ -28,9 +30,11 @@ router.get("/", verifyToken, checkRole(["clinic"]), checkSubscription, getIPDs);
 router.get("/:id", verifyToken, checkRole(["clinic"]), checkSubscription, getIPDById);
 router.put("/:id", verifyToken, checkRole(["clinic"]), checkSubscription, updateIPD);
 router.put("/updateOPD/:id", verifyToken, checkRole(["clinic"]), checkSubscription, updateOPD);
-router.patch("/:id/discharge", verifyToken, checkRole(["clinic"]), checkSubscription, dischargeIPD);
+// router.patch("/:id/discharge", verifyToken, checkRole(["clinic"]), checkSubscription, dischargeIPD);
 router.delete("/:id", verifyToken, checkRole(["clinic"]), checkSubscription, deleteIPD);
 router.get("/:id/download-pdf", verifyToken, checkRole(["clinic"]), checkSubscription, downloadIPDPDF);
 router.get("/:id/print-pdf", verifyToken, checkRole(["clinic"]), checkSubscription, printIPDPDF);
+router.get("/:id/opd/download-pdf", verifyToken, checkRole(["clinic"]), checkSubscription, downloadOPDPDF);
+router.get("/:id/opd/print-pdf", verifyToken, checkRole(["clinic"]), checkSubscription, printOPDPDF);
 
 export default router;

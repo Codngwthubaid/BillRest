@@ -1,10 +1,10 @@
 import { Appointment } from "../models/appointment.model.js"
+import { generatePDFOPD } from "../utils/generateOPDPDF.js";
 import { generateIPDPDF } from "../utils/generateIPDPDF.js"
-import { Bed } from "../models/bed.model.js"
-import { Clinic } from "../models/clinic.model.js"
-import crypto from "crypto";
-import { IPD } from "../models/ipd.model.js"
 import { Service } from "../models/service.model.js";
+import { Bed } from "../models/bed.model.js"
+import { IPD } from "../models/ipd.model.js"
+import crypto from "crypto";
 
 const generateRandomBillId = () => {
   const randomString = crypto.randomBytes(6).toString("base64").replace(/[^a-zA-Z0-9]/g, "").slice(0, 10);
@@ -20,7 +20,6 @@ export const createIPD = async (req, res) => {
     const bed = await Bed.findOne({ _id: bedId })
       .populate("patient")
       .populate("services.service")
-      .populate("treatments")
       .populate("medicines");
 
     if (!bed) return res.status(404).json({ message: "Bed not found" });
@@ -41,13 +40,10 @@ export const createIPD = async (req, res) => {
       return acc + (s.price || 0) * (s.quantity || 1);
     }, 0);
 
-    // ✅ Calculate treatment charges
-    const treatmentCharges = bed.treatments.reduce((acc, t) => acc + (t.price || 0), 0);
-
     // ✅ Calculate medicine charges
     const medicineCharges = bed.medicines.reduce((acc, m) => acc + (m.price || 0), 0);
 
-    const totalBeforeDiscount = bedCharges + serviceCharges + treatmentCharges + medicineCharges;
+    const totalBeforeDiscount = bedCharges + serviceCharges + medicineCharges;
     const finalAmount = totalBeforeDiscount - grantsOrDiscounts;
 
     // ✅ Create IPD entry
@@ -61,7 +57,6 @@ export const createIPD = async (req, res) => {
       billing: {
         bedCharges,
         serviceCharges,
-        treatmentCharges,
         medicineCharges,
         grantsOrDiscounts,
         totalBeforeDiscount,
@@ -86,7 +81,6 @@ export const createIPD = async (req, res) => {
       billing: {
         bedCharges,
         serviceCharges,
-        treatmentCharges,
         medicineCharges,
         grantsOrDiscounts,
         totalBeforeDiscount,
@@ -126,7 +120,6 @@ export const updateIPD = async (req, res) => {
       const newBed = await Bed.findById(bedId)
         .populate("patient")
         .populate("services.service")
-        .populate("treatments")
         .populate("medicines");
 
       if (!newBed) return res.status(404).json({ message: "New bed not found" });
@@ -139,7 +132,6 @@ export const updateIPD = async (req, res) => {
 
     const bed = await Bed.findById(ipd.bed)
       .populate("services.service")
-      .populate("treatments")
       .populate("medicines");
 
     if (!bed) return res.status(404).json({ message: "Bed not found" });
@@ -151,10 +143,9 @@ export const updateIPD = async (req, res) => {
 
     const bedCharges = bed.bedCharges * daysStayed;
     const serviceCharges = bed.services.reduce((acc, s) => acc + (s.price || 0) * (s.quantity || 1), 0);
-    const treatmentCharges = bed.treatments.reduce((acc, t) => acc + (t.price || 0), 0);
     const medicineCharges = bed.medicines.reduce((acc, m) => acc + (m.price || 0), 0);
 
-    const totalBeforeDiscount = bedCharges + serviceCharges + treatmentCharges + medicineCharges;
+    const totalBeforeDiscount = bedCharges + serviceCharges + medicineCharges;
     const finalAmount = totalBeforeDiscount - (grantsOrDiscounts || ipd.billing.grantsOrDiscounts);
 
     // ✅ Update IPD
@@ -166,7 +157,6 @@ export const updateIPD = async (req, res) => {
     ipd.billing = {
       bedCharges,
       serviceCharges,
-      treatmentCharges,
       medicineCharges,
       grantsOrDiscounts: grantsOrDiscounts ?? ipd.billing.grantsOrDiscounts,
       totalBeforeDiscount,
@@ -227,64 +217,64 @@ export const getIPDById = async (req, res) => {
   }
 };
 
-export const dischargeIPD = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { id } = req.params;
-    const { dischargeDate } = req.body;
+// export const dischargeIPD = async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+//     const { id } = req.params;
+//     const { dischargeDate } = req.body;
 
-    const ipd = await IPD.findOne({ _id: id, clinic: userId }).populate("bed");
-    if (!ipd) return res.status(404).json({ message: "IPD record not found" });
+//     const ipd = await IPD.findOne({ _id: id, clinic: userId }).populate("bed");
+//     if (!ipd) return res.status(404).json({ message: "IPD record not found" });
 
-    if (ipd.status === "Discharged") {
-      return res.status(400).json({ message: "Patient already discharged" });
-    }
+//     if (ipd.status === "Discharged") {
+//       return res.status(400).json({ message: "Patient already discharged" });
+//     }
 
-    const discharge = dischargeDate ? new Date(dischargeDate) : new Date();
-    const admissionDate = new Date(ipd.admissionDate);
-    const daysStayed = Math.max(1, Math.ceil((discharge - admissionDate) / (1000 * 60 * 60 * 24)));
+//     const discharge = dischargeDate ? new Date(dischargeDate) : new Date();
+//     const admissionDate = new Date(ipd.admissionDate);
+//     const daysStayed = Math.max(1, Math.ceil((discharge - admissionDate) / (1000 * 60 * 60 * 24)));
 
-    const bed = await Bed.findById(ipd.bed)
-      .populate("services.service")
-      .populate("treatments")
-      .populate("medicines");
+//     const bed = await Bed.findById(ipd.bed)
+//       .populate("services.service")
+//       .populate("treatments")
+//       .populate("medicines");
 
-    const bedCharges = bed.bedCharges * daysStayed;
-    const serviceCharges = bed.services.reduce((acc, s) => acc + (s.price || 0) * (s.quantity || 1), 0);
-    const treatmentCharges = bed.treatments.reduce((acc, t) => acc + (t.price || 0), 0);
-    const medicineCharges = bed.medicines.reduce((acc, m) => acc + (m.price || 0), 0);
+//     const bedCharges = bed.bedCharges * daysStayed;
+//     const serviceCharges = bed.services.reduce((acc, s) => acc + (s.price || 0) * (s.quantity || 1), 0);
+//     const treatmentCharges = bed.treatments.reduce((acc, t) => acc + (t.price || 0), 0);
+//     const medicineCharges = bed.medicines.reduce((acc, m) => acc + (m.price || 0), 0);
 
-    const totalBeforeDiscount = bedCharges + serviceCharges + treatmentCharges + medicineCharges;
-    const finalAmount = totalBeforeDiscount - (ipd.billing.grantsOrDiscounts || 0);
+//     const totalBeforeDiscount = bedCharges + serviceCharges + treatmentCharges + medicineCharges;
+//     const finalAmount = totalBeforeDiscount - (ipd.billing.grantsOrDiscounts || 0);
 
-    ipd.status = "Discharged";
-    ipd.dischargeDate = discharge;
-    ipd.billing = {
-      ...ipd.billing,
-      bedCharges,
-      serviceCharges,
-      treatmentCharges,
-      medicineCharges,
-      totalBeforeDiscount,
-      finalAmount,
-      paymentStatus: "paid",
-    };
+//     ipd.status = "Discharged";
+//     ipd.dischargeDate = discharge;
+//     ipd.billing = {
+//       ...ipd.billing,
+//       bedCharges,
+//       serviceCharges,
+//       treatmentCharges,
+//       medicineCharges,
+//       totalBeforeDiscount,
+//       finalAmount,
+//       paymentStatus: "paid",
+//     };
 
-    await ipd.save();
+//     await ipd.save();
 
-    bed.status = "Available";
-    bed.patient = null;
-    await bed.save();
+//     bed.status = "Available";
+//     bed.patient = null;
+//     await bed.save();
 
-    res.status(200).json({
-      message: "Patient discharged successfully",
-      ipd,
-    });
-  } catch (err) {
-    console.error("Discharge IPD error:", err);
-    res.status(500).json({ message: err.message });
-  }
-};
+//     res.status(200).json({
+//       message: "Patient discharged successfully",
+//       ipd,
+//     });
+//   } catch (err) {
+//     console.error("Discharge IPD error:", err);
+//     res.status(500).json({ message: err.message });
+//   }
+// };
 
 export const deleteIPD = async (req, res) => {
   try {
@@ -443,15 +433,37 @@ export const printIPDPDF = async (req, res) => {
 export const createOPD = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { appointmentId, note = "", grantsOrDiscounts = 0 } = req.body;
+    const {
+      appointmentId,
+      note = "",
+      grantsOrDiscounts = 0,
+      treatments = [], // Array of services { service, quantity }
+      otherCharges = [], // Array of { name, quantity, amount }
+    } = req.body;
 
     // ✅ Find the appointment
     const appointment = await Appointment.findById(appointmentId).populate("patient");
     if (!appointment) return res.status(404).json({ message: "Appointment not found" });
 
-    // ✅ Use a flat OPD charge (if you want, can also take it from request)
-    const consultationCharge = 500; // Example fixed charge
-    const totalBeforeDiscount = consultationCharge;
+    // ✅ Calculate treatments total (service charges)
+    let serviceCharges = 0;
+    for (let t of treatments) {
+      const serviceData = await Service.findById(t.service);
+      if (!serviceData) return res.status(400).json({ message: `Service not found: ${t.service}` });
+      serviceCharges += (serviceData.price || 0) * (t.quantity || 1);
+    }
+
+    // ✅ Calculate other charges total
+    let otherChargesTotal = 0;
+    for (let oc of otherCharges) {
+      otherChargesTotal += (oc.amount || 0) * (oc.quantity || 1);
+    }
+
+    // ✅ OPD base consultation charge
+    const consultationCharge = 500;
+
+    // ✅ Calculate totals
+    const totalBeforeDiscount = consultationCharge + serviceCharges + otherChargesTotal;
     const finalAmount = totalBeforeDiscount - grantsOrDiscounts;
 
     // ✅ Create OPD record
@@ -461,8 +473,15 @@ export const createOPD = async (req, res) => {
       appointment: appointmentId,
       ipdNumber: await generateRandomBillId(),
       consultationDate: appointment.date,
+      treatments: treatments.map(t => ({
+        service: t.service,
+        quantity: t.quantity,
+        totalCharges: (t.quantity || 1) * (serviceCharges / treatments.length), // basic allocation
+      })),
+      otherCharges,
       billing: {
-        consultationCharge,
+        bedCharges: 0, // OPD doesn't use beds
+        serviceCharges,
         grantsOrDiscounts,
         totalBeforeDiscount,
         finalAmount,
@@ -471,8 +490,14 @@ export const createOPD = async (req, res) => {
       note,
     });
 
+    // ✅ Update appointment status to "Completed"
+    appointment.status = "Completed";
+    await appointment.save();
+
+    console.log("OPD created successfully:", opd);
+
     res.status(201).json({
-      message: "OPD record created successfully",
+      message: "OPD record created successfully and appointment marked as Completed",
       opd,
     });
   } catch (err) {
@@ -484,14 +509,20 @@ export const createOPD = async (req, res) => {
 export const updateOPD = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { id } = req.params; // OPD record ID (stored in IPD collection)
-    const { services = [], note, grantsOrDiscounts, paymentStatus } = req.body;
+    const { id } = req.params; // OPD record ID
+    const {
+      services = [], // [{ serviceId, quantity }]
+      otherCharges = [], // [{ name, quantity, amount }]
+      note,
+      grantsOrDiscounts,
+      paymentStatus
+    } = req.body;
 
-    // ✅ Find OPD Record in IPD collection
+    // ✅ Find OPD Record
     const opd = await IPD.findOne({ _id: id, clinic: userId }).populate("treatments.service");
     if (!opd) return res.status(404).json({ message: "OPD record not found" });
 
-    // ✅ Add new treatments (services) if provided
+    // ✅ Add new treatments if provided
     if (services.length > 0) {
       for (let s of services) {
         const serviceData = await Service.findById(s.serviceId);
@@ -500,7 +531,7 @@ export const updateOPD = async (req, res) => {
         }
 
         const quantity = s.quantity || 1;
-        const totalCharges = serviceData.price * quantity;
+        const totalCharges = (serviceData.price || 0) * quantity;
 
         opd.treatments.push({
           service: serviceData._id,
@@ -511,12 +542,25 @@ export const updateOPD = async (req, res) => {
       }
     }
 
-    // ✅ Recalculate charges
-    const bedCharges = opd.billing.bedCharges || 0; // For OPD, usually 0
-    const serviceCharges = opd.treatments.reduce((acc, t) => acc + t.totalCharges, 0);
-    const grants = grantsOrDiscounts ?? opd.billing.grantsOrDiscounts;
+    // ✅ Add new otherCharges if provided
+    if (otherCharges.length > 0) {
+      for (let oc of otherCharges) {
+        opd.otherCharges.push({
+          name: oc.name,
+          quantity: oc.quantity || 1,
+          amount: oc.amount || 0
+        });
+      }
+    }
 
-    const totalBeforeDiscount = bedCharges + serviceCharges;
+    // ✅ Recalculate charges
+    const bedCharges = opd.billing.bedCharges || 0;
+    const serviceCharges = opd.treatments.reduce((acc, t) => acc + (t.totalCharges || 0), 0);
+    const otherChargesTotal = opd.otherCharges.reduce((acc, oc) => acc + (oc.amount || 0) * (oc.quantity || 1), 0);
+    const grants = grantsOrDiscounts ?? opd.billing.grantsOrDiscounts;
+    const consultationCharge = 500; // Same as in createOPD
+
+    const totalBeforeDiscount = bedCharges + serviceCharges + otherChargesTotal + consultationCharge;
     const finalAmount = totalBeforeDiscount - grants;
 
     // ✅ Update billing object
@@ -525,7 +569,7 @@ export const updateOPD = async (req, res) => {
       serviceCharges,
       grantsOrDiscounts: grants,
       totalBeforeDiscount,
-      finalAmount,
+      finalAmount
     };
 
     if (note) opd.note = note;
@@ -534,12 +578,98 @@ export const updateOPD = async (req, res) => {
     await opd.save();
 
     res.json({
-      message: "OPD updated successfully with services",
-      opd,
+      message: "OPD updated successfully",
+      opd
     });
   } catch (err) {
     console.error("Update OPD error:", err);
     res.status(500).json({ message: err.message });
+  }
+};
+
+export const downloadOPDPDF = async (req, res) => {
+  try {
+    // Fetch OPD with related details
+    const opd = await IPD.findOne({
+      _id: req.params.id,
+      clinic: req.user.id,
+    })
+      .populate("patient", "name phoneNumber age gender address")
+      .populate({
+        path: "treatments",
+        populate: { path: "service", select: "name price category" },
+      })
+      .populate("clinic", "name phone email");
+
+      console.log("Fetched OPD:", opd);
+
+    if (!opd) return res.status(404).json({ message: "OPD record not found" });
+
+    // Prepare PDF data
+    const pdfData = {
+      opdNumber: opd.ipdNumber,
+      consultationDate: opd.admissionDate,
+      note: opd.note,
+      patient: opd.patient,
+      treatments: opd.treatments,
+      otherCharges: opd.otherCharges || [],
+      billing: opd.billing || {},
+    };
+
+    // Generate PDF
+    const pdfBuffer = await generatePDFOPD(pdfData, opd.clinic, opd.patient);
+
+    // Send PDF as download
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename=${opd.ipdNumber || "OPD"}.pdf`,
+      "Content-Length": pdfBuffer.length,
+    });
+
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error("Download OPD PDF error:", err);
+    res.status(500).json({ message: "Internal Server Error", error: err.message });
+  }
+};
+
+export const printOPDPDF = async (req, res) => {
+  try {
+    const opd = await IPD.findOne({
+      _id: req.params.id,
+      clinic: req.user.id,
+    })
+      .populate("patient")
+      .populate({
+        path: "treatments",
+        populate: { path: "service" },
+      })
+      .populate("clinic", "name phone email");
+
+    if (!opd) return res.status(404).json({ message: "OPD record not found" });
+
+    const pdfData = {
+      opdNumber: opd.ipdNumber,
+      consultationDate: opd.consultationDate,
+      note: opd.note,
+      patient: opd.patient,
+      treatments: opd.treatments,
+      otherCharges: opd.otherCharges || [],
+      billing: opd.billing || {},
+    };
+
+    const pdfBuffer = await generatePDFOPD(pdfData, opd.clinic, opd.patient);
+
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `inline; filename=${opd.ipdNumber || "OPD"}.pdf`,
+      "Content-Length": pdfBuffer.length,
+    });
+
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error("Print OPD PDF error:", err);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 

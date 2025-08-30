@@ -28,6 +28,12 @@ const billingSchema = new mongoose.Schema({
   finalAmount: { type: Number, default: 0 },
 });
 
+const chargeSchema = new mongoose.Schema({
+  name: { type: String },
+  quantity: { type: Number },
+  amount: { type: Number },
+});
+
 const ipdSchema = new mongoose.Schema(
   {
     clinic: {
@@ -66,9 +72,10 @@ const ipdSchema = new mongoose.Schema(
       default: "pending",
     },
     note: {
-      type: String, // ✅ added note field
+      type: String,
       default: "",
     },
+    otherCharges: [chargeSchema], // now an array of charges
   },
   { timestamps: true }
 );

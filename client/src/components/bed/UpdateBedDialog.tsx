@@ -16,7 +16,6 @@ interface Props {
 export default function UpdateBedDialog({ open, bed, onClose, onUpdate }: Props) {
   const [form, setForm] = useState<UpdateBedPayload>({
     services: [],
-    treatments: [],
     medicines: []
   });
   console.log("UpdateBedDialog render with bed:", bed);
@@ -38,7 +37,6 @@ export default function UpdateBedDialog({ open, bed, onClose, onUpdate }: Props)
         bedNumber: bed.bedNumber,
         bedCharges: bed.bedCharges,
         services: bed.services || [],
-        treatments: bed.treatments || [],
         medicines: bed.medicines || []
       });
     }
@@ -90,25 +88,6 @@ export default function UpdateBedDialog({ open, bed, onClose, onUpdate }: Props)
   const removeService = (index: number) => {
     const updated = form.services?.filter((_, i) => i !== index);
     setForm({ ...form, services: updated });
-  };
-
-  // ✅ Add/Remove treatments
-  const addTreatment = () => {
-    setForm({
-      ...form,
-      treatments: [...(form.treatments || []), { name: "", description: "", price: 0 }]
-    });
-  };
-
-  const updateTreatment = (index: number, field: string, value: any) => {
-    const updated = [...(form.treatments || [])];
-    updated[index][field] = value;
-    setForm({ ...form, treatments: updated });
-  };
-
-  const removeTreatment = (index: number) => {
-    const updated = form.treatments?.filter((_, i) => i !== index);
-    setForm({ ...form, treatments: updated });
   };
 
   // ✅ Add/Remove medicines
@@ -183,20 +162,6 @@ export default function UpdateBedDialog({ open, bed, onClose, onUpdate }: Props)
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Treatments Section */}
-        <div className="mt-4">
-          <h3 className="font-semibold mb-2">Treatments</h3>
-          {(form.treatments || []).map((treatment, index) => (
-            <div key={index} className="flex gap-2 mb-2">
-              <Input placeholder="Name" value={treatment.name} onChange={(e) => updateTreatment(index, "name", e.target.value)} />
-              <Input placeholder="Description" value={treatment.description} onChange={(e) => updateTreatment(index, "description", e.target.value)} />
-              <Input type="number" placeholder="Price" value={treatment.price} onChange={(e) => updateTreatment(index, "price", Number(e.target.value))} />
-              <Button variant="destructive" onClick={() => removeTreatment(index)}>X</Button>
-            </div>
-          ))}
-          <Button onClick={addTreatment} className="mt-2 bg-green-600">Add Treatment</Button>
         </div>
 
         {/* Medicines Section */}

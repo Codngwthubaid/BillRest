@@ -16,54 +16,41 @@ const fonts = {
 
 const printer = new PdfPrinter(fonts);
 
-export const generateIPDPDF = async (ipd, clinic, patient) => {
-  const bed = ipd.bed || {};
-  const billing = ipd.billing || {};
+export const generatePDFOPD = async (opd, clinic, patient) => {
+  const billing = opd.billing || {};
 
-  const bedCharges = billing.bedCharges ?? 0;
   const serviceCharges = billing.serviceCharges ?? 0;
-  const treatmentCharges = billing.treatmentCharges ?? 0;
-  const medicineCharges = billing.medicineCharges ?? 0;
   const grantsOrDiscounts = billing.grantsOrDiscounts ?? 0;
   const finalAmount = billing.finalAmount ?? 0;
 
-  // Combine all items: Treatments, Services, Medicines
+  // ✅ Add Consultation Charge (fixed ₹500)
+  const consultationCharge = 500;
+
+  // Combine all items: Consultation + Treatments + Other Charges
   const allItems = [
-    // Treatments from IPD
-    ...(ipd.treatments || []).map((t) => ({
-      name: t.service?.name || t.name || "Treatment",
+    {
+      name: "Consultation Charge",
+      category: "Consultation",
+      quantity: 1,
+      price: consultationCharge,
+      amount: consultationCharge,
+    },
+    ...(opd.treatments || []).map((t) => ({
+      name: t.service?.name || "Service",
       category: "Treatment",
       quantity: t.quantity || 1,
-      price: t.service?.price ?? t.price ?? 0,
-      amount: (t.service?.price ?? t.price ?? 0) * (t.quantity || 1),
+      price: t.service?.price ?? 0,
+      amount: (t.service?.price ?? 0) * (t.quantity || 1),
     })),
-    // Treatments from Bed (if any)
-    ...(bed.treatments || []).map((t) => ({
-      name: t.service?.name || t.name || "Treatment",
-      category: "Treatment",
-      quantity: t.quantity || 1,
-      price: t.service?.price ?? t.price ?? 0,
-      amount: (t.service?.price ?? t.price ?? 0) * (t.quantity || 1),
-    })),
-    // Services from Bed
-    ...(bed.services || []).map((s) => ({
-      name: s.service?.name || s.name || "Service",
-      category: "Service",
-      quantity: s.quantity || 1,
-      price: s.price ?? 0,
-      amount: (s.price ?? 0) * (s.quantity || 1),
-    })),
-    // Medicines from Bed
-    ...(bed.medicines || []).map((m) => ({
-      name: m.name || "Medicine",
-      category: "Medicine",
-      quantity: m.quantity || 1,
-      price: m.price ?? 0,
-      amount: (m.price ?? 0) * (m.quantity || 1),
+    ...(opd.otherCharges || []).map((oc) => ({
+      name: oc.name || "Other",
+      category: "Other Charges",
+      quantity: oc.quantity || 1,
+      price: oc.amount ?? 0,
+      amount: (oc.amount ?? 0) * (oc.quantity || 1),
     })),
   ];
 
-  // Table body
   const tableBody = [
     [
       { text: "Item", style: "tableHeader" },
@@ -85,27 +72,24 @@ export const generateIPDPDF = async (ipd, clinic, patient) => {
 
   const docDefinition = {
     content: [
-      // Header
       {
         columns: [
           [
-            { text: clinic?.name || "Hospital Name", style: "header" },
-            { text: `Phone: ${clinic?.phone || clinic?.phoneNumber || "N/A"}`, style: "subheader" },
-            { text: `Email: ${clinic?.email || clinic?.emailAddress || "N/A"}`, style: "subheader" },
+            { text: clinic?.name || "Clinic Name", style: "header" },
+            { text: `Phone: ${clinic?.phone || "N/A"}`, style: "subheader" },
+            { text: `Email: ${clinic?.email || "N/A"}`, style: "subheader" },
           ],
           {
             alignment: "right",
             stack: [
-              { text: "Hospital Bill", style: "invoiceTitle" },
-              { text: `IPD No: ${ipd.ipdNumber || "N/A"}` },
-              { text: `Admission: ${ipd.admissionDate ? new Date(ipd.admissionDate).toLocaleDateString() : "N/A"}` },
-              { text: `Discharge: ${ipd.dischargeDate ? new Date(ipd.dischargeDate).toLocaleDateString() : "N/A"}` },
+              { text: "OPD Bill", style: "invoiceTitle" },
+              { text: `OPD No: ${opd.opdNumber || "N/A"}` },
+              { text: `Consultation: ${opd.consultationDate ? new Date(opd.consultationDate).toLocaleDateString() : "N/A"}` },
             ],
           },
         ],
       },
       "\n",
-      // Patient & Bed details
       {
         columns: [
           {
@@ -120,16 +104,14 @@ export const generateIPDPDF = async (ipd, clinic, patient) => {
           },
           {
             stack: [
-              { text: "Bed Details", bold: true },
-              { text: `Room: ${bed.room || bed.roomNumber || "N/A"}` },
-              { text: `Bed No: ${bed.bedNumber || "N/A"}` },
+              { text: "Consultation Note", bold: true },
+              { text: opd.note && opd.note.trim() !== "" ? opd.note : "No notes provided", italics: true }
             ],
             width: "50%",
           },
         ],
       },
       "\n",
-      // Items Table
       {
         table: {
           headerRows: 1,
@@ -141,7 +123,6 @@ export const generateIPDPDF = async (ipd, clinic, patient) => {
         },
       },
       "\n",
-      // Billing summary
       {
         columns: [
           { text: `Amount in words: ${amountInWords}`, italics: true },
@@ -150,10 +131,8 @@ export const generateIPDPDF = async (ipd, clinic, patient) => {
             table: {
               widths: ["auto", "auto"],
               body: [
-                ["Bed Charges:", `₹${bedCharges.toFixed(2)}`],
+                ["Consultation Charges:", `₹${consultationCharge.toFixed(2)}`],
                 ["Service Charges:", `₹${serviceCharges.toFixed(2)}`],
-                ["Treatment Charges:", `₹${treatmentCharges.toFixed(2)}`],
-                ["Medicine Charges:", `₹${medicineCharges.toFixed(2)}`],
                 ["Discounts:", `-₹${grantsOrDiscounts.toFixed(2)}`],
                 [{ text: "Total Amount:", bold: true }, { text: `₹${finalAmount.toFixed(2)}`, bold: true }],
               ],
@@ -162,10 +141,6 @@ export const generateIPDPDF = async (ipd, clinic, patient) => {
           },
         ],
       },
-      "\n",
-      // Note
-      { text: "Note:", bold: true },
-      { text: ipd.note || "N/A", margin: [0, 5, 0, 0] },
     ],
     styles: {
       header: { fontSize: 14, bold: true },
@@ -185,3 +160,4 @@ export const generateIPDPDF = async (ipd, clinic, patient) => {
     pdfDoc.end();
   });
 };
+

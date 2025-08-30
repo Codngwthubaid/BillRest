@@ -28,7 +28,7 @@ export const addBed = async (req, res) => {
 export const updateBed = async (req, res) => {
   try {
     const { id } = req.params;
-    const { roomNumber, bedNumber, bedCharges, patient, services, treatments, medicines } = req.body;
+    const { roomNumber, bedNumber, bedCharges, patient, services, medicines } = req.body;
 
     const updateData = {};
     if (roomNumber) updateData.roomNumber = roomNumber;
@@ -54,7 +54,6 @@ export const updateBed = async (req, res) => {
       }));
     }
 
-    if (treatments) updateData.treatments = treatments;
     if (medicines) updateData.medicines = medicines;
 
     const updatedBed = await Bed.findByIdAndUpdate(id, updateData, {

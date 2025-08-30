@@ -68,7 +68,6 @@ export default function CreateBedDialog({ open, onOpenChange }: Props) {
           >
             <option value="Available">Available</option>
             <option value="Occupied">Occupied</option>
-            <option value="Maintenance">Maintenance</option>
           </select>
         </div>
         <DialogFooter className="mt-4">
