@@ -87,7 +87,7 @@ export default function PreviewOPDDialog({ open, onOpenChange, opd }: Props) {
             <p><strong>Age:</strong> {opd.patient?.age}</p>
             <p><strong>Gender:</strong> {opd.patient?.gender}</p>
           </div>
-
+          
           {/* Services & Other Charges */}
           <h4 className="font-semibold mb-2">Services & Charges</h4>
           <table className="w-full border border-gray-300 text-xs mb-4">

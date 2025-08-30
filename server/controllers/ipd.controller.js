@@ -475,7 +475,7 @@ export const createOPD = async (req, res) => {
     }
 
     // ✅ Base consultation charge
-    const consultationCharge = 500;
+    const consultationCharge = 0;
 
     // ✅ Calculate totals
     const totalBeforeDiscount = consultationCharge + serviceCharges + otherChargesTotal;
@@ -496,6 +496,7 @@ export const createOPD = async (req, res) => {
         grantsOrDiscounts,
         totalBeforeDiscount,
         finalAmount,
+        consultationCharge,
       },
       paymentStatus: "pending",
       note,
@@ -526,79 +527,10 @@ export const createOPD = async (req, res) => {
   }
 };
 
-// export const updateOPD = async (req, res) => {
-//   try {
-//     const userId = req.user.id;
-//     const { id } = req.params;
-//     const { services = [], otherCharges = [], note, grantsOrDiscounts, paymentStatus } = req.body;
-
-//     // Find OPD record
-//     const opd = await IPD.findOne({ _id: id, clinic: userId }).populate("treatments.service");
-//     if (!opd) return res.status(404).json({ message: "OPD record not found" });
-
-//     // Initialize arrays if undefined
-//     opd.treatments = opd.treatments || [];
-//     opd.otherCharges = opd.otherCharges || [];
-//     opd.billing = opd.billing || {};
-
-//     // Add treatments from request
-//     for (let s of services) {
-//       const serviceData = await Service.findById(s.serviceId);
-//       if (!serviceData) {
-//         return res.status(404).json({ message: `Service not found: ${s.serviceId}` });
-//       }
-
-//       const quantity = s.quantity || 1;
-//       opd.treatments.push({
-//         service: serviceData._id,
-//         quantity,
-//         date: new Date(),
-//         totalCharges: (serviceData.price || 0) * quantity,
-//       });
-//     }
-
-//     // Add other charges
-//     for (let oc of otherCharges) {
-//       opd.otherCharges.push({
-//         name: oc.name,
-//         quantity: oc.quantity || 1,
-//         amount: oc.amount || 0,
-//       });
-//     }
-
-//     // Calculate billing
-//     const bedCharges = opd.billing.bedCharges || 0;
-//     const serviceCharges = opd.treatments.reduce((acc, t) => acc + (t.totalCharges || 0), 0);
-//     const otherChargesTotal = opd.otherCharges.reduce((acc, oc) => acc + (oc.amount || 0) * (oc.quantity || 1), 0);
-//     const grants = grantsOrDiscounts ?? opd.billing.grantsOrDiscounts ?? 0;
-//     const consultationCharge = 500;
-
-//     const totalBeforeDiscount = bedCharges + serviceCharges + otherChargesTotal + consultationCharge;
-//     const finalAmount = totalBeforeDiscount - grants;
-
-//     opd.billing = { bedCharges, serviceCharges, grantsOrDiscounts: grants, totalBeforeDiscount, finalAmount };
-
-//     if (note !== undefined) opd.note = note;
-//     if (paymentStatus !== undefined) opd.paymentStatus = paymentStatus;
-
-//     await opd.save();
-
-//     res.json({ message: "OPD updated successfully", opd });
-//   } catch (err) {
-//     console.error("Update OPD error:", err);
-//     res.status(500).json({ message: err.message });
-//   }
-// };
-
-// controller: updateOPD
 export const updateOPD = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
-
-    // Accept BOTH shapes:
-    // - treatments: [{ service, quantity }]
-    // - services:   [{ serviceId, quantity }]
     const rawTreatments = req.body.treatments ?? req.body.services ?? [];
     const rawOtherCharges = Array.isArray(req.body.otherCharges) ? req.body.otherCharges : [];
 
@@ -609,8 +541,6 @@ export const updateOPD = async (req, res) => {
     const opd = await IPD.findOne({ _id: id, clinic: userId });
     if (!opd) return res.status(404).json({ message: "OPD record not found" });
 
-    // -------- Build new treatments (REPLACE, don't push) --------
-    // Extract all service IDs in one go to avoid N+1 queries.
     const serviceIds = rawTreatments.map(t => t.serviceId || t.service).filter(Boolean);
     const services = await Service.find({ _id: { $in: serviceIds } });
 
@@ -618,11 +548,8 @@ export const updateOPD = async (req, res) => {
     const newTreatments = rawTreatments.map(t => {
       const id = String(t.serviceId || t.service || "");
       const svc = serviceMap.get(id);
-      if (!svc) {
-        // If you prefer to error on missing, uncomment:
-        // throw new Error(`Service not found: ${id}`);
-        return null; // silently drop invalid entries
-      }
+      if (!svc) return null;
+
       const quantity = Number(t.quantity) > 0 ? Number(t.quantity) : 1;
       const price = Number(svc.price) || 0;
 
@@ -630,25 +557,21 @@ export const updateOPD = async (req, res) => {
         service: svc._id,
         quantity,
         date: new Date(),
-        // OPTIONAL: persist denormalized name/price for resilience
         name: svc.name,
         price,
         totalCharges: price * quantity,
       };
     }).filter(Boolean);
 
-    // -------- Build new otherCharges (REPLACE, don't push) --------
     const newOtherCharges = rawOtherCharges.map(oc => ({
       name: oc?.name || "",
       quantity: Number(oc?.quantity) > 0 ? Number(oc.quantity) : 1,
       amount: Number(oc?.amount) || 0,
     }));
 
-    // Assign (REPLACE) instead of pushing
     opd.treatments = newTreatments;
     opd.otherCharges = newOtherCharges;
 
-    // -------- Billing recalculation --------
     const bedCharges = Number(opd.billing?.bedCharges) || 0;
     const serviceCharges = opd.treatments.reduce((acc, t) => acc + (Number(t.totalCharges) || 0), 0);
     const otherChargesTotal = opd.otherCharges.reduce((acc, oc) => acc + (Number(oc.amount) || 0) * (Number(oc.quantity) || 1), 0);
@@ -678,7 +601,6 @@ export const updateOPD = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
-
 
 
 export const downloadOPDPDF = async (req, res) => {
