@@ -177,13 +177,15 @@ export default function Billing() {
                 <td className="p-4">{record.ipdNumber}<br /><span className="text-xs text-muted-foreground">{record.createdAt?.slice(0, 10)}</span></td>
                 <td>{record.patient?.name || "N/A"}<br /><span className="text-xs text-muted-foreground">{record.patient?.phoneNumber || "N/A"}</span></td>
                 <td>
-                  ₹{record.billing?.finalAmount?.toLocaleString() ?? 0}
+                  <p>
+                    ₹{record.billing?.finalAmount?.toLocaleString() ?? 0}
+                  </p>
                   {activeTab === "IPD" && <span className="text-xs text-muted-foreground">Bed: ₹{record.billing?.bedCharges?.toLocaleString() ?? 0}</span>}
                 </td>
                 <td>{getPaymentStatusBadge(record.paymentStatus || "")}</td>
                 <td>{record.admissionDate?.slice(0, 10)}</td>
                 {activeTab === "IPD" && <td>{record.dischargeDate?.slice(0, 10)}</td>}
-                <td className="flex gap-1">
+                <td className="flex gap-1 mt-6">
                   {activeTab === "IPD" ? (
                     <>
                       <button onClick={() => { setSelectedRecord(record); setShowPreviewDialog(true); }}><Eye className="w-4 h-4 text-blue-500 hover:scale-110" /></button>
@@ -217,11 +219,11 @@ export default function Billing() {
 
       {/* Dialogs */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-sm">
           <DialogHeader><DialogTitle>Select Bill Type</DialogTitle></DialogHeader>
-          <div className="flex justify-center gap-4 mt-4">
-            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { setShowCreateDialog(false); setShowCreateIPDDialog(true); }}>Create IPD</Button>
-            <Button className="bg-green-600 hover:bg-green-700" onClick={() => { setShowCreateDialog(false); setShowCreateOPDDialog(true); }}>Create OPD</Button>
+          <div className="flex justify-center gap-4 mt-4 flex-col">
+            <Button className="bg-blue-600 hover:bg-blue-700 w-full" onClick={() => { setShowCreateDialog(false); setShowCreateIPDDialog(true); }}>Create IPD</Button>
+            <Button className="bg-green-600 hover:bg-green-700 w-full" onClick={() => { setShowCreateDialog(false); setShowCreateOPDDialog(true); }}>Create OPD</Button>
           </div>
         </DialogContent>
       </Dialog>

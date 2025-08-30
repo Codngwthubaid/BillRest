@@ -118,6 +118,7 @@ export default function AppointmentListDialog({ open, onClose }: AppointmentList
                   <TableHead>Age</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Time</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -134,6 +135,7 @@ export default function AppointmentListDialog({ open, onClose }: AppointmentList
                         {appt?.date ? new Date(appt.date).toLocaleDateString() : ""}
                       </TableCell>
                       <TableCell>{appt?.time}</TableCell>
+                      <TableCell>{appt?.status}</TableCell>
                       <TableCell className="flex justify-end gap-2">
                         <Button size="sm" variant="ghost" onClick={() => handleEdit(appt._id)}>
                           <Edit className="w-4 h-4" />

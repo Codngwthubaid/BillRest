@@ -144,19 +144,21 @@ export default function UpdateOPDDialog({ open, onOpenChange, opd }: Props) {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Existing Info */}
-          <Card>
+          <Card className="py-5">
             <CardHeader>
-              <CardTitle>Current Details</CardTitle>
+              <CardTitle>Patient Details</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-700">Patient: {opd?.patient?.name}</p>
-              <p className="text-sm text-gray-700">Consultation Date: {opd?.consultationDate}</p>
+                <p className="text-sm text-gray-700">
+                Consultation Date: {opd?.admissionDate ? new Date(opd.admissionDate).toLocaleDateString() : ""}
+                </p>
               <p className="text-sm text-gray-700">Current Total: ₹{opd?.billing?.finalAmount}</p>
             </CardContent>
           </Card>
 
           {/* Services */}
-          <Card>
+          <Card className="py-5">
             <CardHeader className="flex justify-between items-center">
               <CardTitle>Add Services</CardTitle>
               <Button type="button" variant="outline" onClick={handleAddService}>
@@ -196,7 +198,7 @@ export default function UpdateOPDDialog({ open, onOpenChange, opd }: Props) {
           </Card>
 
           {/* Other Charges */}
-          <Card>
+          <Card className="py-5">
             <CardHeader className="flex justify-between items-center">
               <CardTitle>Add Other Charges</CardTitle>
               <Button type="button" variant="outline" onClick={handleAddOtherCharge}>
@@ -233,7 +235,7 @@ export default function UpdateOPDDialog({ open, onOpenChange, opd }: Props) {
           </Card>
 
           {/* Note & Discounts */}
-          <Card>
+          <Card className="py-5">
             <CardContent className="space-y-4">
               <Textarea
                 placeholder="Update Note"
