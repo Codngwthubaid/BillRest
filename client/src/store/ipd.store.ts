@@ -9,6 +9,10 @@ import {
   downloadIPDPDF,
   printIPDPDF,
   getAllIPDs,
+  createOPD,
+  updateOPD,
+  downloadOPDPDF,
+  printOPDPDF,
 } from "@/services/ipd.service";
 
 import type { IPDInput, IPDResponse } from "@/types/ipd.types";
@@ -30,6 +34,12 @@ interface IPDState {
 
   downloadIPDPDFById: (id: string) => Promise<void>;
   printIPDPDF: (id: string) => void;
+
+  // ✅ OPD related actions
+  createOPDRecord: (data: IPDInput) => Promise<void>;
+  updateOPDRecord: (id: string, data: Partial<IPDInput>) => Promise<void>;
+  downloadOPDPDFById: (id: string) => Promise<void>;
+  printOPDPDF: (id: string) => void;
 }
 
 export const useIPDStore = create<IPDState>((set) => ({
@@ -78,7 +88,7 @@ export const useIPDStore = create<IPDState>((set) => ({
   updateIPDRecord: async (id, data) => {
     set({ loading: true, error: null });
     try {
-      const updatedIPD = await updateIPD(id, data); // API call returns updated record
+      const updatedIPD = await updateIPD(id, data);
       set((state) => ({
         ipds: state.ipds.map((ipd) =>
           ipd._id === id ? { ...ipd, ...updatedIPD } : ipd
@@ -90,7 +100,6 @@ export const useIPDStore = create<IPDState>((set) => ({
       set({ loading: false });
     }
   },
-
 
   dischargeIPDRecord: async (id, dischargeDate) => {
     set({ loading: true, error: null });
@@ -163,4 +172,68 @@ export const useIPDStore = create<IPDState>((set) => ({
     }
   },
 
+  // ✅ OPD ACTIONS
+  createOPDRecord: async (data) => {
+    set({ loading: true, error: null });
+    try {
+      await createOPD(data);
+      await useIPDStore.getState().fetchIPDs();
+    } catch (err: any) {
+      set({ error: err.message || "Failed to create OPD" });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  updateOPDRecord: async (id, data) => {
+    set({ loading: true, error: null });
+    try {
+      const updatedOPD = await updateOPD(id, data);
+      set((state) => ({
+        ipds: state.ipds.map((opd) =>
+          opd._id === id ? { ...opd, ...updatedOPD } : opd
+        ),
+      }));
+    } catch (err: any) {
+      set({ error: err.message || "Failed to update OPD" });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+
+  downloadOPDPDFById: async (id) => {
+    try {
+      const blob = await downloadOPDPDF(id);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `OPD-${id}.pdf`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      set({ error: err.message || "Failed to download OPD PDF" });
+    }
+  },
+
+  printOPDPDF: async (id) => {
+    try {
+      const blob = await printOPDPDF(id);
+      const url = window.URL.createObjectURL(blob);
+      const newWindow = window.open(url);
+      if (newWindow) {
+        newWindow.onload = () => {
+          newWindow.print();
+          newWindow.onafterprint = () => {
+            window.URL.revokeObjectURL(url);
+            newWindow.close();
+          };
+        };
+      } else {
+        set({ error: "Failed to open print window. Please allow pop-ups." });
+      }
+    } catch (err: any) {
+      set({ error: err.message || "Failed to print OPD PDF" });
+    }
+  },
 }));

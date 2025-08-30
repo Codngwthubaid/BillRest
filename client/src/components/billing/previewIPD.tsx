@@ -85,7 +85,6 @@ export default function IPDPreview({ IPD }: IPDPreviewProps) {
         )}
       </div>
 
-      {/* Unified Table */}
       <h4 className="font-semibold mb-2">Services & Treatments</h4>
       <table className="w-full border border-gray-300 text-xs mb-4">
         <thead className="bg-emerald-100">

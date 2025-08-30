@@ -14,6 +14,8 @@ const treatmentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  name: String,
+  price: Number,
   totalCharges: {
     type: Number,
     default: 0,
@@ -21,7 +23,7 @@ const treatmentSchema = new mongoose.Schema({
 });
 
 const billingSchema = new mongoose.Schema({
-  bedCharges: { type: Number, default: 0 }, 
+  bedCharges: { type: Number, default: 0 },
   serviceCharges: { type: Number, default: 0 },
   grantsOrDiscounts: { type: Number, default: 0 },
   totalBeforeDiscount: { type: Number, default: 0 },
