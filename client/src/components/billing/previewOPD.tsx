@@ -16,15 +16,15 @@ interface Props {
   onPrintPDF?: () => void;
 }
 
-export default function PreviewOPDDialog({ open, onOpenChange, opd}: Props) {
+export default function PreviewOPDDialog({ open, onOpenChange, opd }: Props) {
   const { user } = useAuthStore();
   const { business } = useBusinessStore();
-  const { allServices, fetchAllServices } = useServiceStore();
+  const { services, fetchServices } = useServiceStore();
   const toWords = new ToWords();
 
   useEffect(() => {
-    fetchAllServices();
-  }, [fetchAllServices]);
+    fetchServices();
+  }, [fetchServices]);
 
   if (!opd) return null;
 
@@ -33,9 +33,9 @@ export default function PreviewOPDDialog({ open, onOpenChange, opd}: Props) {
   // Unified table items with fallback to saved data
   const allItems = [
     ...(opd.treatments || []).map((t) => {
-      // Use service object if populated, else find in allServices by ID, else fallback to saved name/price
-      const svc = typeof t.service === "string" 
-        ? allServices.find(s => s._id === t.service) 
+      // Use service object if populated, else find in services by ID, else fallback to saved name/price
+      const svc = typeof t.service === "string"
+        ? services.find(s => s._id === t.service)
         : t.service;
 
       return {
@@ -55,6 +55,8 @@ export default function PreviewOPDDialog({ open, onOpenChange, opd}: Props) {
     })),
   ];
 
+  console.log(opd)
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-full sm:max-w-[65vw] p-6 overflow-y-auto">
@@ -62,7 +64,7 @@ export default function PreviewOPDDialog({ open, onOpenChange, opd}: Props) {
           <DialogTitle className="text-xl font-bold">Preview OPD Details</DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="h-[70vh] pr-2">
+        <ScrollArea className="pr-2">
           {/* Header */}
           <div className="flex justify-between border-b pb-3 mb-4">
             <div>
@@ -72,8 +74,8 @@ export default function PreviewOPDDialog({ open, onOpenChange, opd}: Props) {
             </div>
             <div className="text-right">
               <h3 className="text-lg font-bold mb-1">OPD Bill</h3>
-              <p>OPD No: {opd.opdNumber}</p>
-              <p>Appointment: {opd.consultationDate ? new Date(opd.consultationDate).toLocaleDateString() : "N/A"}</p>
+              <p>OPD No: {opd.ipdNumber}</p>
+              <p>Appointment: {opd.admissionDate ? new Date(opd.admissionDate).toLocaleDateString() : "N/A"}</p>
             </div>
           </div>
 

@@ -102,7 +102,7 @@ export default function CreateOPDDialog({ open, onOpenChange }: Props) {
     }
   };
 
-  console.log("Form Data:", form);
+  console.log(selectedAppointment);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -137,7 +137,7 @@ export default function CreateOPDDialog({ open, onOpenChange }: Props) {
                   <SelectContent>
                     {(appointments ?? []).map((a) => (
                       <SelectItem key={a._id} value={a._id}>
-                        {a.patient.name} - {a.date}
+                        {a.patient.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -161,7 +161,7 @@ export default function CreateOPDDialog({ open, onOpenChange }: Props) {
                       </p>
                       <p>
                         <span className="font-semibold">Phone:</span>{" "}
-                        {selectedAppointment.patient.phone}
+                        {selectedAppointment.patient.phoneNumber}
                       </p>
                     </div>
                   </div>

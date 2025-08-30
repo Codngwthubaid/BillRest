@@ -115,12 +115,25 @@ export default function UpdateOPDDialog({ open, onOpenChange, opd }: Props) {
     e.preventDefault();
     setLoading(true);
     try {
-      await updateOPDRecord(opd._id, form);
+      const payload = {
+        note: form.note,
+        grantsOrDiscounts: form.grantsOrDiscounts,
+        paymentStatus: form.paymentStatus,
+        treatments: form.services.map((s: any) => ({
+          service: s.serviceId,
+          quantity: s.quantity
+        })),
+        otherCharges: form.otherCharges
+      };
+
+
+      await updateOPDRecord(opd._id, payload);
       onOpenChange(false);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
